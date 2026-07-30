@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E141B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<meta name="description" content="אפליקציית הכנה למבחן AWS Certified Solutions Architect - Associate (SAA-C03)">
+<title>SAA-C03 — מכון הכנה</title>
+<style>
+:root{
+  --bg:#0E141B; --surf:#151E28; --surf2:#1C2733; --surf3:#233140;
+  --line:#2A3846; --txt:#E3EBF2; --dim:#8FA3B5; --dim2:#63798C;
+  --acc:#3FD1AE; --acc-d:#0F3D34; --amber:#F2A93B; --amber-d:#3E2F12;
+  --red:#E2606C; --red-d:#3D1B20; --vio:#8B7CF6;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue","Arial Hebrew",Arial,sans-serif;
+  --r:10px; --sh:0 1px 0 rgba(255,255,255,.03) inset, 0 2px 12px rgba(0,0,0,.35);
+}
+html[data-t="light"]{
+  --bg:#F2F5F8; --surf:#FFFFFF; --surf2:#F7F9FB; --surf3:#EDF1F5;
+  --line:#D9E1E9; --txt:#16212C; --dim:#5A6E80; --dim2:#889BAC;
+  --acc:#0E9E7E; --acc-d:#D9F3EC; --amber:#B77405; --amber-d:#FBEFD8;
+  --red:#C93A48; --red-d:#FBE3E5; --vio:#6D5BD0;
+  --sh:0 1px 3px rgba(16,33,48,.08),0 1px 12px rgba(16,33,48,.05);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--txt); font-family:var(--sans);
+  font-size:15px; line-height:1.65; overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+code,.mono{font-family:var(--mono);font-size:.88em}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:none;background:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- shell ---------- */
+.wrap{max-width:940px;margin:0 auto;padding:0 14px 96px}
+header.top{
+  position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+}
+.top-in{max-width:940px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:baseline;gap:9px;min-width:0}
+.brand b{font-size:16px;font-weight:700;letter-spacing:-.2px;white-space:nowrap}
+.brand .code{font-family:var(--mono);font-size:11px;color:var(--acc);border:1px solid var(--acc);
+  padding:1px 6px;border-radius:5px;letter-spacing:.5px}
+.spacer{flex:1}
+.icobtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surf);
+  display:grid;place-items:center;font-size:15px;transition:background .15s}
+.icobtn:hover{background:var(--surf3)}
+
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:50;background:color-mix(in srgb,var(--surf) 96%,transparent);
+  backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;
+  padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10.5px;color:var(--dim2);border-top:2px solid transparent;transition:color .15s}
+nav.tabs button .ic{font-size:17px;line-height:1}
+nav.tabs button.on{color:var(--acc);border-top-color:var(--acc)}
+@media(min-width:800px){
+  nav.tabs{position:sticky;top:55px;bottom:auto;border-top:none;border-bottom:1px solid var(--line);
+    max-width:940px;margin:0 auto;background:transparent;backdrop-filter:none;padding:0 14px;gap:2px}
+  nav.tabs button{flex:0 0 auto;flex-direction:row;gap:7px;font-size:13px;padding:10px 14px;
+    border-top:none;border-bottom:2px solid transparent}
+  nav.tabs button.on{border-bottom-color:var(--acc)}
+  .wrap{padding-bottom:40px}
+}
+
+/* ---------- primitives ---------- */
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
+  padding:16px;margin:14px 0}
+.card.tight{padding:13px}
+h2.sec{font-size:12px;font-weight:700;color:var(--dim);letter-spacing:1.4px;text-transform:uppercase;
+  margin:26px 0 8px;font-family:var(--mono)}
+h3{font-size:15px;margin:0 0 10px;font-weight:700}
+p.lead{color:var(--dim);margin:0 0 14px;font-size:14px}
+.btn{background:var(--acc);color:#06231D;font-weight:700;padding:11px 18px;border-radius:9px;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:filter .15s}
+html[data-t="light"] .btn{color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--surf3);color:var(--txt);border:1px solid var(--line);font-weight:600}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}
+.chip{padding:6px 11px;border-radius:20px;border:1px solid var(--line);background:var(--surf2);
+  font-size:12.5px;color:var(--dim);transition:.15s}
+.chip.on{background:var(--acc-d);border-color:var(--acc);color:var(--acc);font-weight:700}
+.tag{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:5px;
+  background:var(--surf3);color:var(--dim);border:1px solid var(--line);letter-spacing:.3px}
+.tag.d1{color:var(--vio)} .tag.d2{color:var(--acc)} .tag.d3{color:var(--amber)} .tag.d4{color:var(--red)}
+.muted{color:var(--dim);font-size:13px}
+hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
+
+/* ---------- signature: readiness gauge ---------- */
+.gauge{margin:6px 0 2px}
+.gauge .scale{position:relative;height:34px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(90deg,var(--red-d),var(--amber-d) 55%,var(--acc-d));border:1px solid var(--line)}
+.gauge .fillbar{position:absolute;top:0;bottom:0;right:0;background:var(--acc);opacity:.22;
+  transition:width .7s cubic-bezier(.2,.7,.3,1)}
+.gauge .passline{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--txt);opacity:.85}
+.gauge .passlbl{position:absolute;top:-17px;transform:translateX(50%);font-family:var(--mono);
+  font-size:10px;color:var(--dim);white-space:nowrap}
+.gauge .marker{position:absolute;top:50%;transform:translate(50%,-50%);
+  background:var(--txt);color:var(--bg);font-family:var(--mono);font-weight:700;font-size:13px;
+  padding:3px 9px;border-radius:6px;transition:right .7s cubic-bezier(.2,.7,.3,1)}
+.gauge .ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  color:var(--dim2);margin-top:5px}
+.bigstat{display:flex;gap:18px;flex-wrap:wrap;margin:4px 0 2px}
+.bigstat div{min-width:74px}
+.bigstat .n{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1.1}
+.bigstat .l{font-size:11px;color:var(--dim)}
+
+/* domain bars */
+.dbar{margin:11px 0}
+.dbar .hd{display:flex;align-items:baseline;gap:8px;font-size:13px;margin-bottom:5px}
+.dbar .hd .pct{margin-inline-start:auto;font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+.dbar .track{height:8px;background:var(--surf3);border-radius:5px;overflow:hidden}
+.dbar .fill{height:100%;border-radius:5px;transition:width .6s ease}
+
+/* topic mastery grid */
+.grid-m{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.cellm{width:100%;max-width:none}
+.tpill{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;border:1px solid var(--line);
+  background:var(--surf2);font-size:12px}
+.tpill .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.tpill .sc{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* ---------- question ---------- */
+.qmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.stem{direction:ltr;text-align:left;font-size:14.5px;line-height:1.62;
+  border-inline-start:none;border-left:2px solid var(--line);padding-left:12px;margin:0 0 15px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{direction:ltr;text-align:left;display:flex;gap:10px;align-items:flex-start;
+  padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surf2);
+  font-size:14px;line-height:1.5;transition:border-color .12s,background .12s;width:100%}
+.opt:hover{border-color:var(--dim2)}
+.opt .k{font-family:var(--mono);font-weight:700;color:var(--dim);flex:none;width:15px}
+.opt.sel{border-color:var(--acc);background:var(--acc-d)}
+.opt.sel .k{color:var(--acc)}
+.opt.good{border-color:var(--acc);background:var(--acc-d)}
+.opt.bad{border-color:var(--red);background:var(--red-d)}
+.opt.dim{opacity:.62}
+.expl{margin-top:14px;padding:13px;border-radius:9px;background:var(--surf2);border:1px solid var(--line)}
+.expl .hd{font-size:12px;font-weight:700;letter-spacing:.6px;font-family:var(--mono);margin-bottom:7px}
+.expl.ok .hd{color:var(--acc)} .expl.no .hd{color:var(--red)}
+.expl .body{font-size:13.5px;line-height:1.7}
+.expl .body code{background:var(--surf3);padding:1px 5px;border-radius:4px;color:var(--amber);direction:ltr;display:inline-block}
+.whywrong{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.whywrong div{font-size:12.5px;color:var(--dim);margin:5px 0}
+.whywrong b{color:var(--txt);font-family:var(--mono);font-size:11.5px}
+
+/* exam bar */
+.exambar{position:sticky;top:56px;z-index:30;background:var(--surf);border:1px solid var(--line);
+  border-radius:var(--r);padding:9px 13px;display:flex;align-items:center;gap:12px;margin:14px 0;box-shadow:var(--sh)}
+.exambar .t{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.5px}
+.exambar .t.warn{color:var(--amber)} .exambar .t.crit{color:var(--red)}
+.exambar .prog{flex:1;height:5px;background:var(--surf3);border-radius:4px;overflow:hidden;min-width:40px}
+.exambar .prog i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.exambar .cnt{font-family:var(--mono);font-size:12.5px;color:var(--dim);white-space:nowrap}
+.flagbtn.on{color:var(--amber)}
+.navgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin-top:12px}
+.navgrid button{aspect-ratio:1;border-radius:7px;border:1px solid var(--line);background:var(--surf2);
+  font-family:var(--mono);font-size:12px;color:var(--dim);display:grid;place-items:center;position:relative}
+.navgrid button.ans{background:var(--surf3);color:var(--txt);border-color:var(--dim2)}
+.navgrid button.flag::after{content:"";position:absolute;top:3px;left:3px;width:5px;height:5px;
+  border-radius:50%;background:var(--amber)}
+.navgrid button.cur{border-color:var(--acc);color:var(--acc);font-weight:700}
+.navgrid button.ok{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
+.navgrid button.no{background:var(--red-d);border-color:var(--red);color:var(--red)}
+
+/* flashcard */
+.fc{border:1px solid var(--line);border-radius:12px;background:var(--surf);padding:20px;min-height:170px;
+  display:flex;flex-direction:column;justify-content:center;box-shadow:var(--sh);cursor:pointer}
+.fc .front{font-size:18px;font-weight:700;text-align:center}
+.fc .back{font-size:14px;line-height:1.75;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.fc .back code{background:var(--surf3);padding:1px 5px;border-radius:4px;color:var(--amber);direction:ltr;display:inline-block}
+.fc .hint{text-align:center;font-size:11.5px;color:var(--dim2);margin-top:12px;font-family:var(--mono)}
+
+/* misc */
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.kv:last-child{border-bottom:none}
+.kv .v{font-family:var(--mono);color:var(--dim)}
+.note{border-inline-start:3px solid var(--amber);background:var(--amber-d);padding:11px 13px;
+  border-radius:0 8px 8px 0;font-size:13px;margin:12px 0}
+html[dir="rtl"] .note{border-radius:8px 0 0 8px}
+.empty{text-align:center;padding:40px 16px;color:var(--dim)}
+.empty .ic{font-size:34px;opacity:.5;display:block;margin-bottom:10px}
+.hide{display:none!important}
+select,input[type=number]{background:var(--surf2);border:1px solid var(--line);color:var(--txt);
+  padding:8px 10px;border-radius:8px;font-family:inherit;font-size:13.5px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03</span></div>
+    <div class="spacer"></div>
+    <button class="icobtn" id="themeBtn" title="מצב תצוגה">◐</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-v="home" class="on"><span class="ic">◈</span>בית</button>
+  <button data-v="exam"><span class="ic">◷</span>מבחן</button>
+  <button data-v="practice"><span class="ic">◎</span>תרגול</button>
+  <button data-v="cards"><span class="ic">▤</span>כרטיסיות</button>
+  <button data-v="stats"><span class="ic">◱</span>נתונים</button>
+</nav>
+
+<div class="wrap">
+  <div id="v-home"></div>
+  <div id="v-exam" class="hide"></div>
+  <div id="v-practice" class="hide"></div>
+  <div id="v-cards" class="hide"></div>
+  <div id="v-stats" class="hide"></div>
+</div>
+
+<script>
+/* ===== Domain 1 — Design Secure Architectures (30%) ===== */
+const D1 = [
+{i:101,d:1,t:"IAM",lv:2,ty:"s",
+q:"A company runs an application on Amazon EC2 instances. The application must read objects from an Amazon S3 bucket and write items to an Amazon DynamoDB table. Developers currently store long-term IAM user access keys in a configuration file on each instance. A solutions architect must remove the static credentials with the LEAST operational overhead. Which solution meets these requirements?",
+o:["Create an IAM role with the required permissions and attach an instance profile to the EC2 instances.",
+"Store the access keys in AWS Secrets Manager and have the application retrieve them at startup.",
+"Store the access keys in AWS Systems Manager Parameter Store as SecureString parameters and rotate them every 30 days with a Lambda function.",
+"Create a new IAM user for each instance and rotate the access keys weekly by using an Amazon EventBridge scheduled rule."],
+a:[0],
+e:"<b>IAM Role + Instance Profile</b> הוא הדפוס הסטנדרטי של AWS לגישה מ־EC2. ה־credentials מסופקים דרך ה־<code>IMDS</code>, מסתובבים אוטומטית, ולעולם לא נשמרים על הדיסק. אפס תחזוקה שוטפת. כל שאלה במבחן שמזכירה \"access keys על instance\" — התשובה כמעט תמיד IAM Role.",
+w:["","Secrets Manager אמנם מנהל סודות, אך עדיין נשארים long‑term keys שצריך לסובב, ויש עלות מיותרת. זו הגנה על הבעיה במקום ביטולה.","עדיין קיימים מפתחות קבועים + Lambda מותאם אישית = תקורה תפעולית גבוהה.","ריבוי IAM Users וסבב ידני הוא בדיוק ה־anti‑pattern שהמבחן בודק."]},
+
+{i:102,d:1,t:"KMS",lv:3,ty:"s",
+q:"A company stores sensitive data in an Amazon S3 bucket that is encrypted with an AWS KMS customer managed key. A partner AWS account must be able to download and decrypt specific objects. Which combination of actions is required? (Choose the single BEST answer.)",
+o:["Grant the partner account access in the S3 bucket policy only.",
+"Grant the partner account access in the S3 bucket policy and in the KMS key policy, and ensure the partner's IAM principal has s3:GetObject and kms:Decrypt permissions.",
+"Enable S3 Cross-Region Replication to a bucket in the partner account.",
+"Change the bucket encryption to SSE-S3 and share the bucket policy with the partner."],
+a:[1],
+e:"בגישה חוצת־חשבונות ל־object מוצפן ב־<code>SSE-KMS</code> עם CMK נדרשות <b>שלוש</b> שכבות: (1) bucket policy מתירה, (2) KMS key policy מתירה לחשבון השותף, (3) ה־IAM policy בצד השותף מתירה <code>s3:GetObject</code> וגם <code>kms:Decrypt</code>. חוסר באחת מהן ⇐ AccessDenied. זהו אחד מדפוסי השאלות הנפוצים ביותר בדומיין הזה.",
+w:["Bucket policy לבדה לא מספיקה — ה־KMS key policy תחסום את ה־Decrypt.","","Replication פותר בעיה אחרת (עותק), לא גישה, ומוסיף עלות וכפילות נתונים.","מעבר ל־SSE-S3 מוריד את רמת השליטה בהצפנה ולא נדרש לפתרון."]},
+
+{i:103,d:1,t:"VPC Security",lv:2,ty:"s",
+q:"A solutions architect needs to allow inbound HTTPS traffic to web servers in a public subnet while denying traffic from a specific range of malicious IP addresses. Security groups are already configured to allow HTTPS from 0.0.0.0/0. What should the solutions architect use to block the malicious IP range at the subnet level?",
+o:["Add an inbound deny rule to the security group.",
+"Add an inbound deny rule to the network ACL associated with the subnet.",
+"Create an AWS WAF rule attached to the security group.",
+"Modify the route table to blackhole the IP range."],
+a:[1],
+e:"<b>Security Groups</b> הן stateful ו־<b>allow-only</b> — אי אפשר לכתוב בהן כלל Deny. <b>Network ACL</b> היא stateless, פועלת ברמת ה־subnet, ותומכת גם ב־Allow וגם ב־Deny עם מספור עדיפויות. לכן חסימת IP זדוני ספציפי היא מקרה השימוש הקלאסי ל־NACL.",
+w:["SG לא תומכת בכללי Deny — זו הנקודה שהמבחן בודק.","","WAF מתחבר ל־ALB / CloudFront / API Gateway, לא ל־Security Group.","Route table לא מסננת תעבורה נכנסת לפי מקור בצורה כזו."]},
+
+{i:104,d:1,t:"VPC Endpoints",lv:3,ty:"s",
+q:"An application runs on EC2 instances in private subnets and must upload objects to Amazon S3. The company's security policy prohibits any traffic to S3 from traversing the public internet, and the solution must minimize cost. What should a solutions architect implement?",
+o:["A NAT gateway in a public subnet",
+"An interface VPC endpoint (AWS PrivateLink) for Amazon S3",
+"A gateway VPC endpoint for Amazon S3",
+"An AWS Direct Connect public virtual interface"],
+a:[2],
+e:"ל־S3 ול־DynamoDB קיים <b>Gateway VPC Endpoint</b> — ללא עלות שעתית וללא עלות תעבורה, מוסיף prefix list ל־route table ומשאיר את התעבורה בתוך רשת AWS. זו התשובה כשהדרישה היא גם \"בלי אינטרנט\" וגם \"עלות מינימלית\".",
+w:["NAT Gateway מוציא את התעבורה דרך האינטרנט הציבורי וגם יקר (עלות שעתית + לכל GB).","Interface Endpoint ל־S3 קיים, אך גובה עלות שעתית ולכל GB — לא הזול ביותר.","","Direct Connect הוא פתרון היברידי יקר ולא רלוונטי לתעבורה תוך־VPC."]},
+
+{i:105,d:1,t:"Secrets",lv:2,ty:"s",
+q:"A company must store database credentials for an Amazon RDS for MySQL database. The credentials must be rotated automatically every 30 days without custom code. Which service should be used?",
+o:["AWS Systems Manager Parameter Store SecureString parameters",
+"AWS Secrets Manager",
+"AWS KMS",
+"Amazon S3 with SSE-KMS encryption"],
+a:[1],
+e:"<b>AWS Secrets Manager</b> הוא היחיד שמספק <b>סבב אוטומטי מובנה</b> (native rotation) עבור RDS, Redshift ו־DocumentDB — ללא כתיבת קוד. ההבחנה במבחן: Parameter Store = תצורה + סודות בסיסיים בחינם; Secrets Manager = סודות + rotation אוטומטי בתשלום.",
+w:["Parameter Store אינו מבצע rotation אוטומטי מובנה — נדרשת Lambda בהתאמה אישית.","","KMS מנהל מפתחות הצפנה, לא סודות אפליקטיביים.","S3 אינו מנגנון ניהול סודות."]},
+
+{i:106,d:1,t:"CloudFront/S3",lv:3,ty:"s",
+q:"A company hosts static content in an Amazon S3 bucket and serves it through Amazon CloudFront. The security team requires that objects be accessible ONLY through CloudFront and never directly from the S3 URL. What is the recommended approach?",
+o:["Enable S3 Block Public Access and use CloudFront Origin Access Control (OAC) with a bucket policy that allows only the CloudFront distribution.",
+"Make the bucket public and rely on CloudFront geo-restriction.",
+"Use an S3 static website endpoint as the origin and restrict by referer header.",
+"Place the S3 bucket in a private subnet and attach a security group."],
+a:[0],
+e:"<b>Origin Access Control (OAC)</b> הוא המנגנון הנוכחי והמומלץ (מחליף את OAI הישן). הוא חותם את הבקשות מ־CloudFront ל־S3 ב־SigV4, תומך ב־SSE-KMS וב־כל האזורים. משלבים אותו עם <code>Block Public Access</code> ו־bucket policy שמתירה רק ל־service principal של CloudFront עם תנאי על ARN של ה־distribution.",
+w:["","Bucket ציבורי סותר את הדרישה מפורשות.","סינון לפי Referer header ניתן לזיוף — לא בקרת אבטחה תקפה.","S3 אינו יושב ב־subnet ולא ניתן לשייך לו Security Group."]},
+
+{i:107,d:1,t:"IAM Identity Center",lv:2,ty:"s",
+q:"An enterprise with 40 AWS accounts under AWS Organizations wants employees to sign in with their existing corporate identity provider and receive least-privilege access in each account. Which solution requires the LEAST ongoing administration?",
+o:["Create IAM users in each account and federate with SAML per account.",
+"Use AWS IAM Identity Center integrated with the external IdP, and assign permission sets to groups across accounts.",
+"Create a single IAM role in the management account and share credentials with employees.",
+"Use Amazon Cognito user pools to authenticate employees into the AWS Management Console."],
+a:[1],
+e:"<b>IAM Identity Center</b> (לשעבר AWS SSO) הוא הפתרון המרכזי לגישת עובדים בסביבת Organizations רב־חשבונית: מתחבר ל־IdP חיצוני, ומגדיר <b>Permission Sets</b> שמוקצים לקבוצות על פני חשבונות — ניהול מרוכז אחד במקום 40.",
+w:["IAM Users לכל חשבון = תקורה עצומה וסתירה ל־best practice.","","שיתוף credentials אסור בכל מצב.","Cognito מיועד למשתמשי אפליקציה (B2C), לא לגישת עובדים לקונסולה."]},
+
+{i:108,d:1,t:"GuardDuty",lv:2,ty:"s",
+q:"A security team wants continuous, managed threat detection across all accounts in an organization, analyzing VPC Flow Logs, DNS logs, and CloudTrail events without deploying agents. Which service should they enable?",
+o:["Amazon Inspector","Amazon Macie","Amazon GuardDuty","AWS Config"],
+a:[2],
+e:"<b>GuardDuty</b> = זיהוי איומים מנוהל, ללא agent, שצורך אוטומטית CloudTrail, VPC Flow Logs ו־DNS logs. מפתח הזיהוי במבחן: \"threat detection\", \"malicious activity\", \"anomalous behavior\", \"no agents\".",
+w:["Inspector = סריקת פגיעויות (CVE) ב־EC2, ECR ו־Lambda.","Macie = גילוי וסיווג מידע רגיש (PII) ב־S3.","","Config = תאימות תצורה ומעקב שינויים, לא זיהוי איומים."]},
+
+{i:109,d:1,t:"Detection",lv:3,ty:"m",sel:2,
+q:"A company must (1) automatically discover personally identifiable information (PII) stored in Amazon S3 and (2) scan EC2 instances and container images for software vulnerabilities and unintended network exposure. Which two services meet these requirements? (Choose TWO.)",
+o:["Amazon Macie","Amazon Inspector","AWS Shield Advanced","Amazon Detective","AWS Firewall Manager"],
+a:[0,1],
+e:"<b>Macie</b> מזהה ומסווג מידע רגיש (PII) ב־S3 באמצעות machine learning ו־pattern matching. <b>Inspector</b> סורק EC2, container images ב־ECR ופונקציות Lambda לאיתור CVEs וחשיפת רשת לא מכוונת.",
+w:["","","Shield Advanced = הגנת DDoS.","Detective = חקירת ממצאים וניתוח סיבתי, לא סריקה.","Firewall Manager = ניהול מרוכז של WAF ו־Security Groups."]},
+
+{i:110,d:1,t:"S3 Access",lv:3,ty:"s",
+q:"A media company must give a third party temporary permission to download a single object from a private S3 bucket. Access must expire after 12 hours and must not require the third party to have AWS credentials. What is the MOST appropriate solution?",
+o:["Make the object public and set an S3 Lifecycle rule to delete it after 12 hours.",
+"Generate a presigned URL for the object with a 12-hour expiration.",
+"Create an IAM user for the third party with a policy that expires after 12 hours.",
+"Add the third party's account to the bucket ACL."],
+a:[1],
+e:"<b>Presigned URL</b> נוצר בחתימה של principal שיש לו הרשאה, מכיל תפוגה מובנית, ואינו דורש מהצד השלישי credentials של AWS. זה הפתרון הקנוני לגישה זמנית לאובייקט בודד.",
+w:["פרסום ציבורי חושף לכולם — לא בקרת גישה.","","IAM policy לא \"פגה\" מעצמה; ניתן להוסיף תנאי DateLessThan אך זו תקורה מיותרת לאובייקט בודד.","ACLs הן מנגנון legacy ש־AWS ממליצה להימנע ממנו."]},
+
+{i:111,d:1,t:"KMS",lv:3,ty:"s",
+q:"A company requires that encryption keys be generated and stored in a hardware security module that the company controls exclusively, with FIPS 140-2 Level 3 validation and full control over the HSM cluster. Which service meets this requirement?",
+o:["AWS KMS with an AWS managed key","AWS KMS with a customer managed key","AWS CloudHSM","AWS Certificate Manager"],
+a:[2],
+e:"<b>CloudHSM</b> מספק אשכול HSM ייעודי ובלעדי ללקוח, בתקן <code>FIPS 140-2 Level 3</code>, שבו AWS אינה מחזיקה גישה למפתחות. KMS הוא multi-tenant ומאומת ברמה 3 בהקשר מסוים, אך אינו נותן שליטה בלעדית על ה־HSM. מילות מפתח: \"dedicated\", \"exclusive control\", \"Level 3\".",
+w:["מפתח מנוהל AWS מעניק את השליטה המועטה ביותר.","CMK ב־KMS משפר שליטה אך עדיין בסביבה משותפת ומנוהלת בידי AWS.","","ACM מנפיק ומנהל תעודות TLS, לא מפתחות כלליים."]},
+
+{i:112,d:1,t:"Network Security",lv:3,ty:"s",
+q:"A company runs a public-facing web application on an Application Load Balancer. The application has recently suffered SQL injection attempts and HTTP floods from specific countries. Which solution provides the MOST targeted protection?",
+o:["Enable AWS Shield Standard on the ALB.",
+"Deploy AWS WAF on the ALB with managed rule groups, a rate-based rule, and geo-match rules.",
+"Attach a network ACL to the ALB subnets that denies the offending countries.",
+"Enable Amazon GuardDuty and create EventBridge rules to block traffic."],
+a:[1],
+e:"<b>AWS WAF</b> פועל בשכבה 7 ומטפל בדיוק בשלושת הווקטורים: <code>AWSManagedRulesSQLiRuleSet</code> נגד SQL injection, <b>rate-based rule</b> נגד HTTP flood, ו־<b>geo-match</b> לחסימה גיאוגרפית. Shield Standard פעיל אוטומטית אך מגן רק על שכבות 3/4.",
+w:["Shield Standard כבר פעיל כברירת מחדל ואינו מטפל בהתקפות שכבה 7 כמו SQLi.","","NACL עובדת ברמת IP/CIDR בלבד ואינה מודעת לגיאוגרפיה או לתוכן HTTP.","GuardDuty מזהה בדיעבד ואינו מנגנון חסימה inline."]},
+
+{i:113,d:1,t:"IAM",lv:3,ty:"s",
+q:"A developer in Account A needs to assume a role in Account B to manage resources. Which configuration is required in Account B?",
+o:["A resource-based trust policy on the role in Account B that trusts the principal in Account A, plus a permissions policy on the role.",
+"An IAM user in Account B with the same credentials as the developer in Account A.",
+"An SCP in Account A allowing sts:AssumeRole.",
+"A VPC peering connection between the two accounts."],
+a:[0],
+e:"גישה חוצת־חשבונות בנויה משני חלקים: ב־<b>Account B</b> — role עם <b>trust policy</b> שמציינת את ה־principal מ־Account A כ־<code>Principal</code>, ועם <b>permissions policy</b> שמגדירה מה מותר לעשות. בצד Account A ה־principal זקוק להרשאת <code>sts:AssumeRole</code>.",
+w:["","שכפול credentials בין חשבונות הוא anti-pattern ואינו אפשרי.","SCP רק מגביל הרשאות מקסימליות — לא מעניק אותן, וגם לא מוגדר בצד הנכון.","Peering הוא קישוריות רשת, לא הרשאות."]},
+
+{i:114,d:1,t:"Compliance",lv:2,ty:"s",
+q:"An auditor requires an immutable record of all API calls made in an AWS account, with proof that the log files have not been altered. Which configuration should a solutions architect implement?",
+o:["Enable CloudTrail, deliver logs to an S3 bucket with Object Lock in compliance mode, and enable log file validation.",
+"Enable VPC Flow Logs to Amazon CloudWatch Logs.",
+"Enable AWS Config with a conformance pack.",
+"Enable Amazon CloudWatch detailed monitoring on all resources."],
+a:[0],
+e:"<b>CloudTrail</b> מתעד קריאות API. <b>log file validation</b> יוצר קובצי digest חתומים דיגיטלית שמוכיחים אי־שינוי, ו־<b>S3 Object Lock</b> ב־compliance mode מונע מחיקה או דריסה — גם על ידי ה־root. זהו הצירוף המלא לדרישת ביקורת.",
+w:["","Flow Logs מתעדים תעבורת רשת, לא קריאות API.","Config עוקב אחר תצורות משאבים, לא אחר מי ביצע כל קריאה.","CloudWatch monitoring אוסף מטריקות ביצועים."]},
+
+{i:115,d:1,t:"EC2 Security",lv:3,ty:"s",
+q:"A penetration test revealed that a server-side request forgery (SSRF) vulnerability in a web application allowed retrieval of EC2 instance credentials from the instance metadata service. What is the MOST effective mitigation?",
+o:["Remove the IAM role from the instance.",
+"Require IMDSv2 (session-oriented tokens) and set the metadata hop limit to 1.",
+"Move the instances to a private subnet.",
+"Enable termination protection on the instances."],
+a:[1],
+e:"<b>IMDSv2</b> מחייב קבלת token דרך בקשת <code>PUT</code> עם header ייעודי — פעולה ש־SSRF פשוט לא מסוגל לבצע. הגדרת <code>http-put-response-hop-limit=1</code> מונעת גם דליפה לקונטיינרים. זו ההמלצה הרשמית של AWS מול SSRF.",
+w:["הסרת ה־role תשבור את האפליקציה — לא פתרון מעשי.","","Subnet פרטי אינו מונע SSRF מתוך האפליקציה עצמה.","Termination protection לא קשור לאבטחת credentials."]},
+
+{i:116,d:1,t:"Organizations",lv:3,ty:"s",
+q:"A company must guarantee that no account in its organization can disable AWS CloudTrail, regardless of the permissions granted by account administrators. What should be implemented?",
+o:["An IAM policy attached to all users denying cloudtrail:StopLogging",
+"A service control policy (SCP) at the organization root denying cloudtrail:StopLogging and cloudtrail:DeleteTrail",
+"An AWS Config rule that re-enables CloudTrail",
+"A permissions boundary on the administrator role in each account"],
+a:[1],
+e:"<b>SCP</b> מגדירה את התקרה המקסימלית של ההרשאות בחשבון — היא גוברת על כל IAM policy מקומית, כולל של ה־root user בחשבון החבר. זו הדרך היחידה לאכוף איסור מוחלט ברמת הארגון.",
+w:["IAM policy יכולה להיות מוסרת בידי מנהל החשבון המקומי.","","Config יתקן בדיעבד — אבל החלון שבו הלוג כבוי כבר קרה, וזו אינה מניעה.","Permissions boundary חלה על identity ספציפי ולא מכסה את כל החשבון."]},
+
+{i:117,d:1,t:"Cognito",lv:2,ty:"s",
+q:"A mobile application needs to allow users to sign up and sign in with email or with Google and Facebook, and then obtain temporary AWS credentials to upload files to Amazon S3. Which combination should be used?",
+o:["Amazon Cognito user pools for authentication and Cognito identity pools for temporary AWS credentials",
+"IAM users created dynamically for each mobile user",
+"AWS IAM Identity Center with an external identity provider",
+"AWS Directory Service with AD Connector"],
+a:[0],
+e:"החלוקה שחוזרת במבחן: <b>User Pool</b> = ספריית משתמשים ואימות (sign-up / sign-in, כולל social IdPs) ⇐ מחזיר JWT. <b>Identity Pool</b> = החלפת ה־token ב־credentials זמניים של AWS דרך STS ⇐ מאפשר גישה ישירה ל־S3.",
+w:["","יצירת IAM Users למשתמשי קצה אינה ניתנת להרחבה ואסורה כ־best practice.","Identity Center מיועד לעובדים, לא למשתמשי אפליקציה ציבורית.","Directory Service מיועד לאינטגרציית Active Directory."]},
+
+{i:118,d:1,t:"Data Protection",lv:2,ty:"s",
+q:"A company must ensure that all objects uploaded to an S3 bucket are encrypted at rest, and must reject any upload request that does not specify encryption. What should a solutions architect do?",
+o:["Enable S3 Versioning on the bucket.",
+"Add a bucket policy that denies s3:PutObject when the s3:x-amz-server-side-encryption condition is not present, and enable default encryption.",
+"Enable S3 Transfer Acceleration.",
+"Configure an S3 Lifecycle policy to encrypt objects after 24 hours."],
+a:[1],
+e:"שילוב של <b>default encryption</b> (מבטיח הצפנה בפועל) עם <b>bucket policy מסוג Deny</b> על בקשות ללא header ההצפנה (אוכף גם דחייה מפורשת של הבקשה) הוא הדפוס שמופיע בשאלות אכיפה. שים לב: כיום S3 מצפין כברירת מחדל, אך המבחן עדיין בודק את מנגנון האכיפה המפורש.",
+w:["Versioning מגן מפני מחיקה, לא קשור להצפנה.","","Transfer Acceleration משפר מהירות העלאה.","Lifecycle אינו מצפין אובייקטים ולא דוחה בקשות."]},
+
+{i:119,d:1,t:"PrivateLink",lv:3,ty:"s",
+q:"A SaaS provider wants to expose its application, which runs behind a Network Load Balancer in its own VPC, to hundreds of customer VPCs without using VPC peering, without overlapping CIDR concerns, and without exposing the service to the internet. What should the provider use?",
+o:["AWS Transit Gateway with route propagation",
+"An AWS PrivateLink endpoint service backed by the Network Load Balancer",
+"VPC peering with each customer VPC",
+"AWS Site-to-Site VPN to each customer"],
+a:[1],
+e:"<b>AWS PrivateLink</b> נבנה בדיוק לתרחיש הזה: יוצרים <b>endpoint service</b> מול NLB, והלקוחות יוצרים <b>Interface Endpoint</b> בענן שלהם. הקישוריות חד־כיוונית, אינה דורשת CIDR ייחודי, ואינה חושפת את השירות לאינטרנט. \"SaaS provider\" + \"hundreds of consumers\" = PrivateLink.",
+w:["Transit Gateway מחבר רשתות במלואן ודורש תכנון CIDR — לא מתאים לחשיפת שירות בודד למאות לקוחות זרים.","","Peering אינו transitive, מוגבל בכמות, ורגיש לחפיפת CIDR.","VPN למאות לקוחות = תקורה בלתי אפשרית."]},
+
+{i:120,d:1,t:"ACM",lv:2,ty:"s",
+q:"A company needs TLS certificates for an Application Load Balancer and wants automatic renewal at no additional cost. Which solution meets these requirements?",
+o:["Purchase certificates from a third-party CA and import them into IAM.",
+"Request public certificates from AWS Certificate Manager and attach them to the ALB listener.",
+"Generate self-signed certificates on the EC2 instances.",
+"Use AWS Private CA to issue public certificates."],
+a:[1],
+e:"<b>ACM public certificates</b> חינמיים לשימוש עם שירותי AWS משולבים (ALB, CloudFront, API Gateway) ומתחדשים אוטומטית כאשר האימות הוא DNS. תעודות שיובאו ידנית ל־ACM/IAM אינן מתחדשות אוטומטית.",
+w:["תעודה מיובאת אינה נהנית מחידוש אוטומטי.","","תעודה self-signed לא תיתמך בדפדפנים.","Private CA מנפיקה תעודות פנימיות בלבד וכרוכה בעלות חודשית משמעותית."]},
+
+{i:121,d:1,t:"Firewall",lv:3,ty:"s",
+q:"A company operates 30 VPCs across multiple accounts and needs centralized, stateful traffic inspection with domain-name filtering and intrusion prevention for all egress traffic. Which service should be deployed?",
+o:["Security groups with prefix lists","AWS Network Firewall in an inspection VPC","AWS WAF on the NAT gateways","Network ACLs with deny rules"],
+a:[1],
+e:"<b>AWS Network Firewall</b> הוא firewall מנוהל stateful ברמת ה־VPC, תומך בכללי <code>Suricata</code>, סינון לפי domain name ו־IPS. הדפוס המקובל: <b>inspection VPC</b> מרכזי מאחורי Transit Gateway, וניהול מרוכז דרך Firewall Manager.",
+w:["SG הן stateful אך ללא בדיקת תוכן, IPS או סינון דומיינים.","","WAF אינו מתחבר ל־NAT Gateway ומטפל בשכבה 7 של HTTP בלבד.","NACL היא stateless ופרימיטיבית — ללא deep inspection."]},
+
+{i:122,d:1,t:"RAM",lv:2,ty:"s",
+q:"A central networking account owns subnets that application accounts in the same AWS Organization need to launch resources into, without duplicating VPC infrastructure. Which service enables this?",
+o:["AWS Resource Access Manager (AWS RAM)","AWS Transit Gateway","VPC peering","AWS Control Tower"],
+a:[0],
+e:"<b>AWS RAM</b> מאפשר שיתוף משאבים בין חשבונות באותו ארגון — ובפרט <b>subnets</b> בדפוס ה־Shared VPC. חשבון הרשת מחזיק ומנהל את ה־VPC, וחשבונות האפליקציה מפעילים בו משאבים. חוסך שכפול רשתות ו־peering מיותר.",
+w:["","Transit Gateway מחבר בין VPCs נפרדים — לא משתף subnet אחד.","Peering מחבר רשתות, אינו מאפשר הפעלת משאבים ב־subnet של אחר.","Control Tower מקים ומנהל landing zone, לא משתף משאבים ספציפיים."]},
+
+{i:123,d:1,t:"Shield",lv:2,ty:"s",
+q:"A high-profile application must be protected against large-scale DDoS attacks, and the company wants 24/7 access to the AWS DDoS Response Team plus cost protection for scaling charges incurred during an attack. What should be enabled?",
+o:["AWS Shield Standard","AWS Shield Advanced","AWS WAF Bot Control","Amazon GuardDuty"],
+a:[1],
+e:"<b>Shield Advanced</b> (בתשלום) מוסיף מעל Standard: גישה ל־<b>DRT/SRT</b>, הגנה מתקדמת בשכבות 3/4/7, <b>cost protection</b> על חיובי scaling בזמן מתקפה, ו־WAF כלול. מילות המפתח: \"DDoS Response Team\" ו־\"cost protection\".",
+w:["Standard פעיל אוטומטית לכולם וללא DRT או cost protection.","","Bot Control הוא רכיב של WAF נגד בוטים, לא DDoS בקנה מידה גדול.","GuardDuty מזהה, לא מגן."]},
+
+{i:124,d:1,t:"IAM",lv:3,ty:"s",
+q:"A company wants to allow developers to create IAM roles for their applications, but must ensure that no role they create can ever exceed a defined set of permissions. Which feature should be used?",
+o:["Service control policies","Permissions boundaries","IAM Access Analyzer","Session policies"],
+a:[1],
+e:"<b>Permissions boundary</b> מגדירה את ההרשאות המקסימליות של identity שנוצר. כאשר מחייבים בעזרת תנאי (<code>iam:PermissionsBoundary</code>) שכל role חדש ייווצר עם boundary מסוימת — המפתחים יכולים ליצור roles בעצמם, אך לעולם לא חזקים מהתקרה. זהו דפוס ה־delegation הקלאסי.",
+w:["SCP חלה על חשבונות שלמים בארגון, לא על הגבלת יצירת identity ספציפית בידי מפתח.","","Access Analyzer מזהה גישה חיצונית — אינו אוכף.","Session policy מוגבלת לסשן בודד בזמן AssumeRole."]},
+
+{i:125,d:1,t:"Encryption",lv:3,ty:"s",
+q:"An application must encrypt large volumes of data locally before sending it to Amazon S3, while minimizing calls to AWS KMS. Which approach should be used?",
+o:["Call KMS Encrypt for every object.",
+"Use envelope encryption with the KMS GenerateDataKey API and cache the plaintext data key locally for a limited time.",
+"Use SSE-S3 with the default S3 key.",
+"Store a static AES key in the application configuration file."],
+a:[1],
+e:"<b>Envelope encryption</b>: קוראים ל־<code>GenerateDataKey</code> ומקבלים data key ב־plaintext וב־ciphertext. ההצפנה בפועל מתבצעת מקומית עם ה־data key, וה־KMS נקרא רק לפענוח המפתח. שימוש ב־<b>Data Key Caching</b> (ב־AWS Encryption SDK) מפחית דרמטית קריאות ועלות.",
+w:["KMS Encrypt מוגבל ל‑4KB ויוצר קריאה לכל אובייקט — לא ניתן להרחבה.","","SSE-S3 מצפין בצד השרת, לא מקומית לפני השליחה.","מפתח סטטי בקובץ תצורה הוא כשל אבטחה חמור."]},
+
+{i:126,d:1,t:"Directory",lv:2,ty:"s",
+q:"A company runs Windows workloads on Amazon EC2 and needs a fully managed Microsoft Active Directory in AWS that supports trust relationships with its on-premises AD. Which option should be selected?",
+o:["AWS Directory Service AD Connector","AWS Managed Microsoft AD","Simple AD","Amazon Cognito user pools"],
+a:[1],
+e:"<b>AWS Managed Microsoft AD</b> הוא AD אמיתי המנוהל בענן, ותומך ב־<b>trust relationships</b> דו־כיווניים עם AD מקומי, ב־Group Policy וב־LDAP/Kerberos מלא.",
+w:["AD Connector הוא proxy בלבד — אינו מאחסן משתמשים ואינו תומך ב־trusts.","","Simple AD מבוסס Samba ואינו תומך ב־trust relationships.","Cognito אינו Active Directory."]},
+
+{i:127,d:1,t:"Logging",lv:2,ty:"s",
+q:"A security team needs to investigate which EC2 instance communicated with a suspicious external IP address, including source and destination ports and whether the traffic was accepted or rejected. Which log source provides this information?",
+o:["AWS CloudTrail","VPC Flow Logs","Amazon CloudWatch Logs Insights on application logs","AWS Config configuration history"],
+a:[1],
+e:"<b>VPC Flow Logs</b> מתעדים מטא־נתונים של תעבורת IP: כתובות מקור/יעד, פורטים, פרוטוקול, מספר בתים, ו־<code>ACCEPT</code>/<code>REJECT</code>. זהו המקור לחקירת קישוריות רשת. CloudTrail לעומתו מתעד קריאות API בלבד.",
+w:["CloudTrail מתעד פעולות API בחשבון — לא זרימות רשת.","","לוגי אפליקציה לא בהכרח מכילים את התעבורה ברמת הרשת.","Config מתעד שינויי תצורה."]},
+
+{i:128,d:1,t:"S3",lv:3,ty:"s",
+q:"After a misconfiguration, several S3 buckets in an account were made publicly readable. The company wants to prevent any bucket in the account from being made public in the future, regardless of individual bucket policies or ACLs. What should be done?",
+o:["Enable S3 Block Public Access at the account level.",
+"Add an explicit deny to each bucket policy.",
+"Enable S3 Versioning on all buckets.",
+"Turn on AWS Config rule s3-bucket-public-read-prohibited."],
+a:[0],
+e:"<b>S3 Block Public Access ברמת החשבון</b> גובר על כל bucket policy או ACL קיימים ועתידיים, וחוסם חשיפה ציבורית באופן גורף. זו בקרה מונעת (preventive) ולא רק גילויית.",
+w:["","מדיניות לכל bucket בנפרד אינה מונעת יצירת bucket חדש ופתוח.","Versioning אינו קשור לחשיפה ציבורית.","כלל Config מזהה בדיעבד — אינו מונע."]},
+
+{i:129,d:1,t:"Bastion",lv:2,ty:"s",
+q:"A company wants to eliminate bastion hosts and open SSH ports while still allowing administrators to access EC2 instances in private subnets, with full session auditing. What should a solutions architect recommend?",
+o:["AWS Systems Manager Session Manager with the SSM Agent and appropriate IAM policies",
+"An internet-facing NLB forwarding port 22 to the instances",
+"A Site-to-Site VPN with SSH keys distributed to administrators",
+"Elastic IP addresses on each instance with security groups limited to the office IP"],
+a:[0],
+e:"<b>Session Manager</b> יוצר חיבור יוצא מה־SSM Agent ל־AWS — ללא פורטים נכנסים, ללא bastion, ללא מפתחות SSH. הגישה נשלטת ב־IAM וכל סשן ניתן להקלטה ל־S3/CloudWatch לצורכי ביקורת. זו התשובה הנכונה כמעט תמיד כאשר מוזכר \"eliminate bastion\".",
+w:["","חשיפת SSH לאינטרנט סותרת את הדרישה.","VPN + מפתחות עדיין דורש ניהול מפתחות ואינו מספק תיעוד סשנים מובנה.","Elastic IP חושף את המכונות ומוציא אותן מ־subnet פרטי."]},
+
+{i:130,d:1,t:"Multi-Account",lv:3,ty:"s",
+q:"An organization needs a new AWS multi-account environment with pre-configured guardrails, centralized logging, and an account factory for provisioning new accounts consistently. Which service should be used?",
+o:["AWS Organizations only","AWS Control Tower","AWS Service Catalog","AWS Config aggregator"],
+a:[1],
+e:"<b>Control Tower</b> מקים landing zone מלא: בונה מעליו Organizations, מגדיר OUs, <b>guardrails</b> (preventive דרך SCP ו־detective דרך Config), logging מרוכז ב־Log Archive, וחשבון Audit — בתוספת <b>Account Factory</b> להקצאת חשבונות חדשים באופן אחיד.",
+w:["Organizations לבדו מספק מבנה חשבונות ו־SCPs, אך לא guardrails מוכנים, לוגים מרוכזים או account factory.","","Service Catalog מפרסם תבניות מאושרות — הוא רכיב בתוך Control Tower, לא תחליף.","Config aggregator רק מרכז ממצאי תאימות."]},
+];
+
+/* ===== Domain 2 — Design Resilient Architectures (26%) ===== */
+const D2 = [
+{i:201,d:2,t:"RDS",lv:2,ty:"s",
+q:"A company runs a production Amazon RDS for PostgreSQL database. The business requires automatic failover to another Availability Zone within minutes if the primary database fails, with no data loss. What should a solutions architect implement?",
+o:["Create a read replica in a second Availability Zone and promote it manually on failure.",
+"Enable Multi-AZ deployment for the RDS instance.",
+"Take automated snapshots every 5 minutes and restore on failure.",
+"Deploy the database on EC2 instances in an Auto Scaling group."],
+a:[1],
+e:"<b>Multi-AZ</b> מבצע שכפול <b>סינכרוני</b> ל־standby ב־AZ אחרת ומבצע failover אוטומטי (בדרך כלל 60–120 שניות) עם החלפת רשומת ה־DNS. שכפול סינכרוני משמעו <code>RPO ≈ 0</code>. ההבחנה המרכזית במבחן: <b>Multi-AZ = זמינות</b>, <b>Read Replica = ביצועי קריאה</b> (א־סינכרוני).",
+w:["Read Replica הוא א־סינכרוני (אפשרות לאיבוד נתונים) והקידום ידני.","","שחזור מ־snapshot אורך זמן רב ואינו אוטומטי.","ניהול עצמי מגדיל תקורה ואינו נותן failover מובנה."]},
+
+{i:202,d:2,t:"DR",lv:3,ty:"s",
+q:"A company must be able to recover its workload in a second AWS Region with an RTO of a few minutes and an RPO of seconds, while keeping costs lower than running full production capacity in both Regions. Which disaster recovery strategy should be selected?",
+o:["Backup and restore","Pilot light","Warm standby","Multi-site active/active"],
+a:[2],
+e:"<b>Warm standby</b> מפעיל עותק מוקטן אך <b>פעיל ומתפקד</b> של כל הסביבה באזור המשני, ומרחיב אותו בעת אירוע ⇐ RTO של דקות, RPO של שניות, בעלות נמוכה מ־active/active. <b>Pilot light</b> מחזיק רק את שכבת הנתונים חמה (RTO של עשרות דקות), ו־<b>multi-site</b> נותן RTO/RPO כמעט אפסי אך בעלות הגבוהה ביותר.",
+w:["Backup and restore נותן RTO/RPO של שעות.","Pilot light מספק RTO ארוך יותר (עשרות דקות) כי שכבת ה־compute כבויה.","","Active/active עומד בדרישה אך יקר יותר — הדרישה כללה הפחתת עלות."]},
+
+{i:203,d:2,t:"Decoupling",lv:2,ty:"s",
+q:"An application writes image files to an S3 bucket. Multiple independent downstream services must each process every uploaded image. Which architecture provides reliable fan-out with the LEAST coupling?",
+o:["S3 Event Notification to an SNS topic, with an SQS queue subscribed for each downstream service",
+"S3 Event Notification directly to a single SQS queue consumed by all services",
+"S3 Event Notification to a single Lambda function that calls each service synchronously",
+"Have each service poll the S3 bucket every minute using ListObjectsV2"],
+a:[0],
+e:"דפוס <b>fan-out</b> קלאסי: SNS מפיץ הודעה לכל ה־subscribers, וכל שירות מקבל <b>SQS queue משלו</b> — מה שנותן buffering, retry ו־DLQ עצמאיים לכל צרכן. אם צרכן אחד נופל, האחרים אינם מושפעים.",
+w:["","בתור SQS יחיד כל הודעה נצרכת פעם אחת בלבד — צרכן אחד \"יגנוב\" את ההודעה מהאחרים.","קריאה סינכרונית יוצרת צימוד הדוק וכשל משורשר.","Polling של S3 אינו יעיל, יקר, ובעל השהיה."]},
+
+{i:204,d:2,t:"Route 53",lv:3,ty:"s",
+q:"A company hosts an application in two AWS Regions. Users should be routed to the Region with the lowest network latency, and traffic must automatically stop being sent to a Region that becomes unhealthy. Which Route 53 configuration meets these requirements?",
+o:["Simple routing with two IP addresses",
+"Latency-based routing with health checks on each endpoint",
+"Geolocation routing with a default record",
+"Weighted routing with equal weights"],
+a:[1],
+e:"<b>Latency-based routing</b> מפנה כל משתמש ל־endpoint עם ההשהיה הנמוכה ביותר עבורו, ובשילוב <b>health checks</b> Route 53 מפסיק להחזיר רשומה של אזור לא תקין. חשוב להבדיל: latency ≠ geolocation. Geolocation מנתב לפי מיקום גאוגרפי של המשתמש ולא לפי ביצועים בפועל.",
+w:["Simple routing אינו תומך ב־health checks ומחזיר את כל הערכים.","","Geolocation מנתב לפי מיקום, שלא בהכרח נותן latency מינימלי.","Weighted מחלק תעבורה ביחס קבוע ואינו מודע ל־latency."]},
+
+{i:205,d:2,t:"Auto Scaling",lv:2,ty:"s",
+q:"An application runs on EC2 instances behind an Application Load Balancer in a single Availability Zone. The company wants to survive the loss of an Availability Zone without manual intervention. What should a solutions architect do?",
+o:["Increase the instance size to handle more load.",
+"Configure the Auto Scaling group to span at least two Availability Zones and register subnets in both AZs with the ALB.",
+"Create an AMI backup of each instance daily.",
+"Enable EC2 termination protection on all instances."],
+a:[1],
+e:"עמידות ל־AZ מושגת על ידי פריסת ה־<b>Auto Scaling group</b> על פני שני subnets לפחות ב־AZs שונות, כאשר גם ה־ALB מוגדר על אותן AZs. ASG יזהה מכונות לא תקינות ויחליף אותן אוטומטית ב־AZ הזמינה.",
+w:["הגדלת מכונה (scale up) אינה מוסיפה עמידות לכשל אזורי.","","AMI הוא גיבוי — לא זמינות אוטומטית.","Termination protection דווקא מפריע ל־ASG להחליף מכונות."]},
+
+{i:206,d:2,t:"DynamoDB",lv:3,ty:"s",
+q:"A globally distributed application requires a NoSQL database with single-digit millisecond reads and writes in multiple Regions, with automatic multi-Region replication and local write capability. Which solution meets these requirements?",
+o:["Amazon DynamoDB global tables",
+"Amazon DynamoDB with cross-Region read replicas",
+"Amazon RDS Multi-AZ with a cross-Region read replica",
+"Amazon ElastiCache for Redis global datastore"],
+a:[0],
+e:"<b>DynamoDB Global Tables</b> מספקות שכפול <b>multi-active</b> חוצה־אזורים: אפשר לכתוב בכל אזור, והשכפול הוא asynchronous עם last-writer-wins. זהו הפתרון היחיד ברשימה שנותן כתיבה מקומית בכל אזור עם השהיה חד־ספרתית.",
+w:["","ל־DynamoDB אין \"cross-Region read replicas\" — המנגנון נקרא global tables.","RDS הוא רלציוני, וה־read replica אינו מאפשר כתיבה.","ElastiCache הוא שכבת cache — אינו מסד נתונים עמיד לאחסון ראשי."]},
+
+{i:207,d:2,t:"SQS",lv:3,ty:"s",
+q:"Messages in an Amazon SQS queue are occasionally processed more than once because the consumer takes longer than expected to finish. Which change addresses this issue MOST directly?",
+o:["Switch the queue to a FIFO queue.",
+"Increase the queue's visibility timeout to exceed the maximum processing time.",
+"Increase the message retention period.",
+"Enable long polling on the queue."],
+a:[1],
+e:"<b>Visibility timeout</b> הוא משך הזמן שבו הודעה שנמשכה מוסתרת משאר הצרכנים. אם העיבוד ארוך יותר מהערך הזה, ההודעה חוזרת לתור וצרכן אחר יעבד אותה שוב. ההתאמה הנכונה: visibility timeout > זמן העיבוד המקסימלי (ניתן גם להאריך דינמית עם <code>ChangeMessageVisibility</code>).",
+w:["FIFO מבטיח סדר ו־exactly-once processing, אך העלות בביצועים גבוהה והבעיה כאן היא תזמון, לא סדר.","","Retention period קובע כמה זמן הודעה נשמרת בתור לפני מחיקה.","Long polling מפחית קריאות ריקות ועלות — לא קשור לכפילות."]},
+
+{i:208,d:2,t:"S3",lv:2,ty:"s",
+q:"A company must protect objects in an S3 bucket from accidental deletion and must be able to restore any previous version of an object. What should be enabled?",
+o:["S3 Versioning together with MFA Delete","S3 Lifecycle transitions to S3 Glacier","S3 Transfer Acceleration","S3 Intelligent-Tiering"],
+a:[0],
+e:"<b>Versioning</b> שומר כל גרסה של אובייקט; מחיקה יוצרת <code>delete marker</code> הפיך. <b>MFA Delete</b> מוסיף שכבה שמונעת מחיקת גרסאות או כיבוי versioning ללא אימות דו־שלבי — צירוף קלאסי להגנה מפני מחיקה בשוגג או זדונית.",
+w:["","Lifecycle מעביר בין רמות אחסון לחיסכון — אינו מגן מפני מחיקה.","Transfer Acceleration משפר מהירות העלאה.","Intelligent-Tiering מייעל עלות לפי דפוסי גישה."]},
+
+{i:209,d:2,t:"Aurora",lv:3,ty:"s",
+q:"A company needs a relational database with sub-second cross-Region replication lag, the ability to promote a secondary Region in under a minute, and read scaling in the secondary Region. Which solution meets these requirements?",
+o:["Amazon RDS for MySQL with a cross-Region read replica",
+"Amazon Aurora Global Database",
+"Amazon Aurora Multi-AZ with two readers",
+"Amazon DynamoDB global tables"],
+a:[1],
+e:"<b>Aurora Global Database</b> משכפל ברמת שכבת האחסון עם השהיה טיפוסית של פחות משנייה, מאפשר עד 5 אזורים משניים לקריאה, ותומך ב־<b>managed planned failover</b> וב־promotion של אזור משני תוך פחות מדקה — RPO של שנייה ו־RTO של דקה.",
+w:["Read replica חוצה־אזורים ב־RDS סובל מהשהיה גבוהה יותר וקידום איטי יותר.","","Multi-AZ מטפל בכשל בתוך אזור בלבד.","DynamoDB אינו רלציוני."]},
+
+{i:210,d:2,t:"EFS",lv:2,ty:"s",
+q:"A content management application runs on EC2 instances in an Auto Scaling group across three Availability Zones. All instances must read and write the same set of files concurrently with POSIX semantics. Which storage solution should be used?",
+o:["Amazon EBS Multi-Attach volumes","Amazon EFS","Amazon S3 mounted with a file gateway","Instance store volumes"],
+a:[1],
+e:"<b>Amazon EFS</b> הוא NFS מנוהל, אלסטי, נגיש במקביל ממאות מכונות ומרובה־AZ. זו התשובה לכל שאלה עם \"shared file system\" + \"multiple instances\" + \"multiple AZs\" + POSIX.",
+w:["EBS Multi-Attach מוגבל ל־io1/io2, לאותה AZ בלבד, ודורש קובץ־מערכת clustered.","","File Gateway מיועד לחיבור מקומי אל S3, לא לשיתוף בין מכונות EC2 בענן.","Instance store הוא זמני ונמחק בעצירת המכונה."]},
+
+{i:211,d:2,t:"Lambda",lv:3,ty:"s",
+q:"An AWS Lambda function is invoked asynchronously by Amazon S3 events. Some invocations fail repeatedly due to malformed input, and the events are lost. What should a solutions architect configure to retain the failed events for later analysis?",
+o:["Increase the function timeout.",
+"Configure a dead-letter queue (or an on-failure destination) for the function.",
+"Enable provisioned concurrency.",
+"Change the invocation to synchronous."],
+a:[1],
+e:"בהפעלה <b>אסינכרונית</b>, Lambda מנסה מחדש פעמיים ואז מוחקת את האירוע. הגדרת <b>Dead-Letter Queue</b> (SQS/SNS) או <b>on-failure destination</b> משמרת את האירועים שנכשלו לניתוח מאוחר. זו התשובה לכל \"events are lost after failure\".",
+w:["Timeout אינו הבעיה — הקלט פגום.","","Provisioned concurrency פותר cold starts.","הפעלה סינכרונית מ־S3 אינה נתמכת ואינה פותרת את איבוד האירועים."]},
+
+{i:212,d:2,t:"Backup",lv:2,ty:"s",
+q:"A company needs a centralized way to define backup policies and monitor backup compliance for EBS volumes, RDS databases, DynamoDB tables, and EFS file systems across multiple accounts. Which service should be used?",
+o:["Amazon Data Lifecycle Manager","AWS Backup","AWS Storage Gateway","Amazon S3 Cross-Region Replication"],
+a:[1],
+e:"<b>AWS Backup</b> מרכז מדיניות גיבוי (backup plans), תזמון, retention, עותקים חוצי־אזורים וחוצי־חשבונות, ו־<b>Backup Audit Manager</b> לתאימות — עבור מגוון שירותים במקום פתרון נפרד לכל אחד.",
+w:["DLM מטפל ב־snapshots של EBS ו־AMIs בלבד.","","Storage Gateway מחבר סביבה מקומית לאחסון בענן.","CRR משכפל אובייקטי S3 בלבד."]},
+
+{i:213,d:2,t:"ELB",lv:3,ty:"s",
+q:"An application requires a load balancer that can handle millions of requests per second with ultra-low latency, preserve the client source IP, and support a static IP address per Availability Zone. Which load balancer should be used?",
+o:["Application Load Balancer","Network Load Balancer","Gateway Load Balancer","Classic Load Balancer"],
+a:[1],
+e:"<b>NLB</b> פועל בשכבה 4, מטפל במיליוני בקשות בשנייה עם השהיה של מיקרו־שניות, שומר את <b>source IP</b> המקורי, ותומך ב־<b>Elastic IP סטטי לכל AZ</b> — קריטי כשלקוחות צריכים להוסיף IP ל־allowlist.",
+w:["ALB פועל בשכבה 7, מוסיף השהיה, ומחליף את ה־source IP (נדרש X-Forwarded-For).","","Gateway Load Balancer מיועד לפריסת appliances לבדיקת תעבורה.","CLB הוא דור קודם ואינו מומלץ לפריסות חדשות."]},
+
+{i:214,d:2,t:"Stateless",lv:2,ty:"s",
+q:"Users are randomly logged out of a web application running on EC2 instances behind an Application Load Balancer whenever the Auto Scaling group scales in or out. Sessions are stored locally on each instance. What is the MOST scalable fix?",
+o:["Enable sticky sessions on the ALB.",
+"Store session state in Amazon ElastiCache for Redis or Amazon DynamoDB.",
+"Disable Auto Scaling.",
+"Move all instances into a single Availability Zone."],
+a:[1],
+e:"התשובה הארכיטקטונית הנכונה היא <b>externalizing session state</b> — הוצאת ה־session ל־store משותף (ElastiCache for Redis או DynamoDB). כך המכונות הופכות ל־stateless וניתן להחליף אותן בחופשיות. Sticky sessions הוא פתרון עוקף שמשמר את הבעיה.",
+w:["Sticky sessions קושר משתמש למכונה — עדיין מאבד סשן כשהמכונה נסגרת ופוגע בפיזור העומס.","","ביטול Auto Scaling מבטל את יתרון הגמישות.","AZ יחיד פוגע בזמינות ולא פותר את הבעיה."]},
+
+{i:215,d:2,t:"S3 Replication",lv:2,ty:"s",
+q:"A company must maintain a copy of all objects from an S3 bucket in us-east-1 in a bucket in eu-west-1 for disaster recovery, including all new objects automatically. What should be configured?",
+o:["S3 Cross-Region Replication with versioning enabled on both buckets",
+"An S3 Lifecycle rule that transitions objects to the second Region",
+"AWS DataSync running hourly",
+"S3 Transfer Acceleration"],
+a:[0],
+e:"<b>Cross-Region Replication (CRR)</b> משכפל אובייקטים חדשים אוטומטית לדלי באזור אחר. <b>תנאי חובה: versioning מופעל בשני הדליים.</b> לשכפול אובייקטים קיימים נדרש בנוסף <code>S3 Batch Replication</code>.",
+w:["","Lifecycle מעביר בין storage classes — לא בין אזורים.","DataSync אפשרי אך אינו רציף, מוסיף תקורה ועלות תפעולית.","Transfer Acceleration משפיע על מהירות העלאה בלבד."]},
+
+{i:216,d:2,t:"Health",lv:3,ty:"s",
+q:"An Auto Scaling group keeps terminating and replacing instances even though the EC2 status checks pass. The application on some instances is unresponsive. What should a solutions architect verify to ensure unhealthy application instances are correctly replaced?",
+o:["That the Auto Scaling group uses ELB health checks in addition to EC2 status checks, and that the health check grace period is long enough for application startup",
+"That termination protection is enabled",
+"That the ALB is internet-facing",
+"That the instances use Spot Instances"],
+a:[0],
+e:"כברירת מחדל ASG מסתמך על <b>EC2 status checks</b> בלבד, שאינם יודעים דבר על בריאות האפליקציה. יש להגדיר <b>ELB health check type</b> כדי ש־ASG יחליף מכונות שנכשלות ב־target group. במקביל, <b>health check grace period</b> קצר מדי גורם להחלפות מיותרות בזמן העלייה של האפליקציה.",
+w:["","Termination protection אינו רלוונטי למחזור החיים של ASG.","סוג ה־ALB אינו קשור לבדיקות בריאות פנימיות.","סוג התמחור אינו קובע את מנגנון הבריאות."]},
+
+{i:217,d:2,t:"Step Functions",lv:2,ty:"s",
+q:"A company needs to orchestrate a multi-step order-processing workflow with conditional branching, automatic retries with exponential backoff, and full visual auditing of each execution. Which service is MOST appropriate?",
+o:["Amazon SQS with multiple queues","AWS Step Functions","Amazon EventBridge rules","AWS Batch"],
+a:[1],
+e:"<b>Step Functions</b> הוא מנוע orchestration עם state machine: תמיכה מובנית ב־<code>Choice</code> להסתעפות, <code>Retry</code> עם exponential backoff, <code>Catch</code> לטיפול בשגיאות, ותצוגה חזותית של כל execution — בדיוק שלוש הדרישות.",
+w:["SQS מספק תורים אך אינו מנהל מצב או הסתעפות.","","EventBridge מנתב אירועים אך אינו מנהל תהליך רב־שלבי עם מצב.","Batch מריץ עבודות חישוב מרובות, לא workflow עסקי."]},
+
+{i:218,d:2,t:"Multi-AZ",lv:3,ty:"s",
+q:"A stateful application currently runs on a single EC2 instance with an attached EBS volume. The company wants to reduce recovery time after an instance failure to under 5 minutes without re-architecting the application. Which approach is MOST appropriate?",
+o:["Place the instance in an Auto Scaling group with a minimum, maximum, and desired capacity of 1, and use EBS snapshots plus a scripted volume attach or an EC2 Auto Recovery configuration.",
+"Increase the instance size.",
+"Enable EBS encryption.",
+"Move the application to Amazon S3."],
+a:[0],
+e:"עבור אפליקציה stateful שאין ברצוננו לשכתב, הדפוס הוא <b>ASG של 1 מכונה</b> (\"self-healing single instance\") או <b>EC2 Auto Recovery</b>. שילוב עם snapshots סדירים מאפשר החלפה אוטומטית תוך דקות ללא שינוי בקוד האפליקציה.",
+w:["","הגדלת מכונה אינה מקצרת התאוששות מכשל.","הצפנה אינה קשורה לזמינות.","S3 הוא object storage ואינו מריץ אפליקציות."]},
+
+{i:219,d:2,t:"FSx",lv:2,ty:"s",
+q:"A Windows-based application requires shared storage accessible over the SMB protocol with full NTFS permissions and Active Directory integration. Which AWS storage service should be used?",
+o:["Amazon EFS","Amazon FSx for Windows File Server","Amazon FSx for Lustre","Amazon S3"],
+a:[1],
+e:"<b>FSx for Windows File Server</b> הוא שירות SMB מנוהל עם תמיכה מלאה ב־NTFS ACLs, DFS Namespaces ואינטגרציה ל־Active Directory. מילת המפתח: <b>SMB / Windows / NTFS</b>. לעומתו, <b>FSx for Lustre</b> מיועד ל־HPC ולעיבוד בעל תפוקה גבוהה.",
+w:["EFS תומך ב־NFS (Linux) ולא ב־SMB.","","Lustre מיועד ל־High Performance Computing.","S3 הוא object storage ולא file share."]},
+
+{i:220,d:2,t:"Storage Gateway",lv:3,ty:"s",
+q:"An on-premises backup application writes to physical tape libraries. The company wants to eliminate physical tapes while keeping the existing backup software and its tape workflows, storing backups durably in AWS at low cost. Which solution should be used?",
+o:["AWS Storage Gateway – Tape Gateway (VTL)","AWS Storage Gateway – File Gateway","AWS DataSync","AWS Snowball Edge"],
+a:[0],
+e:"<b>Tape Gateway</b> מציג ל־backup software ממשק <b>iSCSI Virtual Tape Library</b> תואם, בעוד שהנתונים נשמרים בפועל ב־S3 ומועברים ל־<code>S3 Glacier</code>/<code>Deep Archive</code>. התוכנה הקיימת ממשיכה לעבוד ללא שינוי. מילות מפתח: \"existing backup software\" + \"tapes\".",
+w:["","File Gateway חושף NFS/SMB — לא ממשק tape.","DataSync הוא העברת קבצים חד־פעמית או מתוזמנת, לא תחליף VTL.","Snowball מיועד להעברה פיזית חד־פעמית של נתונים בקנה מידה גדול."]},
+
+{i:221,d:2,t:"RPO/RTO",lv:3,ty:"s",
+q:"A company defines an RPO of 24 hours and an RTO of 24 hours for a low-priority internal application, and wants the LOWEST possible cost. Which DR strategy should be chosen?",
+o:["Backup and restore","Pilot light","Warm standby","Active/active multi-Region"],
+a:[0],
+e:"כאשר RTO ו־RPO נמדדים ב<b>שעות</b> והדרישה היא עלות מינימלית — <b>Backup and restore</b> הוא הבחירה: גיבויים ל־S3/AWS Backup, ובנייה מחדש בעת אירוע. שאר האסטרטגיות שומרות משאבים פעילים ולכן יקרות יותר ללא צורך.",
+w:["","Pilot light מחזיק שכבת נתונים פעילה — עלות מיותרת ל־RPO של 24 שעות.","Warm standby יקר משמעותית.","Active/active הוא היקר ביותר."]},
+
+{i:222,d:2,t:"SQS FIFO",lv:3,ty:"s",
+q:"A payment processing system must guarantee that transactions for the same customer are processed in the exact order received, and that no transaction is processed twice. Which solution meets these requirements?",
+o:["An SQS standard queue with a visibility timeout of 12 hours",
+"An SQS FIFO queue using the customer ID as the message group ID, with content-based deduplication",
+"An SNS standard topic with multiple subscribers",
+"Amazon Kinesis Data Streams with a single shard for all customers"],
+a:[1],
+e:"<b>SQS FIFO</b> מבטיח סדר <b>בתוך message group</b> ו־exactly-once processing. שימוש ב־<code>MessageGroupId</code> = customer ID שומר על סדר לכל לקוח בנפרד תוך שמירה על מקביליות בין לקוחות. <code>deduplication</code> מונע כפילויות בחלון של 5 דקות.",
+w:["תור standard מספק best-effort ordering ו־at-least-once — לא עומד בדרישה.","","SNS אינו מבטיח סדר בנושא standard.","Shard יחיד ב־Kinesis שומר סדר גלובלי אך יוצר צוואר בקבוק חמור ואינו מונע כפילויות."]},
+
+{i:223,d:2,t:"Route 53",lv:2,ty:"s",
+q:"A company wants to route all users to its primary Region, but automatically send all traffic to a standby Region only if the primary becomes unhealthy. Which Route 53 routing policy should be used?",
+o:["Weighted routing","Failover routing with health checks","Multivalue answer routing","Latency-based routing"],
+a:[1],
+e:"<b>Failover routing</b> מוגדר עם רשומת <code>PRIMARY</code> ורשומת <code>SECONDARY</code>. כל עוד ה־health check על ה־primary תקין — כל התעבורה מגיעה אליו; ברגע שהוא נכשל, Route 53 מחזיר את ה־secondary. זהו דפוס active/passive.",
+w:["Weighted מפצל תעבורה תמידית בין השניים.","","Multivalue מחזיר עד 8 רשומות תקינות במקביל — לא active/passive.","Latency-based ינתב חלק מהמשתמשים ל־standby גם כשהכול תקין."]},
+
+{i:224,d:2,t:"Kinesis",lv:3,ty:"s",
+q:"A company ingests clickstream data and needs multiple independent applications to consume the same records in order, with the ability to replay the last 24 hours of data. Which service should be used?",
+o:["Amazon SQS","Amazon Kinesis Data Streams","Amazon SNS","Amazon MQ"],
+a:[1],
+e:"<b>Kinesis Data Streams</b> שומר את הרשומות ל־retention מוגדר (עד 24 שעות כברירת מחדל, ניתן להארכה), מאפשר <b>מספר צרכנים עצמאיים</b> לקרוא את אותן רשומות, ושומר סדר בתוך shard. יכולת ה־<b>replay</b> היא ההבדל המרכזי מ־SQS, שבו הודעה נמחקת לאחר עיבוד.",
+w:["ב־SQS ההודעה נמחקת אחרי צריכה — אין replay.","","SNS הוא push ללא שמירה או replay.","Amazon MQ הוא message broker מסורתי (ActiveMQ/RabbitMQ) לתאימות עם מערכות קיימות."]},
+
+{i:225,d:2,t:"Placement",lv:3,ty:"s",
+q:"A distributed application requires that its EC2 instances be spread across distinct underlying hardware to minimize the risk of simultaneous failure. Which EC2 placement strategy should be used?",
+o:["Cluster placement group","Spread placement group","Partition placement group","No placement group"],
+a:[1],
+e:"<b>Spread placement group</b> ממקם כל מכונה על rack נפרד עם חשמל ורשת עצמאיים (עד 7 מכונות לכל AZ) — מיועד בדיוק למזעור סיכון כשל משותף. <b>Cluster</b> מרכז מכונות לרשת בעלת latency נמוך, ו־<b>Partition</b> מחלק לקבוצות גדולות עבור HDFS/Kafka.",
+w:["Cluster מגדיל דווקא את הסיכון לכשל משותף.","","Partition מתאים לאשכולות נתונים גדולים בעלי מודעות ל־topology.","ללא placement group אין ערובה לפיזור חומרתי."]},
+
+{i:226,d:2,t:"Aurora",lv:2,ty:"s",
+q:"During a failure test, an Amazon Aurora MySQL cluster's writer instance was terminated. What happens by default?",
+o:["The cluster becomes unavailable until an administrator restores from a snapshot.",
+"Aurora automatically promotes an Aurora Replica to writer, typically within about 30 seconds, using the cluster writer endpoint.",
+"All data is lost because Aurora stores data on the instance.",
+"The application must be reconfigured with a new endpoint manually."],
+a:[1],
+e:"ב־Aurora שכבת האחסון מופרדת מהמכונות ומשוכפלת ב־6 עותקים על פני 3 AZs. בכשל של ה־writer, Aurora מקדם <b>Aurora Replica</b> אוטומטית ומעדכן את ה־<b>cluster (writer) endpoint</b> — בדרך כלל תוך כ־30 שניות, ללא שינוי בצד האפליקציה.",
+w:["Aurora אינו דורש שחזור ידני מ־snapshot בכשל writer — הקידום אוטומטי.","","הנתונים אינם על המכונה אלא בשכבת אחסון משותפת ומשוכפלת.","ה־writer endpoint מתעדכן אוטומטית — אין צורך בשינוי ידני."]},
+];
+
+/* ===== Domain 3 — Design High-Performing Architectures (24%) ===== */
+const D3 = [
+{i:301,d:3,t:"DynamoDB",lv:3,ty:"s",
+q:"A DynamoDB-backed application experiences heavy read traffic on a small set of popular items, causing throttling and increased latency. The team wants microsecond read latency without changing the application's DynamoDB API calls. What should be implemented?",
+o:["Amazon ElastiCache for Redis in front of DynamoDB","Amazon DynamoDB Accelerator (DAX)","A global secondary index on the popular items","Increase the provisioned read capacity units"],
+a:[1],
+e:"<b>DAX</b> הוא cache מנוהל, in-memory, שנועד ל־DynamoDB בלבד: הוא <b>API-compatible</b> — האפליקציה ממשיכה לקרוא לאותן פעולות ללא שינוי קוד — ומספק זמני קריאה במיקרו־שניות ומקל על hot partitions.",
+w:["ElastiCache יעבוד אך דורש שינוי קוד לניהול ה־cache (cache-aside).","","GSI משנה דפוסי שאילתה ואינו מפחית latency של פריטים חמים.","הגדלת RCU מייקרת ואינה מגיעה ל־latency של מיקרו־שניות."]},
+
+{i:302,d:3,t:"EBS",lv:3,ty:"s",
+q:"A database on Amazon EC2 requires 40,000 IOPS with consistent sub-millisecond latency and 99.9% durability guarantees on a single volume. Which EBS volume type should be selected?",
+o:["General Purpose SSD (gp2)","General Purpose SSD (gp3)","Provisioned IOPS SSD (io2 Block Express)","Throughput Optimized HDD (st1)"],
+a:[2],
+e:"<b>io2 Block Express</b> תומך בעד 256,000 IOPS לנפח בודד, latency תת־מילישנייה, ועמידות של <code>99.999%</code> — מיועד למסדי נתונים קריטיים. <b>gp3</b> מוגבל ל־16,000 IOPS, ולכן אינו עומד בדרישת 40,000.",
+w:["gp2 מקסימום 16,000 IOPS ותלוי בגודל הנפח.","gp3 מקסימום 16,000 IOPS — לא מספיק.","","st1 הוא HDD לתפוקה סדרתית, לא ל־IOPS."]},
+
+{i:303,d:3,t:"CloudFront",lv:2,ty:"s",
+q:"A global audience experiences slow load times for a website hosted in a single Region. Static assets make up most of the payload. Which solution improves performance MOST effectively?",
+o:["Deploy Amazon CloudFront in front of the origin and cache static assets at edge locations.",
+"Increase the EC2 instance size.",
+"Enable S3 Transfer Acceleration on the origin bucket.",
+"Add more Availability Zones to the Auto Scaling group."],
+a:[0],
+e:"<b>CloudFront</b> הוא ה־CDN של AWS — מטמין תוכן ב־400+ edge locations בקרבת המשתמשים, מקצר RTT דרמטית ומוריד עומס מה־origin. זו התשובה כמעט תמיד ל־\"global users\" + \"static content\" + \"latency\".",
+w:["","Scale up אינו משפר את מרחק הרשת מהמשתמש.","Transfer Acceleration מאיץ <b>העלאות</b> ל־S3, לא הפצת תוכן למשתמשים.","AZs נוספים משפרים זמינות בתוך אזור, לא latency גלובלי."]},
+
+{i:304,d:3,t:"Global Accelerator",lv:3,ty:"s",
+q:"A company runs a UDP-based real-time gaming backend on Network Load Balancers in three Regions. The company needs static anycast IP addresses and automatic routing of players to the healthiest, closest Region over the AWS backbone. Which service should be used?",
+o:["Amazon CloudFront","AWS Global Accelerator","Amazon Route 53 latency-based routing","AWS Transit Gateway"],
+a:[1],
+e:"<b>Global Accelerator</b> מספק שתי כתובות <b>anycast סטטיות</b>, מנתב את התעבורה מיד לתוך ה־AWS backbone, תומך ב־<b>TCP וגם UDP</b>, ומבצע failover אזורי תוך שניות. CloudFront לעומתו מוגבל ל־HTTP/HTTPS ולכן אינו מתאים ל־UDP.",
+w:["CloudFront תומך ב־HTTP/HTTPS בלבד — לא UDP.","","Route 53 מסתמך על DNS caching, ולכן ה־failover איטי יותר ואין IP סטטי.","Transit Gateway מחבר רשתות פנימיות."]},
+
+{i:305,d:3,t:"RDS",lv:2,ty:"s",
+q:"A reporting workload generates heavy read queries that slow down an Amazon RDS for MySQL production database. Writes must not be affected. What should a solutions architect implement?",
+o:["Enable Multi-AZ deployment and point reports to the standby.",
+"Create one or more read replicas and direct the reporting queries to them.",
+"Increase the instance storage size.",
+"Convert the database to Amazon DynamoDB."],
+a:[1],
+e:"<b>Read Replicas</b> מפזרים עומס קריאה למופעים נפרדים עם endpoint ייעודי. חשוב לזכור: ה־<b>standby ב־Multi-AZ אינו נגיש לקריאה</b> ב־RDS — זו טעות נפוצה שהמבחן בודק ישירות.",
+w:["ה־standby ב־Multi-AZ אינו זמין לקריאה — הוא פסיבי לחלוטין.","","הגדלת אחסון אינה מפחיתה עומס CPU מקריאות.","מעבר ל־NoSQL הוא שכתוב יקר ולא מוצדק."]},
+
+{i:306,d:3,t:"Athena",lv:2,ty:"s",
+q:"A company stores several terabytes of logs in Amazon S3 and needs to run ad-hoc SQL queries occasionally, paying only for the queries executed, without managing any infrastructure. Which service should be used?",
+o:["Amazon Redshift","Amazon Athena","Amazon EMR","Amazon RDS"],
+a:[1],
+e:"<b>Athena</b> הוא serverless ומריץ SQL ישירות מעל S3 בתמחור לפי <b>נפח הנתונים שנסרקו</b>. זו התשובה ל־\"ad-hoc\", \"occasional\", \"no infrastructure\", \"pay per query\". טיפ ביצועים/עלות: המרה ל־<code>Parquet</code> ו־partitioning מפחיתים סריקה משמעותית.",
+w:["Redshift דורש cluster פעיל ומתאים ל־data warehouse קבוע ומתמשך.","","EMR מצריך ניהול cluster של Spark/Hadoop.","RDS אינו מיועד לשאילתות על נתונים ב־S3."]},
+
+{i:307,d:3,t:"Compute",lv:3,ty:"s",
+q:"A batch job runs for up to 8 minutes, is triggered a few hundred times per day, and has unpredictable timing. The company wants no servers to manage and to pay only for execution time. Which compute option is MOST appropriate?",
+o:["AWS Lambda","Amazon EC2 On-Demand Instances","AWS Fargate tasks triggered by Amazon EventBridge","Amazon EC2 Reserved Instances"],
+a:[0],
+e:"מגבלת זמן הריצה של <b>Lambda</b> היא <code>15 דקות</code>, ולכן משימה של 8 דקות נמצאת בתחום. Lambda הוא serverless מלא, מתומחר לפי משך ריצה וזיכרון, ומתאים לעומס לא צפוי בכמות בינונית. אילו המשימה ארכה מעל 15 דקות — Fargate היה הפתרון.",
+w:["","EC2 On-Demand דורש ניהול שרתים ותשלום גם בזמן סרק.","Fargate תקף אך מוסיף תקורה של הגדרת task ו־container לתרחיש שנכנס בקלות בגבולות Lambda.","RI מחייב התחייבות ארוכת טווח לעומס לא צפוי."]},
+
+{i:308,d:3,t:"ElastiCache",lv:3,ty:"s",
+q:"An application needs an in-memory cache that supports data replication, persistence, sorted sets, and pub/sub messaging. Which ElastiCache engine should be selected?",
+o:["ElastiCache for Memcached","ElastiCache for Redis","Amazon DynamoDB DAX","Amazon MemoryDB with Memcached protocol"],
+a:[1],
+e:"<b>Redis</b> תומך ב־replication, persistence (AOF/RDB), Multi-AZ עם failover אוטומטי, מבני נתונים מתקדמים (sorted sets, lists, hashes), pub/sub ו־transactions. <b>Memcached</b> הוא פשוט יותר — multi-threaded ו־sharding בלבד, ללא replication או persistence.",
+w:["Memcached אינו תומך ב־replication, persistence או מבני נתונים מורכבים.","","DAX ייעודי ל־DynamoDB בלבד.","MemoryDB הוא תואם Redis, לא Memcached."]},
+
+{i:309,d:3,t:"S3 Performance",lv:3,ty:"s",
+q:"An application uploads 5 GB files to Amazon S3 from a location with high network latency, and uploads frequently fail or take too long. Which combination of techniques improves upload performance and reliability?",
+o:["Use S3 multipart upload and S3 Transfer Acceleration.",
+"Use S3 Standard-IA and enable versioning.",
+"Compress files into a single object and use PutObject.",
+"Enable S3 Intelligent-Tiering and CloudFront."],
+a:[0],
+e:"<b>Multipart upload</b> מחלק את הקובץ לחלקים המועלים במקביל, מאפשר ניסיון חוזר לחלק בודד בלבד, והוא <b>חובה מעל 5GB</b>. <b>Transfer Acceleration</b> מנתב את ההעלאה דרך edge location קרוב אל ה־backbone של AWS — משפר משמעותית העלאות מרחוק.",
+w:["","מחלקת אחסון ו־versioning אינם משפיעים על מהירות העלאה.","PutObject בודד לקובץ 5GB הוא בדיוק הגבול העליון ואינו עמיד לכשלים.","Intelligent-Tiering מייעל עלות ו־CloudFront מיועד להורדות."]},
+
+{i:310,d:3,t:"Fargate",lv:2,ty:"s",
+q:"A company is containerizing a microservice and wants to run it without provisioning, patching, or scaling EC2 instances, while keeping full container orchestration. What should a solutions architect recommend?",
+o:["Amazon ECS with the EC2 launch type","Amazon ECS or Amazon EKS with AWS Fargate","EC2 instances with Docker installed manually","AWS Elastic Beanstalk with a single instance"],
+a:[1],
+e:"<b>AWS Fargate</b> הוא מנוע compute serverless לקונטיינרים — אין מכונות לנהל, לתקן או להרחיב, והתשלום לפי vCPU וזיכרון שהוקצו למשימה. עובד גם עם ECS וגם עם EKS.",
+w:["EC2 launch type מחייב ניהול של אשכול המכונות.","","התקנה ידנית היא ההפך מהדרישה.","Beanstalk עדיין מפעיל EC2 שבבעלותך."]},
+
+{i:311,d:3,t:"Redshift",lv:3,ty:"s",
+q:"An analytics team must run complex joins and aggregations over petabytes of structured data with consistently fast response times for business intelligence dashboards. Which service is the BEST fit?",
+o:["Amazon Athena","Amazon Redshift","Amazon DynamoDB","Amazon RDS for PostgreSQL"],
+a:[1],
+e:"<b>Redshift</b> הוא data warehouse בארכיטקטורת MPP עם אחסון עמודי, מיועד לשאילתות אנליטיות מורכבות בקנה מידה של פטה־בייטים עם ביצועים עקביים ל־BI. Athena מצוין ל־ad-hoc, אך פחות עקבי כשמדובר ב־dashboards בשימוש כבד ומתמשך.",
+w:["Athena מתאים לשאילתות מזדמנות; לעומס BI כבד ורציף Redshift נותן ביצועים עקביים יותר.","","DynamoDB הוא NoSQL לגישה לפי מפתח — לא ל־joins.","RDS אינו מתמודד עם פטה־בייטים בשאילתות אנליטיות."]},
+
+{i:312,d:3,t:"Auto Scaling",lv:3,ty:"s",
+q:"An application has a predictable daily traffic spike every morning at 09:00 and takes about 6 minutes for new instances to become fully warm. Which scaling configuration provides the BEST user experience?",
+o:["Simple scaling based on CPU utilization",
+"Scheduled scaling to increase capacity before 09:00, combined with target tracking scaling for the rest of the day",
+"Manual scaling performed by an operator each morning",
+"Step scaling with a 15-minute cooldown"],
+a:[1],
+e:"כאשר הדפוס <b>ידוע וצפוי</b> — <b>Scheduled scaling</b> מרחיב מראש כדי לכסות את זמן החימום של 6 דקות. <b>Target tracking</b> משלים את שאר היום בתגובה אוטומטית למטריקה. שילוב זה הוא ה־best practice של AWS.",
+w:["Simple scaling מגיב רק אחרי שהעומס כבר פגע במשתמשים.","","הרחבה ידנית שברירית ואינה ניתנת להרחבה.","Step scaling עם cooldown ארוך מגיב מאוחר מדי לשיא פתאומי."]},
+
+{i:313,d:3,t:"RDS Proxy",lv:3,ty:"s",
+q:"A serverless application using AWS Lambda opens thousands of concurrent connections to an Amazon RDS database, exhausting the database's connection limit. What should a solutions architect implement?",
+o:["Increase the RDS instance class.","Use Amazon RDS Proxy between Lambda and the database.","Add a read replica.","Switch to DynamoDB."],
+a:[1],
+e:"<b>RDS Proxy</b> מבצע <b>connection pooling</b> ומשתמש מחדש בחיבורים בין הפעלות Lambda רבות — פותר בדיוק את מיצוי מגבלת החיבורים, ובנוסף מקצר זמן failover ומאפשר אימות דרך IAM/Secrets Manager.",
+w:["הגדלת מכונה מעלה מעט את מגבלת החיבורים אך אינה פותרת את הדפוס.","","Read replica אינו עוזר לעומס חיבורי כתיבה.","שכתוב ל־DynamoDB אינו נדרש."]},
+
+{i:314,d:3,t:"Direct Connect",lv:3,ty:"s",
+q:"A company transfers 20 TB of data per month between its data center and AWS and requires consistent, predictable network performance with lower data transfer costs than the internet. Which connectivity option should be chosen?",
+o:["AWS Site-to-Site VPN over the internet","AWS Direct Connect","AWS Transit Gateway","AWS Global Accelerator"],
+a:[1],
+e:"<b>Direct Connect</b> הוא קישור פיזי ייעודי — מספק <b>רוחב פס עקבי, latency צפוי ותעריפי data transfer out נמוכים יותר</b> מהאינטרנט. VPN לעומתו רץ מעל האינטרנט הציבורי ולכן ביצועיו משתנים.",
+w:["VPN עובר באינטרנט הציבורי — ביצועים לא צפויים ואין הוזלת data transfer.","","Transit Gateway מנתב בין רשתות אך אינו מספק את הקישור הפיזי עצמו.","Global Accelerator מיועד לתעבורת משתמשים לאפליקציה, לא לקישוריות היברידית."]},
+
+{i:315,d:3,t:"EFS",lv:3,ty:"s",
+q:"An Amazon EFS file system is used by a machine learning training job that reads many small files with very high aggregate throughput demands, far above what the file system size would provide by default. What should be configured?",
+o:["Switch the EFS throughput mode to Provisioned Throughput (or Elastic), and consider the Max I/O performance mode.",
+"Change the storage class to EFS Infrequent Access.",
+"Move the data to an EBS gp2 volume.",
+"Enable EFS lifecycle management."],
+a:[0],
+e:"במצב <b>Bursting</b> ברירת המחדל, התפוקה תלויה בגודל הנתונים. עבור עומס עתיר תפוקה יש להגדיר <b>Provisioned Throughput</b> (או <b>Elastic</b>) כדי לנתק את התפוקה מהגודל. <b>Max I/O</b> מגדיל מקביליות במחיר latency מעט גבוה יותר לכל פעולה.",
+w:["","IA מוריד עלות אך מגדיל latency לגישה ראשונה.","EBS אינו משותף בין מכונות מרובות באופן אלסטי.","Lifecycle management נוגע לחיסכון בעלות, לא לתפוקה."]},
+
+{i:316,d:3,t:"DynamoDB",lv:3,ty:"s",
+q:"An application must query a DynamoDB table by an attribute that is not the table's partition key, and the query pattern was discovered after the table was created and populated. Which solution meets this requirement?",
+o:["Create a local secondary index (LSI).","Create a global secondary index (GSI).","Perform a Scan with a filter expression.","Recreate the table with a composite primary key."],
+a:[1],
+e:"<b>GSI</b> ניתן ליצירה <b>בכל עת</b> לאחר יצירת הטבלה, עם partition key ו־sort key שונים לחלוטין, וקיבולת נפרדת. לעומתו <b>LSI</b> חייב להיווצר <b>יחד עם הטבלה</b> ומשתף את אותו partition key — ולכן אינו רלוונטי כאן.",
+w:["LSI ניתן להגדרה רק בזמן יצירת הטבלה.","","Scan סורק את כל הטבלה — יקר ואיטי בקנה מידה.","יצירה מחדש של הטבלה כרוכה בהעברת נתונים ובהשבתה."]},
+
+{i:317,d:3,t:"Graviton",lv:2,ty:"s",
+q:"A company wants to improve price-performance for its Linux-based, open-source workloads on EC2 without changing the application architecture. Which action should be taken first?",
+o:["Migrate to AWS Graviton-based instance types after validating compatibility.",
+"Purchase Reserved Instances for the existing instance types.",
+"Move the workload to Spot Instances.",
+"Enable detailed CloudWatch monitoring."],
+a:[0],
+e:"מעבדי <b>Graviton</b> (ARM) של AWS מספקים בדרך כלל שיפור משמעותי ביחס מחיר־ביצועים לעומסים מבוססי Linux וקוד פתוח. השאלה מתמקדת בביצועים לכל דולר — ולכן זו הפעולה הראשונה, לאחר בדיקת תאימות ארכיטקטורת ARM.",
+w:["","RI מוזיל את המחיר אך אינו משפר ביצועים.","Spot מוזיל אך מוסיף סיכון הפסקה — לא שיפור ביצועים.","ניטור אינו משנה ביצועים."]},
+
+{i:318,d:3,t:"OpenSearch",lv:2,ty:"s",
+q:"A company needs to provide full-text search with fuzzy matching, faceting, and near real-time log analytics dashboards over application logs. Which service should be used?",
+o:["Amazon Athena","Amazon OpenSearch Service","Amazon Redshift","Amazon Neptune"],
+a:[1],
+e:"<b>OpenSearch Service</b> מיועד לחיפוש טקסט מלא (fuzzy, faceting, relevance scoring) ולניתוח לוגים בזמן כמעט־אמת, כולל dashboards מובנים. זו התשובה למילות המפתח \"full-text search\" ו־\"log analytics\".",
+w:["Athena מריץ SQL על S3 — לא מנוע חיפוש.","","Redshift הוא data warehouse אנליטי.","Neptune הוא מסד גרפים לקשרים בין ישויות."]},
+
+{i:319,d:3,t:"Caching",lv:3,ty:"s",
+q:"A read-heavy application repeatedly queries the same rows from an Amazon RDS database, causing high CPU usage. The team wants to reduce database load with minimal latency for repeated reads. Which solution should be implemented?",
+o:["Add an Amazon ElastiCache cluster and implement a cache-aside (lazy loading) pattern.",
+"Enable Multi-AZ on the RDS instance.",
+"Increase the RDS backup retention period.",
+"Enable Performance Insights."],
+a:[0],
+e:"<b>ElastiCache</b> עם דפוס <b>cache-aside</b>: האפליקציה קוראת קודם מה־cache, ובמקרה של miss קוראת מה־DB וכותבת ל־cache. מוריד דרמטית את העומס על ה־RDS ומספק זמני תגובה של מילישניות בודדות.",
+w:["","Multi-AZ הוא מנגנון זמינות ואינו מפחית עומס CPU.","Backup retention אינו קשור לביצועים.","Performance Insights מנתח ומאבחן — אינו מפחית עומס."]},
+
+{i:320,d:3,t:"Data Ingestion",lv:3,ty:"s",
+q:"A company needs to deliver streaming data to Amazon S3 and Amazon Redshift in near real time, with automatic buffering, compression, and format conversion, and with no cluster or shard management. Which service should be used?",
+o:["Amazon Kinesis Data Streams","Amazon Data Firehose","Amazon SQS","AWS Glue crawlers"],
+a:[1],
+e:"<b>Amazon Data Firehose</b> (לשעבר Kinesis Data Firehose) הוא שירות מנוהל ואוטומטי לחלוטין: buffering, דחיסה, הצפנה, המרה ל־Parquet/ORC ומסירה ל־S3, Redshift, OpenSearch ועוד — <b>ללא ניהול shards</b>. Kinesis Data Streams לעומתו דורש ניהול shards וכתיבת consumer.",
+w:["Kinesis Data Streams דורש ניהול shards וקוד צרכן — לא \"ללא ניהול\".","","SQS הוא תור הודעות, לא צינור מסירה אנליטי.","Glue crawler מאכלס קטלוג מטא־דאטה בלבד."]},
+
+{i:321,d:3,t:"Network",lv:3,ty:"s",
+q:"An HPC application requires the lowest possible network latency and highest packet-per-second performance between a tightly coupled group of EC2 instances. Which combination should be used?",
+o:["A cluster placement group with instances that support Elastic Fabric Adapter (EFA) in a single Availability Zone",
+"A spread placement group across three Availability Zones",
+"Instances in different Regions connected by VPC peering",
+"A Network Load Balancer between the instances"],
+a:[0],
+e:"<b>Cluster placement group</b> ממקם מכונות בקרבה פיזית מרבית בתוך AZ יחיד ⇐ latency מינימלי ורוחב פס גבוה. בשילוב עם <b>EFA</b> (מאפשר OS-bypass ותקשורת MPI) מתקבל הפתרון המהיר ביותר ל־HPC.",
+w:["","Spread מפזר במכוון בין AZs — מגדיל latency.","אזורים שונים מוסיפים עשרות מילישניות.","NLB אינו רלוונטי לתקשורת node-to-node ב־HPC."]},
+
+{i:322,d:3,t:"S3 Storage Class",lv:2,ty:"s",
+q:"An application requires millisecond retrieval of objects that are accessed unpredictably — sometimes daily, sometimes not for months — and the company wants to avoid manual lifecycle management while optimizing cost. Which S3 storage class should be selected?",
+o:["S3 Standard","S3 Intelligent-Tiering","S3 Standard-IA","S3 Glacier Instant Retrieval"],
+a:[1],
+e:"<b>S3 Intelligent-Tiering</b> מעביר אובייקטים בין רמות גישה אוטומטית לפי דפוסי שימוש בפועל, ללא דמי אחזור וללא ניהול lifecycle. זו התשובה למילות המפתח \"unpredictable\" / \"unknown access patterns\" / \"no operational overhead\".",
+w:["Standard יקר יותר לנתונים שאינם נגישים לאורך חודשים.","","Standard-IA גובה דמי אחזור ומינימום 30 יום — יקר אם הגישה תכופה.","Glacier Instant Retrieval מיועד לארכיון שנגיש רבעונית, עם מינימום 90 יום."]},
+
+{i:323,d:3,t:"API",lv:2,ty:"s",
+q:"A REST API built on Amazon API Gateway and AWS Lambda returns the same reference data for most requests, and the backend Lambda cost is high. Which feature reduces backend invocations MOST directly?",
+o:["Enable API Gateway caching on the stage.",
+"Increase the Lambda memory allocation.",
+"Enable Lambda provisioned concurrency.",
+"Add a CloudFront distribution with no cache policy."],
+a:[0],
+e:"<b>API Gateway stage caching</b> שומר תגובות ל־TTL מוגדר ומחזיר אותן ישירות מהשכבה של ה־API — כך מספר ההפעלות של Lambda יורד דרמטית, וכך גם העלות וה־latency.",
+w:["","זיכרון גדול יותר מאיץ ריצה אך אינו מפחית את מספר ההפעלות.","Provisioned concurrency פותר cold start ומייקר.","CloudFront ללא מדיניות cache לא ימנע פניות ל־origin."]},
+
+{i:324,d:3,t:"FSx Lustre",lv:3,ty:"s",
+q:"A financial simulation requires a high-performance file system delivering hundreds of gigabytes per second of throughput and sub-millisecond latency, linked directly to a dataset stored in Amazon S3. Which service should be used?",
+o:["Amazon EFS with Max I/O","Amazon FSx for Lustre","Amazon FSx for Windows File Server","Amazon EBS io2"],
+a:[1],
+e:"<b>FSx for Lustre</b> נבנה ל־HPC ולעומסי ML: מאות GB/s תפוקה, latency תת־מילישנייה, ויכולת <b>קישור ישיר ל־S3 bucket</b> כך שאובייקטים מוצגים כקבצים ותוצאות נכתבות חזרה. זו התשובה ל־\"HPC\" + \"S3-linked\".",
+w:["EFS לא מגיע לרמות תפוקה של Lustre.","","FSx for Windows הוא SMB לעומסי Windows.","EBS אינו file system משותף."]},
+];
+
+/* ===== Domain 4 — Design Cost-Optimized Architectures (20%) ===== */
+const D4 = [
+{i:401,d:4,t:"Pricing",lv:2,ty:"s",
+q:"A company runs a fault-tolerant, stateless batch processing workload that can be interrupted and resumed at any time. The company wants the LOWEST possible compute cost. Which purchasing option should be used?",
+o:["On-Demand Instances","Spot Instances","Reserved Instances","Dedicated Hosts"],
+a:[1],
+e:"<b>Spot Instances</b> מציעים עד <code>90%</code> הנחה מול On-Demand, בתמורה לאפשרות שהמופע יופסק בהתראה של 2 דקות. עומס <b>fault-tolerant, stateless, interruptible</b> הוא ההתאמה המושלמת — צירוף המילים הזה בשאלה כמעט תמיד מצביע על Spot.",
+w:["On-Demand הוא היקר ביותר לעומס גמיש כזה.","","RI מחייב התחייבות של שנה או שלוש לקיבולת קבועה.","Dedicated Hosts הם היקרים ביותר ומיועדים לרישוי BYOL ולדרישות רגולטוריות."]},
+
+{i:402,d:4,t:"Savings Plans",lv:3,ty:"s",
+q:"A company has a steady baseline of compute usage but expects to shift workloads between EC2 instance families, AWS Fargate, and AWS Lambda over the next year. The company wants a discount with maximum flexibility. Which option should be chosen?",
+o:["Standard Reserved Instances","Compute Savings Plans","EC2 Instance Savings Plans","Convertible Reserved Instances"],
+a:[1],
+e:"<b>Compute Savings Plans</b> נותנים עד ~66% הנחה וחלים אוטומטית על <b>EC2 בכל משפחה ואזור, וגם על Fargate ועל Lambda</b> — הגמישות המרבית. <b>EC2 Instance Savings Plans</b> מוזילים יותר (עד ~72%) אך נעולים למשפחה ולאזור.",
+w:["Standard RI נעול לסוג מופע ואינו חל על Fargate או Lambda.","","EC2 Instance Savings Plan נעול למשפחה ואזור — פחות גמיש, ולא מכסה Lambda.","Convertible RI גמיש יותר מ־Standard אך מוגבל ל־EC2 בלבד."]},
+
+{i:403,d:4,t:"S3 Lifecycle",lv:2,ty:"s",
+q:"Log files must be kept for 7 years for compliance. They are accessed frequently during the first 30 days, rarely for the next 60 days, and essentially never afterward, though retrieval within 12 hours must remain possible. Which lifecycle configuration is MOST cost-effective?",
+o:["Keep all objects in S3 Standard for 7 years.",
+"S3 Standard for 30 days, transition to S3 Standard-IA at 30 days, transition to S3 Glacier Deep Archive at 90 days, expire at 7 years.",
+"Transition to S3 Glacier Deep Archive immediately on upload.",
+"S3 Intelligent-Tiering for the entire 7 years."],
+a:[1],
+e:"התאמה מדויקת לדפוס הגישה: <b>Standard</b> ל־30 יום ראשונים, <b>Standard-IA</b> ל־60 הימים הבאים (מינימום 30 יום מתקיים), ואז <b>Glacier Deep Archive</b> — הזול ביותר, עם אחזור סטנדרטי של עד 12 שעות שעומד בדיוק בדרישה. בסוף — <code>Expiration</code> לאחר 7 שנים.",
+w:["Standard ל־7 שנים הוא בזבוז עצום.","","אחזור בימים הראשונים מ־Deep Archive יהיה איטי ויקר מאוד.","Intelligent-Tiering גובה דמי ניטור לכל אובייקט ואינו זול כמו Deep Archive לארכיון ארוך."]},
+
+{i:404,d:4,t:"Data Transfer",lv:3,ty:"s",
+q:"A company notices very high NAT gateway data processing charges caused by EC2 instances in private subnets downloading objects from Amazon S3 and writing to Amazon DynamoDB. What is the MOST cost-effective change?",
+o:["Replace the NAT gateway with NAT instances.",
+"Create gateway VPC endpoints for Amazon S3 and Amazon DynamoDB.",
+"Move the instances to public subnets with Elastic IP addresses.",
+"Enable S3 Transfer Acceleration."],
+a:[1],
+e:"<b>Gateway VPC Endpoints</b> ל־S3 ול־DynamoDB הם <b>ללא עלות</b> — לא שעתית ולא לפי GB. הם מסיטים את התעבורה מה־NAT Gateway (שגובה גם עלות שעתית וגם לכל GB מעובד) ומשאירים אותה ברשת AWS. זה החיסכון הקלאסי ביותר בשאלות עלות רשת.",
+w:["NAT instances מוזילים מעט אך מוסיפים תחזוקה, מגבילים רוחב פס ומהווים נקודת כשל.","","העברה ל־subnet ציבורי פוגעת קשות באבטחה.","Transfer Acceleration דווקא מוסיף עלות."]},
+
+{i:405,d:4,t:"Rightsizing",lv:2,ty:"s",
+q:"A company wants automated recommendations to right-size its EC2 instances, EBS volumes, and Lambda functions based on actual utilization metrics. Which service should be used?",
+o:["AWS Cost Explorer","AWS Compute Optimizer","AWS Budgets","AWS Trusted Advisor Service Limits checks"],
+a:[1],
+e:"<b>AWS Compute Optimizer</b> מנתח מטריקות CloudWatch היסטוריות ומייצר המלצות rightsizing מבוססות machine learning עבור EC2, Auto Scaling groups, EBS, Lambda ו־ECS on Fargate — כולל אומדן החיסכון.",
+w:["Cost Explorer מציג ומנתח הוצאות (וכולל המלצות RI/SP), אך ההמלצות המפורטות ל־rightsizing הן של Compute Optimizer.","","Budgets מתריע על חריגה מתקציב.","בדיקות Service Limits עוסקות במכסות, לא בעלות."]},
+
+{i:406,d:4,t:"EBS",lv:2,ty:"s",
+q:"A company runs hundreds of gp2 EBS volumes that are provisioned large mainly to obtain enough IOPS. The company wants to reduce storage cost while keeping or improving performance. What should be done?",
+o:["Migrate the volumes to gp3 and provision IOPS and throughput independently of volume size.",
+"Migrate the volumes to io2 Block Express.",
+"Migrate the volumes to st1.",
+"Take snapshots and delete the volumes."],
+a:[0],
+e:"ב־<b>gp2</b> ה־IOPS צמודים לגודל (3 IOPS/GB) — ולכן מנפחים במיוחד. ב־<b>gp3</b> מקבלים 3,000 IOPS ו־125 MB/s כבסיס וניתן להגדיל <b>ללא תלות בגודל</b>, בעלות בסיס נמוכה בכ־20%. זהו אחד מדפוסי החיסכון המובהקים.",
+w:["","io2 יקר יותר ומיועד לעומסים קריטיים עם דרישות IOPS קיצוניות.","st1 הוא HDD — ביצועי IOPS ירודים.","מחיקת נפחים משביתה את העומס."]},
+
+{i:407,d:4,t:"DynamoDB",lv:3,ty:"s",
+q:"A new application has completely unpredictable traffic that may be zero for hours and then spike sharply. The team does not want to manage capacity planning and wants to pay only for actual requests. Which DynamoDB capacity mode should be selected?",
+o:["Provisioned capacity with auto scaling","On-demand capacity mode","Provisioned capacity with reserved capacity","DynamoDB Accelerator (DAX)"],
+a:[1],
+e:"<b>On-demand mode</b> מתמחר לפי בקשות בפועל, מתאים מיידית לשיאים, ואינו דורש תכנון קיבולת — האידיאלי לעומס חדש ובלתי צפוי. כאשר הדפוס מתייצב וניתן לחיזוי, מעבר ל־provisioned עם auto scaling יהיה זול יותר.",
+w:["Auto scaling מגיב באיטיות לשיאים פתאומיים ועלול לגרום throttling.","","Reserved capacity מחייב התחייבות ארוכה לעומס יציב.","DAX הוא cache לשיפור ביצועים, לא מודל תמחור."]},
+
+{i:408,d:4,t:"Budgets",lv:2,ty:"s",
+q:"A finance team must be alerted by email when the monthly AWS spend is forecasted to exceed a specific threshold, before the month ends. Which service should be configured?",
+o:["AWS Cost and Usage Report","AWS Budgets with a forecasted-cost alert","Amazon CloudWatch billing metrics with a static alarm","AWS Trusted Advisor"],
+a:[1],
+e:"<b>AWS Budgets</b> תומך בהתראות גם על עלות <b>בפועל</b> וגם על עלות <b>חזויה (forecasted)</b> — מה שמאפשר התרעה מוקדמת לפני סוף החודש, עם שליחה ל־SNS או למייל.",
+w:["CUR הוא דוח מפורט לניתוח, ללא מנגנון התראה.","","CloudWatch billing alarm מגיב לערך בפועל בלבד, לא לתחזית.","Trusted Advisor מספק המלצות תקופתיות, לא התראות תקציב."]},
+
+{i:409,d:4,t:"Aurora",lv:3,ty:"s",
+q:"A development and test database is used heavily during business hours and is completely idle at night and on weekends. The team wants to avoid paying for idle capacity without managing start/stop scripts. Which solution is MOST cost-effective?",
+o:["Amazon Aurora Serverless v2","Amazon RDS with Reserved Instances","Amazon Aurora provisioned with a large instance class","Amazon DynamoDB with provisioned capacity"],
+a:[0],
+e:"<b>Aurora Serverless v2</b> מרחיב ומצמצם קיבולת אוטומטית ביחידות <code>ACU</code> לפי העומס בפועל, ויכול לרדת לרמה מינימלית מאוד בשעות סרק — ללא סקריפטים לניהול הפעלה וכיבוי. מתאים במיוחד לסביבות dev/test ולעומסים לסירוגין.",
+w:["","RI מחייב תשלום קבוע גם בשעות סרק — ההפך מהדרישה.","מופע provisioned גדול משלם על קיבולת שאינה בשימוש.","החלפת מנוע מסד הנתונים אינה נדרשת."]},
+
+{i:410,d:4,t:"S3",lv:3,ty:"s",
+q:"A company must archive data for regulatory purposes for 10 years. The data will almost certainly never be retrieved, but if it is, a retrieval time of up to 48 hours is acceptable. Which storage class provides the LOWEST cost?",
+o:["S3 Glacier Instant Retrieval","S3 Glacier Flexible Retrieval","S3 Glacier Deep Archive","S3 One Zone-IA"],
+a:[2],
+e:"<b>S3 Glacier Deep Archive</b> הוא האחסון הזול ביותר ב־AWS, מיועד לשמירה ארוכת טווח של 7–10 שנים, עם זמני אחזור של 12 שעות (Standard) עד 48 שעות (Bulk) — בדיוק בטווח שהוגדר. מינימום אחסון: 180 יום.",
+w:["Instant Retrieval יקר יותר ומיועד לאחזור מיידי.","Flexible Retrieval זול אך עדיין יקר מ־Deep Archive.","","One Zone-IA שומר ב־AZ אחת בלבד — אינו מתאים לארכיון רגולטורי ארוך טווח."]},
+
+{i:411,d:4,t:"Tagging",lv:2,ty:"s",
+q:"A company with many teams sharing one AWS account needs to allocate costs per team and produce chargeback reports. What should be implemented?",
+o:["Enable cost allocation tags, apply a consistent tagging strategy, and analyze spend in AWS Cost Explorer.",
+"Create a separate AWS account for every developer.",
+"Enable AWS Config across all resources.",
+"Turn on detailed CloudWatch monitoring."],
+a:[0],
+e:"<b>Cost allocation tags</b> (user-defined, לאחר הפעלה בקונסולת Billing) מאפשרים לפלח עלויות לפי team / project / environment ולהפיק דוחות chargeback ב־<b>Cost Explorer</b> וב־CUR. אכיפת התיוג מתבצעת דרך <code>Tag Policies</code> ב־Organizations.",
+w:["","חשבון לכל מפתח הוא תקורה ניהולית גדולה מדי לצורך זה.","Config עוסק בתאימות תצורה, לא בחלוקת עלויות.","ניטור מפורט דווקא מוסיף עלות."]},
+
+{i:412,d:4,t:"Compute",lv:3,ty:"m",sel:2,
+q:"A company runs a containerized web application with a stable baseline of traffic plus a highly variable component that can tolerate interruptions. Which TWO actions optimize cost while maintaining availability?",
+o:["Purchase Compute Savings Plans to cover the baseline capacity.",
+"Use Spot capacity (Spot Instances or Fargate Spot) for the variable, interruption-tolerant portion.",
+"Run the entire workload on Dedicated Hosts.",
+"Run the entire workload on On-Demand Instances.",
+"Move the workload to a single large Reserved Instance."],
+a:[0,1],
+e:"הדפוס המומלץ הוא <b>שכבות תמחור</b>: כיסוי הבסיס היציב ב־<b>Savings Plans</b> (הנחה על שימוש מובטח), והשלמת חלק העומס המשתנה והסובל הפסקות ב־<b>Spot / Fargate Spot</b>. שילוב זה מביא לחיסכון מרבי מבלי לפגוע בזמינות הבסיס.",
+w:["","","Dedicated Hosts הם האפשרות היקרה ביותר.","On-Demand בלבד מוותר על כל ההנחות.","מופע יחיד גדול פוגע בזמינות ובגמישות."]},
+
+{i:413,d:4,t:"CloudFront",lv:3,ty:"s",
+q:"A company serves large video files from Amazon S3 to a global audience and is concerned about high data transfer out charges. Which solution reduces cost while improving performance?",
+o:["Serve the content through Amazon CloudFront.",
+"Enable S3 Transfer Acceleration.",
+"Replicate the bucket to every AWS Region.",
+"Move the content to S3 One Zone-IA."],
+a:[0],
+e:"<b>CloudFront</b> מוזיל את עלות ה־data transfer out לעומת הוצאה ישירה מ־S3, וגם מפחית משמעותית את מספר הבקשות ל־origin בזכות ה־cache. בנוסף, התעבורה מ־S3 אל CloudFront אינה מחויבת. חיסכון + ביצועים בבת אחת.",
+w:["","Transfer Acceleration מייקר ומיועד להעלאות.","שכפול לכל אזור מכפיל עלויות אחסון ושכפול.","One Zone-IA מוזיל אחסון אך אינו משפיע על עלות ההוצאה ופוגע בעמידות."]},
+
+{i:414,d:4,t:"Snapshots",lv:2,ty:"s",
+q:"A company has accumulated thousands of manual EBS snapshots over several years, driving up storage costs. The company wants an automated policy-driven approach to snapshot creation and retention going forward. Which service should be used?",
+o:["Amazon Data Lifecycle Manager (or AWS Backup) with defined retention policies",
+"Amazon S3 Lifecycle rules",
+"AWS Config rules",
+"Amazon CloudWatch Events with manual scripts"],
+a:[0],
+e:"<b>Amazon Data Lifecycle Manager</b> (או <b>AWS Backup</b> לכיסוי רחב יותר) מאוטמט יצירה, תיוג ומחיקה של snapshots לפי מדיניות retention — במקום הצטברות ידנית בלתי מבוקרת.",
+w:["","S3 Lifecycle אינו חל על EBS snapshots.","Config מזהה אך אינו מנהל מחזור חיים.","סקריפטים ידניים הם תקורה תפעולית מיותרת כשקיים שירות מנוהל."]},
+
+{i:415,d:4,t:"Serverless",lv:3,ty:"s",
+q:"An infrequently used internal API currently runs on two always-on t3.medium EC2 instances behind an ALB, receiving a few hundred requests per day. Which re-architecture reduces cost the MOST?",
+o:["Migrate to Amazon API Gateway with AWS Lambda.",
+"Purchase Reserved Instances for the two EC2 instances.",
+"Move the instances to a smaller instance type.",
+"Replace the ALB with a Network Load Balancer."],
+a:[0],
+e:"עומס של מאות בקשות ביום פירושו שהמכונות וה־ALB יושבים בסרק כמעט תמיד. מעבר ל־<b>API Gateway + Lambda</b> מבטל תשלום על זמן סרק לחלוטין — תשלום לפי בקשה ולפי משך ריצה בלבד. זהו דפוס \"low, spiky traffic ⇐ serverless\".",
+w:["","RI מנציח תשלום קבוע על משאבים בסרק.","Downsizing מוזיל חלקית אך משאיר תשלום 24/7 על ALB ומכונות.","החלפת סוג ה־LB חוסכת מעט ואינה משנה את התמונה."]},
+
+{i:416,d:4,t:"Multi-AZ Cost",lv:3,ty:"s",
+q:"A company discovers significant inter-Availability Zone data transfer charges between its application tier and its cache tier. Which change reduces this cost while preserving high availability?",
+o:["Place cache read replicas in each Availability Zone and configure clients to read from the local AZ.",
+"Consolidate all instances into a single Availability Zone.",
+"Increase the cache node size.",
+"Enable encryption in transit."],
+a:[0],
+e:"תעבורה בין AZs מחויבת בשני הכיוונים. הצבת <b>replica בכל AZ</b> וקריאה מקומית (למשל <code>AZ affinity</code> / connect to local replica) מבטלת את רוב התעבורה החוצה־AZ — מבלי לוותר על פריסה מרובת־AZ ועל הזמינות.",
+w:["","ריכוז ב־AZ אחת אמנם מבטל את החיוב אך הורס את הזמינות הגבוהה — סתירה לדרישה.","גודל ה־node אינו משפיע על חיובי תעבורה בין AZs.","הצפנה אינה מפחיתה עלות תעבורה."]},
+
+{i:417,d:4,t:"Storage Lens",lv:2,ty:"s",
+q:"A company wants organization-wide visibility into S3 storage usage and activity trends, with recommendations to reduce cost across hundreds of buckets. Which feature should be enabled?",
+o:["S3 Storage Lens","S3 Inventory","S3 Access Logs","S3 Analytics Storage Class Analysis only"],
+a:[0],
+e:"<b>S3 Storage Lens</b> מספק dashboard ברמת הארגון על פני חשבונות ודליים, עם מטריקות שימוש ופעילות ו<b>המלצות מובנות לחיסכון</b> (זיהוי multipart uploads לא שלמים, גרסאות לא־נוכחיות ועוד).",
+w:["","Inventory מפיק רשימת אובייקטים — נתון גולמי ללא תובנות.","Access Logs מתעדים בקשות ברמת דלי בודד.","Storage Class Analysis מנתח דלי בודד ואינו נותן תמונה ארגונית."]},
+
+{i:418,d:4,t:"Licensing",lv:3,ty:"s",
+q:"A company must run a commercial database that is licensed per physical core and requires visibility into the underlying host's sockets and cores for license compliance. Which EC2 option should be used?",
+o:["Dedicated Instances","Dedicated Hosts","Reserved Instances","Spot Instances"],
+a:[1],
+e:"<b>Dedicated Hosts</b> מספקים שרת פיזי ייעודי עם <b>נראות ל־sockets ול־cores</b> ועם affinity ל־host מסוים — הדרישה החיונית לרישוי BYOL לפי ליבות פיזיות. <b>Dedicated Instances</b> מבודדים ברמת החומרה אך <b>אינם</b> חושפים את מבנה ה־host.",
+w:["Dedicated Instances אינם נותנים נראות ל־sockets/cores ואינם מאפשרים affinity.","","RI הוא מודל תמחור, לא בידוד חומרה.","Spot אינו מתאים לרישוי או ליציבות."]},
+
+{i:419,d:4,t:"Trusted Advisor",lv:2,ty:"s",
+q:"A solutions architect needs a quick assessment of idle load balancers, underutilized EC2 instances, unassociated Elastic IP addresses, and low-utilization EBS volumes. Which tool provides these checks?",
+o:["AWS Trusted Advisor cost optimization checks","AWS CloudTrail Insights","Amazon Inspector","AWS Well-Architected Tool"],
+a:[0],
+e:"<b>Trusted Advisor</b> כולל קטגוריית <b>Cost Optimization</b> עם בדיקות מוכנות בדיוק לאלה: load balancers בסרק, מופעי EC2 בניצולת נמוכה, Elastic IPs לא משויכים (שמחויבים!) ונפחי EBS בשימוש מועט. הבדיקות המלאות דורשות תוכנית תמיכה Business ומעלה.",
+w:["","CloudTrail Insights מזהה חריגות בפעילות API.","Inspector סורק פגיעויות אבטחה.","Well-Architected Tool מבצע סקירה איכותנית מובנית, לא בדיקות משאבים ספציפיות."]},
+
+{i:420,d:4,t:"Migration",lv:3,ty:"s",
+q:"A company must transfer 400 TB of archival data from an on-premises data center to Amazon S3. The available internet connection is 200 Mbps and is also needed for daily business operations. Which approach is MOST practical and cost-effective?",
+o:["AWS DataSync over the existing internet connection","AWS Snowball Edge devices","AWS Direct Connect provisioned for the transfer","S3 multipart upload with Transfer Acceleration"],
+a:[1],
+e:"בחישוב מהיר: 400TB על 200Mbps ⇐ למעלה מ־<b>180 יום</b> של רוויה מלאה, וזאת בלי לפגוע בעסק. <b>Snowball Edge</b> מעביר את הנתונים פיזית תוך ימים ובעלות נמוכה בהרבה. כלל אצבע למבחן: מעל ~10TB עם קו צר ⇐ Snow Family.",
+w:["DataSync היה רווי את הקו לחודשים ופוגע בפעילות העסקית.","","הקמת Direct Connect אורכת שבועות עד חודשים ואינה מוצדקת להעברה חד־פעמית.","Transfer Acceleration מוגבל באותו רוחב פס פיזי."]},
+];
+
+/* ===== Flashcards: decision rules & service comparisons ===== */
+const CARDS = [
+{c:"Compute",f:"Multi-AZ vs Read Replica ב־RDS",b:"<b>Multi-AZ</b> = זמינות. שכפול <b>סינכרוני</b>, standby לא נגיש לקריאה, failover אוטומטי, RPO≈0.<br><b>Read Replica</b> = ביצועים. שכפול <b>א־סינכרוני</b>, נגיש לקריאה, קידום ידני, יכול להיות חוצה־אזור."},
+{c:"Storage",f:"gp2 מול gp3",b:"<b>gp2</b>: IOPS צמודים לגודל (3/GB), מקס' 16,000.<br><b>gp3</b>: 3,000 IOPS + 125MB/s בבסיס, ניתן להגדלה <b>ללא תלות בגודל</b>, זול בכ־20%.<br>כלל: \"ניפחנו נפח כדי לקבל IOPS\" ⇐ עבור ל־gp3."},
+{c:"Storage",f:"מתי io2 Block Express?",b:"כשצריך מעל 16,000 IOPS לנפח בודד, latency תת־מילישנייה, או עמידות 99.999%. מסדי נתונים קריטיים בלבד — יקר."},
+{c:"Networking",f:"Gateway Endpoint מול Interface Endpoint",b:"<b>Gateway</b>: רק S3 ו־DynamoDB. <b>חינם</b>. מוסיף route ל־route table.<br><b>Interface (PrivateLink)</b>: כמעט כל שירות. ENI עם IP פרטי. <b>עלות שעתית + לכל GB</b>.<br>שאלת עלות ⇐ Gateway."},
+{c:"Networking",f:"NLB מול ALB מול GWLB",b:"<b>ALB</b> — L7, HTTP/HTTPS, path/host routing, WAF.<br><b>NLB</b> — L4, TCP/UDP/TLS, מיליוני RPS, שומר source IP, <b>Elastic IP סטטי</b>.<br><b>GWLB</b> — פריסת appliances לבדיקת תעבורה (GENEVE)."},
+{c:"Networking",f:"CloudFront מול Global Accelerator",b:"<b>CloudFront</b> — CDN, מטמין תוכן, HTTP/HTTPS בלבד.<br><b>Global Accelerator</b> — אין cache, <b>IP anycast סטטי</b>, TCP <b>וגם UDP</b>, failover אזורי בשניות.<br>UDP/gaming/IoT ⇐ Global Accelerator."},
+{c:"Security",f:"Security Group מול NACL",b:"<b>SG</b>: stateful, ברמת ENI, <b>Allow בלבד</b>, כל הכללים נבדקים.<br><b>NACL</b>: stateless, ברמת subnet, Allow <b>ו־Deny</b>, נבדק לפי מספר סידורי עולה.<br>חסימת IP ספציפי ⇐ NACL."},
+{c:"Security",f:"Secrets Manager מול Parameter Store",b:"<b>Secrets Manager</b>: <b>rotation אוטומטי מובנה</b> ל־RDS/Redshift/DocumentDB, cross-account, בתשלום.<br><b>Parameter Store</b>: חינם (Standard), SecureString עם KMS, ללא rotation מובנה.<br>המילה \"automatic rotation\" ⇐ Secrets Manager."},
+{c:"Security",f:"KMS מול CloudHSM",b:"<b>KMS</b>: מנוהל, multi-tenant, משולב בכל שירותי AWS, FIPS 140-3 L3 במודולים.<br><b>CloudHSM</b>: אשכול HSM <b>ייעודי ובלעדי</b>, FIPS 140-2 Level 3, AWS ללא גישה למפתחות.<br>\"dedicated / exclusive control\" ⇐ CloudHSM."},
+{c:"Security",f:"GuardDuty / Inspector / Macie / Detective",b:"<b>GuardDuty</b> — זיהוי איומים (CloudTrail, DNS, Flow Logs), ללא agent.<br><b>Inspector</b> — פגיעויות CVE ב־EC2/ECR/Lambda.<br><b>Macie</b> — גילוי PII ב־S3.<br><b>Detective</b> — חקירת שורש ממצא.<br><b>Security Hub</b> — ריכוז כל הממצאים."},
+{c:"Security",f:"מניעת SSRF שגונב credentials",b:"אכוף <b>IMDSv2</b> (token מבוסס PUT) + <code>hop-limit=1</code>. זו התשובה הרשמית של AWS מול SSRF על metadata."},
+{c:"Resilience",f:"ארבע אסטרטגיות DR",b:"<b>Backup & Restore</b> — RTO/RPO שעות. הזול ביותר.<br><b>Pilot Light</b> — נתונים חמים, compute כבוי. RTO עשרות דקות.<br><b>Warm Standby</b> — סביבה מוקטנת ופעילה. RTO דקות.<br><b>Multi-site active/active</b> — RTO/RPO כמעט 0. היקר ביותר."},
+{c:"Resilience",f:"מדיניות ניתוב ב־Route 53",b:"<b>Simple</b>, <b>Weighted</b> (חלוקה יחסית / canary), <b>Latency</b> (הביצועים הטובים ביותר), <b>Failover</b> (active/passive), <b>Geolocation</b> (לפי מיקום/רגולציה), <b>Geoproximity</b> (עם bias), <b>Multivalue</b> (עד 8 תשובות תקינות)."},
+{c:"Resilience",f:"Placement Groups",b:"<b>Cluster</b> — קרבה מרבית, latency נמוך, HPC. סיכון כשל משותף.<br><b>Spread</b> — חומרה נפרדת, עד 7 מכונות ל־AZ. עמידות מרבית.<br><b>Partition</b> — קבוצות גדולות מודעות topology: HDFS, Kafka, Cassandra."},
+{c:"Integration",f:"SQS מול SNS מול EventBridge מול Kinesis",b:"<b>SQS</b> — תור, צרכן אחד לכל הודעה, buffering.<br><b>SNS</b> — pub/sub, fan-out, push.<br><b>EventBridge</b> — ניתוב אירועים לפי תוכן, schema registry, SaaS partners, מתוזמן.<br><b>Kinesis</b> — streaming עם סדר, מספר צרכנים, <b>replay</b>."},
+{c:"Integration",f:"מתי SQS FIFO?",b:"כשצריך סדר מדויק ו/או exactly-once. <code>MessageGroupId</code> שומר סדר בתוך קבוצה ומאפשר מקביליות בין קבוצות. תפוקה נמוכה יותר מ־standard."},
+{c:"Integration",f:"Visibility Timeout",b:"הזמן שבו הודעה שנמשכה מוסתרת משאר הצרכנים. קצר מדי ⇐ עיבוד כפול. ברירת מחדל 30 שניות, מקסימום 12 שעות. ניתן להארכה דינמית ב־<code>ChangeMessageVisibility</code>."},
+{c:"Cost",f:"Savings Plans מול Reserved Instances",b:"<b>Compute SP</b> — הגמיש ביותר: EC2 בכל משפחה/אזור + Fargate + Lambda (~66%).<br><b>EC2 Instance SP</b> — נעול למשפחה ואזור (~72%).<br><b>Standard RI</b> — הנחה מרבית, נוקשה. <b>Convertible RI</b> — ניתן להחלפה, הנחה נמוכה יותר."},
+{c:"Cost",f:"מחלקות אחסון S3 לפי עלות",b:"Standard ← Intelligent-Tiering ← Standard-IA ← One Zone-IA ← Glacier Instant (min 90d) ← Glacier Flexible (min 90d) ← <b>Deep Archive</b> (min 180d, אחזור 12–48 שעות, הזול ביותר)."},
+{c:"Cost",f:"כלל האצבע להעברת נתונים גדולה",b:"חשב: TB × 8000 / (Mbps) = שניות. אם התוצאה שבועות/חודשים ⇐ <b>Snow Family</b>. עד ~10TB עם קו רחב ⇐ DataSync / Direct Connect."},
+{c:"Cost",f:"שלושת החשדים המיידיים לחיסכון",b:"1. <b>NAT Gateway</b> ⇐ החלף ב־Gateway Endpoints ל־S3/DynamoDB (חינם).<br>2. <b>gp2</b> ⇐ gp3.<br>3. <b>data transfer out</b> ⇐ CloudFront."},
+{c:"Performance",f:"DAX מול ElastiCache",b:"<b>DAX</b> — רק ל־DynamoDB, <b>תואם API</b> (בלי שינוי קוד), מיקרו־שניות.<br><b>ElastiCache</b> — כללי (Redis/Memcached), דורש לוגיקת cache-aside בקוד."},
+{c:"Performance",f:"Redis מול Memcached",b:"<b>Redis</b>: replication, persistence, Multi-AZ + failover, sorted sets, pub/sub, transactions.<br><b>Memcached</b>: multi-threaded, sharding פשוט, ללא persistence או replication."},
+{c:"Performance",f:"GSI מול LSI ב־DynamoDB",b:"<b>GSI</b>: partition key שונה, ניתן ליצירה <b>בכל עת</b>, קיבולת נפרדת, eventually consistent.<br><b>LSI</b>: אותו partition key, sort key שונה, <b>רק בזמן יצירת הטבלה</b>, מגבלת 10GB לפרטישן."},
+{c:"Performance",f:"FSx — איזה סוג?",b:"<b>Windows File Server</b> — SMB, NTFS, Active Directory.<br><b>Lustre</b> — HPC/ML, מאות GB/s, מקושר ל־S3.<br><b>NetApp ONTAP</b> — רב־פרוטוקולי (NFS+SMB+iSCSI), snapshots.<br><b>OpenZFS</b> — NFS עם snapshots ו־cloning."},
+{c:"Identity",f:"Cognito User Pool מול Identity Pool",b:"<b>User Pool</b> = אימות. ספריית משתמשים, sign-up/sign-in, social IdP ⇐ מחזיר JWT.<br><b>Identity Pool</b> = הרשאה. ממיר token ל־credentials זמניים של AWS דרך STS."},
+{c:"Identity",f:"SCP מול Permissions Boundary מול IAM Policy",b:"<b>SCP</b> — תקרה ברמת חשבון/OU בארגון. לא מעניקה, רק מגבילה.<br><b>Permissions Boundary</b> — תקרה ל־identity בודד (מאפשר האצלת יצירת roles).<br><b>IAM Policy</b> — ההרשאה בפועל. ההרשאה האפקטיבית = החיתוך של כולן."},
+{c:"Ops",f:"גישה למכונות בלי bastion",b:"<b>Systems Manager Session Manager</b>: אין פורטים נכנסים, אין מפתחות SSH, בקרה ב־IAM, הקלטת סשן ל־S3/CloudWatch. תשובה קבועה ל־\"eliminate bastion hosts\"."},
+{c:"Ops",f:"CloudTrail מול Config מול CloudWatch",b:"<b>CloudTrail</b> — <b>מי</b> עשה <b>מה</b> (API calls).<br><b>Config</b> — <b>מה מצב</b> המשאב ואיך השתנה + תאימות.<br><b>CloudWatch</b> — מטריקות, לוגים והתראות ביצועים."},
+{c:"Ops",f:"Organizations / Control Tower / RAM",b:"<b>Organizations</b> — מבנה חשבונות, OUs, SCPs, חיוב מאוחד.<br><b>Control Tower</b> — landing zone מוכן: guardrails, לוגים מרוכזים, Account Factory.<br><b>RAM</b> — שיתוף משאבים (subnets, TGW, Route53 rules) בין חשבונות."},
+];
+
+/* ===== Exam meta (verified against the official AWS exam guide) ===== */
+const EXAM = {
+code:"SAA-C03",
+questions:65, scored:50, unscored:15,
+minutes:130, pass:720, scaleMin:100, scaleMax:1000,
+domains:[
+ {id:1,w:30,he:"עיצוב ארכיטקטורות מאובטחות",en:"Design Secure Architectures"},
+ {id:2,w:26,he:"עיצוב ארכיטקטורות עמידות",en:"Design Resilient Architectures"},
+ {id:3,w:24,he:"עיצוב ארכיטקטורות בעלות ביצועים גבוהים",en:"Design High-Performing Architectures"},
+ {id:4,w:20,he:"עיצוב ארכיטקטורות מותאמות עלות",en:"Design Cost-Optimized Architectures"}
+]};
+
+
+/* ================= storage layer ================= */
+const Store=(()=>{
+  const KEY="saa_c03_state_v1"; let mem=null;
+  const blank=()=>({ans:{},sessions:[],cards:{},streak:{last:null,n:0},v:1});
+  async function load(){
+    if(mem) return mem;
+    try{
+      if(window.storage&&window.storage.get){
+        const r=await window.storage.get(KEY); mem=r&&r.value?JSON.parse(r.value):blank(); return mem;
+      }
+    }catch(e){}
+    try{ const s=localStorage.getItem(KEY); mem=s?JSON.parse(s):blank(); }catch(e){ mem=blank(); }
+    return mem;
+  }
+  let t=null;
+  async function save(){
+    if(!mem) return;
+    const s=JSON.stringify(mem);
+    try{ if(window.storage&&window.storage.set){ await window.storage.set(KEY,s); return; } }catch(e){}
+    try{ localStorage.setItem(KEY,s); }catch(e){}
+  }
+  function flush(){ clearTimeout(t); t=setTimeout(save,400); }
+  return {load,save,flush,get s(){return mem},reset(){mem=blank();save();}};
+})();
+
+/* ================= data ================= */
+const QS=[...D1,...D2,...D3,...D4];
+const byId=Object.fromEntries(QS.map(q=>[q.i,q]));
+const DOM=Object.fromEntries(EXAM.domains.map(d=>[d.id,d]));
+const DCOL={1:"var(--vio)",2:"var(--acc)",3:"var(--amber)",4:"var(--red)"};
+const LET="ABCDE";
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const eq=(a,b)=>a.length===b.length&&[...a].sort().every((v,i)=>v===[...b].sort()[i]);
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+/* randomize option order so the correct letter is never predictable */
+function prep(q){
+  const idx=shuffle(q.o.map((_,i)=>i));
+  return {...q,
+    o:idx.map(i=>q.o[i]),
+    w:q.w?idx.map(i=>q.w[i]):null,
+    a:q.a.map(i=>idx.indexOf(i)).sort((x,y)=>x-y)};
+}
+function scaled(c,t){ return t?Math.round(100+(c/t)*900):100; }
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,"0")+":"+String(x).padStart(2,"0");}
+function stat(qid){ return Store.s.ans[qid]||null; }
+function record(qid,ok){
+  const a=Store.s.ans, r=a[qid]||{n:0,ok:0,box:1,last:0};
+  r.n++; if(ok){r.ok++; r.box=Math.min(5,r.box+1);} else {r.box=1;}
+  r.last=Date.now(); a[qid]=r; touchStreak(); Store.flush();
+}
+function touchStreak(){
+  const t=new Date().toDateString(), st=Store.s.streak;
+  if(st.last===t) return;
+  const y=new Date(Date.now()-864e5).toDateString();
+  st.n = st.last===y ? st.n+1 : 1; st.last=t;
+}
+function overall(){
+  let n=0,ok=0; const d={1:[0,0],2:[0,0],3:[0,0],4:[0,0]}, tp={};
+  for(const [id,r] of Object.entries(Store.s.ans)){
+    const q=byId[id]; if(!q) continue;
+    n+=r.n; ok+=r.ok; d[q.d][0]+=r.ok; d[q.d][1]+=r.n;
+    tp[q.t]=tp[q.t]||[0,0]; tp[q.t][0]+=r.ok; tp[q.t][1]+=r.n;
+  }
+  return {n,ok,d,tp,seen:Object.keys(Store.s.ans).length};
+}
+
+/* ================= router ================= */
+let view="home";
+const R={};
+function go(v){
+  view=v;
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  ["home","exam","practice","cards","stats"].forEach(x=>$("#v-"+x).classList.toggle("hide",x!==v));
+  R[v]&&R[v]();
+  window.scrollTo({top:0,behavior:"instant"});
+}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button"); if(b) go(b.dataset.v);});
+$("#themeBtn").addEventListener("click",()=>{
+  const cur=document.documentElement.dataset.t==="light"?"dark":"light";
+  document.documentElement.dataset.t=cur;
+  try{localStorage.setItem("saa_theme",cur)}catch(e){}
+});
+try{ const th=localStorage.getItem("saa_theme"); if(th) document.documentElement.dataset.t=th; }catch(e){}
+
+/* ================= gauge ================= */
+function gaugeHTML(score){
+  const p=Math.max(0,Math.min(100,(score-EXAM.scaleMin)/(EXAM.scaleMax-EXAM.scaleMin)*100));
+  const pp=(EXAM.pass-EXAM.scaleMin)/(EXAM.scaleMax-EXAM.scaleMin)*100;
+  return `<div class="gauge">
+    <div class="scale">
+      <div class="fillbar" style="width:${p}%"></div>
+      <div class="passline" style="right:${pp}%"></div>
+      <div class="passlbl" style="right:${pp}%">${EXAM.pass}</div>
+      <div class="marker" style="right:${p}%">${score}</div>
+    </div>
+    <div class="ends"><span>${EXAM.scaleMax}</span><span>${EXAM.scaleMin}</span></div>
+  </div>`;
+}
+function domainBars(d){
+  return EXAM.domains.map(dm=>{
+    const [ok,n]=d[dm.id], p=pct(ok,n);
+    return `<div class="dbar">
+      <div class="hd"><span class="tag d${dm.id}">D${dm.id}</span><span>${dm.he}</span>
+        <span class="pct">${n?p+"%":"—"} <span style="color:var(--dim2)">(${dm.w}%)</span></span></div>
+      <div class="track"><i class="fill" style="width:${p}%;background:${DCOL[dm.id]}"></i></div>
+    </div>`;
+  }).join("");
+}
+
+/* ================= HOME ================= */
+R.home=()=>{
+  const o=overall(), sc=scaled(o.ok,o.n), pass=sc>=EXAM.pass;
+  const last=Store.s.sessions.slice(-1)[0];
+  $("#v-home").innerHTML=`
+  <div class="card">
+    <h3>מוכנות משוערת</h3>
+    <p class="lead">ציון מדומה על סולם ${EXAM.scaleMin}–${EXAM.scaleMax}, מבוסס על כל התשובות שלך עד כה. סף המעבר הרשמי הוא ${EXAM.pass}.</p>
+    ${gaugeHTML(sc)}
+    <div class="bigstat" style="margin-top:18px">
+      <div><div class="n" style="color:${pass?"var(--acc)":"var(--amber)"}">${o.n?pct(o.ok,o.n)+"%":"—"}</div><div class="l">דיוק כולל</div></div>
+      <div><div class="n">${o.n}</div><div class="l">תשובות</div></div>
+      <div><div class="n">${o.seen}<span style="font-size:14px;color:var(--dim)">/${QS.length}</span></div><div class="l">שאלות שנראו</div></div>
+      <div><div class="n">${Store.s.streak.n||0}</div><div class="l">ימים ברצף</div></div>
+    </div>
+  </div>
+
+  <h2 class="sec">התחל עכשיו</h2>
+  <div class="card tight">
+    <div class="row">
+      <button class="btn" onclick="go('exam')">מבחן מלא · ${EXAM.questions} שאלות</button>
+      <button class="btn ghost" onclick="go('practice')">תרגול לפי דומיין</button>
+      <button class="btn ghost" onclick="startWeak()">חזרה על טעויות</button>
+    </div>
+  </div>
+
+  <h2 class="sec">פילוח לפי דומיין</h2>
+  <div class="card">${domainBars(o.d)}
+    <div class="muted" style="margin-top:10px">האחוז בסוגריים הוא משקל הדומיין במבחן האמיתי. דומיין 1 (אבטחה) הוא הכבד ביותר — 30% מהניקוד.</div>
+  </div>
+
+  ${last?`<h2 class="sec">מבחן אחרון</h2>
+  <div class="card tight">
+    <div class="kv"><span>תאריך</span><span class="v">${new Date(last.at).toLocaleDateString("he-IL")}</span></div>
+    <div class="kv"><span>ציון משוער</span><span class="v" style="color:${last.score>=EXAM.pass?"var(--acc)":"var(--red)"}">${last.score}</span></div>
+    <div class="kv"><span>נכונות</span><span class="v">${last.ok}/${last.total}</span></div>
+    <div class="kv"><span>זמן</span><span class="v">${fmt(last.secs)}</span></div>
+  </div>`:""}
+
+  <h2 class="sec">על המבחן</h2>
+  <div class="card tight">
+    <div class="kv"><span>גרסה נוכחית</span><span class="v">${EXAM.code}</span></div>
+    <div class="kv"><span>שאלות</span><span class="v">${EXAM.questions} (${EXAM.scored} מנוקדות + ${EXAM.unscored})</span></div>
+    <div class="kv"><span>זמן</span><span class="v">${EXAM.minutes} min</span></div>
+    <div class="kv"><span>סף מעבר</span><span class="v">${EXAM.pass} / ${EXAM.scaleMax}</span></div>
+    <div class="kv"><span>סוגי שאלות</span><span class="v">multiple choice · multiple response</span></div>
+    <div class="note">שים לב: בשאלות <b>multiple response</b> אין ניקוד חלקי — חייבים לסמן את <b>כל</b> התשובות הנכונות ורק אותן.</div>
+  </div>`;
+};
+
+/* ================= EXAM ================= */
+let EX=null;
+function buildExam(){
+  const per={1:20,2:17,3:15,4:13};
+  let list=[];
+  for(const d of [1,2,3,4]){
+    const pool=shuffle(QS.filter(q=>q.d===d));
+    list=list.concat(pool.slice(0,Math.min(per[d],pool.length)));
+  }
+  return {qs:shuffle(list).map(prep),cur:0,pick:{},flags:{},t0:Date.now(),
+          left:EXAM.minutes*60,done:false,timer:null,showNav:false};
+}
+R.exam=()=>{ if(!EX) renderExamIntro(); else if(EX.done) renderResults(); else renderExamQ(); };
+
+function renderExamIntro(){
+  $("#v-exam").innerHTML=`
+  <div class="card">
+    <h3>מבחן סימולציה מלא</h3>
+    <p class="lead">${EXAM.questions} שאלות · ${EXAM.minutes} דקות · בלי משוב עד הסיום — בדיוק כמו במבחן האמיתי. התפלגות הדומיינים תואמת את המשקלים הרשמיים.</p>
+    <div class="chips">
+      ${EXAM.domains.map(d=>`<span class="chip"><span class="tag d${d.id}">D${d.id}</span> ${d.w}%</span>`).join("")}
+    </div>
+    <div class="note">טיפ ניהול זמן: ${EXAM.minutes} דקות ל־${EXAM.questions} שאלות = כ־<b>2 דקות לשאלה</b>. אם שאלה תקועה מעל 3 דקות — סמן דגל, נחש, והמשך.</div>
+    <button class="btn wide" onclick="EX=buildExam();startTimer();renderExamQ()" style="margin-top:6px">התחל מבחן</button>
+  </div>`;
+}
+function startTimer(){
+  clearInterval(EX.timer);
+  EX.timer=setInterval(()=>{
+    if(!EX||EX.done) return clearInterval(EX.timer);
+    EX.left--;
+    const el=$("#timer");
+    if(el){ el.textContent=fmt(EX.left);
+      el.className="t"+(EX.left<300?" crit":EX.left<900?" warn":""); }
+    if(EX.left<=0){ clearInterval(EX.timer); finishExam(); }
+  },1000);
+}
+function renderExamQ(){
+  const q=EX.qs[EX.cur], sel=EX.pick[q.i]||[];
+  const answered=Object.keys(EX.pick).length;
+  $("#v-exam").innerHTML=`
+  <div class="exambar">
+    <span id="timer" class="t${EX.left<300?" crit":EX.left<900?" warn":""}">${fmt(EX.left)}</span>
+    <div class="prog"><i style="width:${answered/EX.qs.length*100}%"></i></div>
+    <span class="cnt">${EX.cur+1}/${EX.qs.length}</span>
+    <button class="icobtn flagbtn ${EX.flags[q.i]?"on":""}" onclick="EX.flags[${q.i}]=!EX.flags[${q.i}];renderExamQ()" title="סמן לחזרה">⚑</button>
+    <button class="icobtn" onclick="EX.showNav=!EX.showNav;renderExamQ()" title="מפת שאלות">▦</button>
+  </div>
+  ${EX.showNav?`<div class="card tight"><div class="navgrid">${EX.qs.map((x,i)=>
+      `<button class="${EX.pick[x.i]?"ans ":""}${EX.flags[x.i]?"flag ":""}${i===EX.cur?"cur":""}"
+        onclick="EX.cur=${i};EX.showNav=false;renderExamQ()">${i+1}</button>`).join("")}</div>
+      <button class="btn wide" style="margin-top:12px" onclick="confirmFinish()">סיים והצג תוצאות</button></div>`:""}
+  <div class="card">
+    <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
+      ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
+    <div class="stem">${q.q}</div>
+    <div class="opts">${q.o.map((o,i)=>
+      `<button class="opt ${sel.includes(i)?"sel":""}" onclick="pickOpt(${q.i},${i})">
+        <span class="k">${LET[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  </div>
+  <div class="row">
+    <button class="btn ghost" ${EX.cur===0?"disabled":""} onclick="EX.cur--;renderExamQ()">הקודם</button>
+    ${EX.cur===EX.qs.length-1
+      ?`<button class="btn" onclick="confirmFinish()">סיים מבחן</button>`
+      :`<button class="btn" onclick="EX.cur++;renderExamQ()">הבא</button>`}
+  </div>`;
+}
+function pickOpt(qid,i){
+  const q=byId[qid], cur=EX.pick[qid]||[];
+  if(q.ty==="m"){
+    const n=cur.includes(i)?cur.filter(x=>x!==i):[...cur,i];
+    if(n.length) EX.pick[qid]=n; else delete EX.pick[qid];
+  } else EX.pick[qid]=[i];
+  renderExamQ();
+}
+function confirmFinish(){
+  const un=EX.qs.length-Object.keys(EX.pick).length;
+  if(un>0&&!confirm(`נותרו ${un} שאלות ללא מענה. שאלה ללא מענה נחשבת שגויה. לסיים בכל זאת?`)) return;
+  finishExam();
+}
+function finishExam(){
+  clearInterval(EX.timer); EX.done=true;
+  let ok=0; const d={1:[0,0],2:[0,0],3:[0,0],4:[0,0]};
+  EX.qs.forEach(q=>{
+    const good=eq(EX.pick[q.i]||[],q.a);
+    if(good) ok++; d[q.d][1]++; if(good) d[q.d][0]++;
+    record(q.i,good);
+  });
+  EX.res={ok,d,secs:Math.round((Date.now()-EX.t0)/1000)};
+  Store.s.sessions.push({at:Date.now(),ok,total:EX.qs.length,score:scaled(ok,EX.qs.length),secs:EX.res.secs});
+  Store.flush(); renderResults();
+}
+function renderResults(){
+  const {ok,d,secs}=EX.res, sc=scaled(ok,EX.qs.length), pass=sc>=EXAM.pass;
+  $("#v-exam").innerHTML=`
+  <div class="card">
+    <h3 style="color:${pass?"var(--acc)":"var(--red)"}">${pass?"עברת ✓":"לא עברת"}</h3>
+    <p class="lead">${pass
+      ?"הציון המשוער שלך מעל סף המעבר. שמור על העקביות והמשך לחזור על דומיינים חלשים."
+      :`חסרות לך ${EXAM.pass-sc} נקודות. הפילוח למטה מראה בדיוק איפה להשקיע.`}</p>
+    ${gaugeHTML(sc)}
+    <div class="bigstat" style="margin-top:18px">
+      <div><div class="n">${ok}/${EX.qs.length}</div><div class="l">נכונות</div></div>
+      <div><div class="n">${pct(ok,EX.qs.length)}%</div><div class="l">דיוק</div></div>
+      <div><div class="n">${fmt(secs)}</div><div class="l">זמן</div></div>
+      <div><div class="n">${(secs/EX.qs.length).toFixed(0)}s</div><div class="l">לשאלה</div></div>
+    </div>
+  </div>
+  <h2 class="sec">פילוח לפי דומיין</h2>
+  <div class="card">${domainBars(d)}</div>
+  <h2 class="sec">מפת התשובות</h2>
+  <div class="card tight"><div class="navgrid">${EX.qs.map((q,i)=>
+    `<button class="${eq(EX.pick[q.i]||[],q.a)?"ok":"no"}" onclick="reviewAt(${i})">${i+1}</button>`).join("")}</div></div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn" onclick="reviewAt(0)">סקירת כל השאלות</button>
+    <button class="btn ghost" onclick="EX=null;renderExamIntro()">מבחן חדש</button>
+  </div>`;
+}
+function reviewAt(i){
+  const q=EX.qs[i], sel=EX.pick[q.i]||[], good=eq(sel,q.a);
+  $("#v-exam").innerHTML=`
+  <div class="exambar"><span class="cnt">סקירה ${i+1}/${EX.qs.length}</span>
+    <div class="prog"><i style="width:${(i+1)/EX.qs.length*100}%"></i></div>
+    <button class="icobtn" onclick="renderResults()" title="חזרה לתוצאות">✕</button></div>
+  ${qReviewHTML(q,sel,good)}
+  <div class="row">
+    <button class="btn ghost" ${i===0?"disabled":""} onclick="reviewAt(${i-1})">הקודם</button>
+    <button class="btn ghost" ${i===EX.qs.length-1?"disabled":""} onclick="reviewAt(${i+1})">הבא</button>
+    <button class="btn" onclick="renderResults()">סיום סקירה</button>
+  </div>`;
+  window.scrollTo({top:0,behavior:"instant"});
+}
+function qReviewHTML(q,sel,good){
+  return `<div class="card">
+    <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
+      ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
+    <div class="stem">${q.q}</div>
+    <div class="opts">${q.o.map((o,i)=>{
+      const isA=q.a.includes(i), isS=sel.includes(i);
+      return `<div class="opt ${isA?"good":isS?"bad":"dim"}">
+        <span class="k">${LET[i]}</span><span>${esc(o)}${isA?"  ✓":isS?"  ✗":""}</span></div>`;
+    }).join("")}</div>
+    <div class="expl ${good?"ok":"no"}">
+      <div class="hd">${good?"✓ תשובה נכונה":"✗ תשובה שגויה"} — ${q.a.map(i=>LET[i]).join(", ")}</div>
+      <div class="body">${q.e}</div>
+      ${q.w&&q.w.some(x=>x)?`<div class="whywrong">${q.w.map((x,i)=>x
+        ?`<div><b>${LET[i]}</b> — ${x}</div>`:"").join("")}</div>`:""}
+    </div>
+  </div>`;
+}
+
+/* ================= PRACTICE ================= */
+let PR={d:0,mode:"all",list:[],i:0,sel:[],shown:false};
+R.practice=()=>{ PR.list.length?renderPr():renderPrIntro(); };
+function renderPrIntro(){
+  const o=overall();
+  const topics=[...new Set(QS.map(q=>q.t))].sort();
+  $("#v-practice").innerHTML=`
+  <div class="card">
+    <h3>תרגול עם משוב מיידי</h3>
+    <p class="lead">בחר דומיין ומצב. אחרי כל שאלה תקבל את ההסבר המלא — כולל למה כל מסיח שגוי.</p>
+    <div class="muted" style="margin-bottom:6px">דומיין</div>
+    <div class="chips" id="prD">
+      <button class="chip ${PR.d===0?"on":""}" onclick="PR.d=0;renderPrIntro()">הכל</button>
+      ${EXAM.domains.map(d=>`<button class="chip ${PR.d===d.id?"on":""}" onclick="PR.d=${d.id};renderPrIntro()">
+        D${d.id} · ${d.he}</button>`).join("")}
+    </div>
+    <div class="muted" style="margin:12px 0 6px">מצב</div>
+    <div class="chips">
+      <button class="chip ${PR.mode==="all"?"on":""}" onclick="PR.mode='all';renderPrIntro()">כל השאלות</button>
+      <button class="chip ${PR.mode==="new"?"on":""}" onclick="PR.mode='new';renderPrIntro()">שלא ראיתי</button>
+      <button class="chip ${PR.mode==="weak"?"on":""}" onclick="PR.mode='weak';renderPrIntro()">שטעיתי בהן</button>
+      <button class="chip ${PR.mode==="due"?"on":""}" onclick="PR.mode='due';renderPrIntro()">חזרה מרווחת</button>
+    </div>
+    <div class="muted" style="margin:10px 0 14px">${poolOf().length} שאלות זמינות בבחירה הנוכחית</div>
+    <button class="btn wide" onclick="startPr()" ${poolOf().length?"":"disabled"}>התחל תרגול</button>
+  </div>
+  <h2 class="sec">שליטה לפי נושא</h2>
+  <div class="card">${topicPills(o.tp)}</div>`;
+}
+function poolOf(){
+  let p=QS.filter(q=>!PR.d||q.d===PR.d);
+  if(PR.mode==="new") p=p.filter(q=>!stat(q.i));
+  if(PR.mode==="weak") p=p.filter(q=>{const s=stat(q.i);return s&&s.ok<s.n;});
+  if(PR.mode==="due") p=p.filter(q=>{const s=stat(q.i); if(!s) return true;
+    const days=[0,0,1,3,7,16][s.box]||0; return Date.now()-s.last>days*864e5;});
+  return p;
+}
+function startPr(){ PR.list=shuffle(poolOf()).map(prep); PR.i=0; PR.sel=[]; PR.shown=false; renderPr(); }
+function startWeak(){ PR.d=0; PR.mode="weak"; go("practice"); if(poolOf().length) startPr(); else renderPrIntro(); }
+function renderPr(){
+  const q=PR.list[PR.i], good=PR.shown&&eq(PR.sel,q.a);
+  $("#v-practice").innerHTML=`
+  <div class="exambar"><span class="cnt">${PR.i+1}/${PR.list.length}</span>
+    <div class="prog"><i style="width:${(PR.i+1)/PR.list.length*100}%"></i></div>
+    <button class="icobtn" onclick="PR.list=[];renderPrIntro()" title="יציאה">✕</button></div>
+  ${PR.shown?qReviewHTML(q,PR.sel,good):`
+  <div class="card">
+    <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
+      ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
+    <div class="stem">${q.q}</div>
+    <div class="opts">${q.o.map((o,i)=>
+      `<button class="opt ${PR.sel.includes(i)?"sel":""}" onclick="prPick(${i})">
+        <span class="k">${LET[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+  </div>`}
+  <div class="row">
+    ${PR.shown
+      ? (PR.i<PR.list.length-1
+          ? `<button class="btn" onclick="PR.i++;PR.sel=[];PR.shown=false;renderPr()">השאלה הבאה</button>`
+          : `<button class="btn" onclick="PR.list=[];renderPrIntro()">סיימת את הסבב ✓</button>`)
+      : `<button class="btn" ${PR.sel.length?"":"disabled"} onclick="prSubmit()">בדוק תשובה</button>`}
+    <button class="btn ghost" onclick="PR.list=[];renderPrIntro()">יציאה</button>
+  </div>`;
+  window.scrollTo({top:0,behavior:"instant"});
+}
+function prPick(i){
+  const q=PR.list[PR.i]; if(PR.shown) return;
+  if(q.ty==="m") PR.sel=PR.sel.includes(i)?PR.sel.filter(x=>x!==i):[...PR.sel,i];
+  else PR.sel=[i];
+  renderPr();
+}
+function prSubmit(){
+  const q=PR.list[PR.i]; PR.shown=true; record(q.i,eq(PR.sel,q.a)); renderPr();
+}
+function topicPills(tp){
+  const ts=[...new Set(QS.map(q=>q.t))].sort();
+  return `<div class="grid-m">${ts.map(t=>{
+    const s=tp[t], p=s?pct(s[0],s[1]):null;
+    const c=p===null?"var(--dim2)":p>=80?"var(--acc)":p>=60?"var(--amber)":"var(--red)";
+    return `<span class="tpill"><span class="dot" style="background:${c}"></span>
+      <span class="mono">${t}</span><span class="sc">${p===null?"—":p+"%"}</span></span>`;
+  }).join("")}</div>`;
+}
+
+/* ================= CARDS ================= */
+let CD={cat:"all",i:0,flip:false};
+R.cards=()=>renderCards();
+function cardPool(){ return CD.cat==="all"?CARDS:CARDS.filter(c=>c.c===CD.cat); }
+function renderCards(){
+  const cats=[...new Set(CARDS.map(c=>c.c))];
+  const pool=cardPool(); if(CD.i>=pool.length) CD.i=0;
+  const c=pool[CD.i];
+  $("#v-cards").innerHTML=`
+  <div class="card tight">
+    <div class="chips">
+      <button class="chip ${CD.cat==="all"?"on":""}" onclick="CD.cat='all';CD.i=0;CD.flip=false;renderCards()">הכל</button>
+      ${cats.map(x=>`<button class="chip ${CD.cat===x?"on":""}" onclick="CD.cat='${x}';CD.i=0;CD.flip=false;renderCards()">${x}</button>`).join("")}
+    </div>
+  </div>
+  <div class="fc" onclick="CD.flip=!CD.flip;renderCards()">
+    <div class="front">${c.f}</div>
+    ${CD.flip?`<div class="back">${c.b}</div>`:`<div class="hint">הקש לחשיפת התשובה</div>`}
+  </div>
+  <div class="row" style="margin-top:14px">
+    <button class="btn ghost" onclick="CD.i=(CD.i-1+${pool.length})%${pool.length};CD.flip=false;renderCards()">הקודם</button>
+    <button class="btn" onclick="CD.i=(CD.i+1)%${pool.length};CD.flip=false;renderCards()">הבא</button>
+    <span class="muted" style="align-self:center;font-family:var(--mono)">${CD.i+1}/${pool.length}</span>
+  </div>
+  <div class="note">הכרטיסיות האלה הן <b>כללי הכרעה</b>, לא הגדרות. במבחן רוב השאלות נפתרות בזיהוי מילת מפתח אחת בתרחיש — למשל "no operational overhead", "interruptible", "lowest cost", "sub-millisecond".</div>`;
+}
+
+/* ================= STATS ================= */
+R.stats=()=>{
+  const o=overall(), sc=scaled(o.ok,o.n);
+  const ses=Store.s.sessions.slice(-8).reverse();
+  const weak=Object.entries(o.tp).filter(([,v])=>v[1]>=2).sort((a,b)=>pct(a[1][0],a[1][1])-pct(b[1][0],b[1][1])).slice(0,5);
+  $("#v-stats").innerHTML=`
+  <div class="card">
+    <h3>סיכום ביצועים</h3>
+    ${gaugeHTML(sc)}
+    <div class="bigstat" style="margin-top:18px">
+      <div><div class="n">${o.n}</div><div class="l">תשובות</div></div>
+      <div><div class="n">${o.n?pct(o.ok,o.n):0}%</div><div class="l">דיוק</div></div>
+      <div><div class="n">${o.seen}/${QS.length}</div><div class="l">כיסוי בנק</div></div>
+      <div><div class="n">${Store.s.sessions.length}</div><div class="l">מבחנים</div></div>
+    </div>
+  </div>
+  <h2 class="sec">דומיינים</h2>
+  <div class="card">${domainBars(o.d)}</div>
+  ${weak.length?`<h2 class="sec">חמשת הנושאים החלשים</h2>
+  <div class="card tight">${weak.map(([t,v])=>
+    `<div class="kv"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
+    <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">תרגל את הטעויות שלי</button></div>`:""}
+  <h2 class="sec">שליטה לפי נושא</h2>
+  <div class="card">${topicPills(o.tp)}</div>
+  ${ses.length?`<h2 class="sec">היסטוריית מבחנים</h2>
+  <div class="card tight">${ses.map(s=>
+    `<div class="kv"><span>${new Date(s.at).toLocaleDateString("he-IL")}</span>
+     <span class="v" style="color:${s.score>=EXAM.pass?"var(--acc)":"var(--red)"}">${s.score} · ${s.ok}/${s.total}</span></div>`).join("")}</div>`:""}
+  <h2 class="sec">נתונים</h2>
+  <div class="card tight">
+    <div class="muted" style="margin-bottom:10px">ההתקדמות נשמרת אוטומטית במכשיר. אם פתחת את הקובץ גם בנייד וגם במחשב — כל מכשיר שומר התקדמות משלו.</div>
+    <button class="btn ghost" onclick="if(confirm('לאפס את כל ההתקדמות? הפעולה בלתי הפיכה.')){Store.reset();go('home')}">איפוס התקדמות</button>
+  </div>`;
+};
+
+/* ================= boot ================= */
+window.go=go; window.startPr=startPr; window.startWeak=startWeak;
+window.renderPrIntro=renderPrIntro; window.renderPr=renderPr; window.prPick=prPick; window.prSubmit=prSubmit;
+window.renderCards=renderCards; window.renderExamQ=renderExamQ; window.renderExamIntro=renderExamIntro;
+window.renderResults=renderResults; window.reviewAt=reviewAt; window.pickOpt=pickOpt;
+window.confirmFinish=confirmFinish; window.buildExam=buildExam; window.startTimer=startTimer;
+window.Store=Store; window.CD=CD; window.PR=PR;
+Object.defineProperty(window,"EX",{get:()=>EX,set:v=>EX=v});
+
+(async()=>{ await Store.load(); go("home"); })();
+
+/* offline support — only when served over http(s), skipped for local file:// use */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+}
+
+document.addEventListener("keydown",e=>{
+  if(view==="exam"&&EX&&!EX.done){
+    const q=EX.qs[EX.cur];
+    if(/^[1-5]$/.test(e.key)&&q.o[+e.key-1]!==undefined){pickOpt(q.i,+e.key-1);}
+    if(e.key==="ArrowLeft"&&EX.cur<EX.qs.length-1){EX.cur++;renderExamQ();}
+    if(e.key==="ArrowRight"&&EX.cur>0){EX.cur--;renderExamQ();}
+  }
+  if(view==="cards"&&e.key===" "){e.preventDefault();CD.flip=!CD.flip;renderCards();}
+});
+</script>
+</body>
+</html>

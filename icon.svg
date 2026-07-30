@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0E141B"/>
+  <rect x="76" y="150" width="360" height="60" rx="14" fill="#233140"/>
+  <rect x="76" y="150" width="252" height="60" rx="14" fill="#3FD1AE"/>
+  <rect x="322" y="132" width="6" height="96" fill="#E3EBF2"/>
+  <text x="256" y="330" font-family="ui-monospace,Menlo,monospace" font-size="86"
+        font-weight="700" fill="#E3EBF2" text-anchor="middle">720</text>
+  <text x="256" y="396" font-family="ui-monospace,Menlo,monospace" font-size="42"
+        fill="#3FD1AE" text-anchor="middle" letter-spacing="4">SAA-C03</text>
+</svg>

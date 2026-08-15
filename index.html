@@ -78,7 +78,7 @@ header.top{
 .spacer{flex:1}
 .icobtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surf);
   display:grid;place-items:center;font-size:15px;transition:background .15s,transform .15s,border-color .15s}
-.icobtn:hover{background:var(--surf3);border-color:var(--dim2)}
+.icobtn:hover{background:var(--surf3);border-color:var(--txt)}
 .icobtn:active{transform:scale(.93)}
 
 nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:50;background:color-mix(in srgb,var(--surf) 96%,transparent);
@@ -115,7 +115,7 @@ html[data-t="light"] .btn{color:#fff}
 .btn:active{transform:scale(.98)}
 .btn.ghost{background:var(--surf3);color:var(--txt);border:1px solid var(--line);font-weight:600;
   box-shadow:none}
-.btn.ghost:hover{border-color:var(--dim2)}
+.btn.ghost:hover{border-color:var(--txt);color:var(--txt)}
 .btn.wide{width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed;filter:none;box-shadow:none}
 .row{display:flex;gap:9px;flex-wrap:wrap}
@@ -189,6 +189,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
   border:1px solid var(--line);border-radius:6px;padding:4px 7px;transition:.15s}
 .trbtn:hover{border-color:var(--dim2);color:var(--txt)}
 .trbtn.on{background:var(--vio);color:#fff;border-color:var(--vio)}
+html[data-t="light"] .trbtn.on{color:#000;font-weight:800}
 .qmeta .trbtn{margin-inline-start:auto;margin-inline-end:0}
 .pauseCard{text-align:center;padding:34px 20px}
 .pauseIc{font-size:38px;margin-bottom:8px;opacity:.85}
@@ -2813,7 +2814,7 @@ function renderPrStats(){
   </div>
   ${weakSes.length?`<h2 class="sec">פילוח לפי נושא — בסבב הזה</h2>
   <div class="card tight">${weakSes.map(([t,v])=>
-    `<div class="kv"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
+    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="PR.list=[];PR.d=0;PR.mode='new';PR.ses={ok:0,wrong:0,topics:{}};const f=QS.filter(q=>q.t==='${t}');PR.list=f;PR.i=0;PR.sel=[];PR.shown=false;PR.tr={stem:{},opt:{}};PR.showStats=false;Store.s.practice={d:0,mode:'new',list:f,i:0,sel:[],shown:false,ses:{ok:0,wrong:0,topics:{}},tr:{stem:{},opt:{}}};Store.save();renderPr()"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
   <h2 class="sec">לאן להשקיע עכשיו</h2>
   <div class="card tight">
     <div class="muted" style="margin-bottom:8px">מבוסס על כל ההיסטוריה שלך (לא רק הסבב הנוכחי) — הנושאים עם אחוז ההצלחה הנמוך ביותר:</div>
@@ -2895,8 +2896,8 @@ R.stats=()=>{
   <div class="card">${domainBars(o.d)}</div>
   ${weak.length?`<h2 class="sec">חמשת הנושאים החלשים</h2>
   <div class="card tight">${weak.map(([t,v])=>
-    `<div class="kv"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
-    <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">תרגל את הטעויות שלי</button></div>`:""}
+    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="PR.list=[];PR.d=0;PR.mode='new';PR.ses={ok:0,wrong:0,topics:{}};const f=QS.filter(q=>q.t==='${t}');PR.list=f;PR.i=0;PR.sel=[];PR.shown=false;PR.tr={stem:{},opt:{}};PR.showStats=false;Store.s.practice={d:0,mode:'new',list:f,i:0,sel:[],shown:false,ses:{ok:0,wrong:0,topics:{}},tr:{stem:{},opt:{}}};Store.save();go('practice');startPr()"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
+    <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">או: תרגל את כל טעויותיי</button></div>`:""}
   <h2 class="sec">שליטה לפי נושא</h2>
   <div class="card">${topicPills(o.tp)}</div>
   <h2 class="sec">כרטיסיות</h2>

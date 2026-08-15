@@ -4,7 +4,7 @@
    (old question bank, old bug fixes) to returning users until the browser's own
    byte-diff update cycle happens to run — which can take a while for a PWA that's
    opened infrequently. Bumping the name forces immediate cache invalidation. */
-const CACHE = "saa-c03-v3";
+const CACHE = "saa-c03-v4";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", e => {

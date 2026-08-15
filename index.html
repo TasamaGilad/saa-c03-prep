@@ -2,6 +2,14 @@
 <html dir="rtl" lang="he">
 <head>
 <meta charset="utf-8">
+<!-- Everything the app needs is inline in this one file and nothing is ever fetched
+     from elsewhere, so a strict self-only CSP costs nothing functionally. This meta
+     tag is a best-effort baseline: <meta> CSP cannot carry frame-ancestors (only a
+     real HTTP header can), and GitHub Pages (this project's documented host) does not
+     let you set custom response headers at all. If frame-ancestors/X-Frame-Options or
+     other real security headers ever matter, host on something that supports a
+     _headers/_headers.toml file (e.g. Cloudflare Pages, Netlify) instead. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E141B">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -495,6 +503,179 @@ o:["AWS Organizations only","AWS Control Tower","AWS Service Catalog","AWS Confi
 a:[1],
 e:"<b>Control Tower</b> מקים landing zone מלא: בונה מעליו Organizations, מגדיר OUs, <b>guardrails</b> (preventive דרך SCP ו־detective דרך Config), logging מרוכז ב־Log Archive, וחשבון Audit — בתוספת <b>Account Factory</b> להקצאת חשבונות חדשים באופן אחיד.",
 w:["Organizations לבדו מספק מבנה חשבונות ו־SCPs, אך לא guardrails מוכנים, לוגים מרוכזים או account factory.","","Service Catalog מפרסם תבניות מאושרות — הוא רכיב בתוך Control Tower, לא תחליף.","Config aggregator רק מרכז ממצאי תאימות."]},
+
+{i:131,d:1,t:"Access Analyzer",lv:2,ty:"s",
+q:"A security team wants continuous, automated detection of S3 buckets, IAM roles, and KMS keys that are accessible from outside the organization's AWS accounts, without waiting for a manual audit. Which service should be used?",
+o:["AWS IAM Access Analyzer","AWS Config","Amazon Inspector","AWS Trusted Advisor"],
+a:[0],
+e:"<b>IAM Access Analyzer</b> משתמש ב־<b>automated reasoning</b> (הוכחה מתמטית) כדי לזהות משאבים המשתפים גישה עם ישויות מחוץ לחשבון/לארגון — S3, IAM roles, KMS keys, Lambda, SQS ועוד — ומייצר ממצא ברגע שההרשאה נוצרת, לא רק בסריקה מתוזמנת.",
+w:["","Config עוקב אחר שינויי תצורה ותאימות לכללים, לא ניתוח הרשאות חוצות־חשבון ספציפי.","Inspector סורק פגיעויות תוכנה (CVE), לא הרשאות IAM.","Trusted Advisor נותן המלצות כלליות מוגבלות ואינו ניתוח הרשאות מתמשך ומדויק כמו Access Analyzer."]},
+
+{i:132,d:1,t:"S3 Access Points",lv:3,ty:"s",
+q:"A single S3 bucket is shared by dozens of applications, each of which needs a different subset of permissions and a distinct network path (some only from a specific VPC). Managing one large bucket policy has become error-prone. What should a solutions architect implement?",
+o:["Create a separate S3 bucket per application.",
+"Create an S3 Access Point per application, each with its own policy and optionally restricted to a specific VPC.",
+"Add more conditions to the single bucket policy to separate each application's rules.",
+"Use IAM users per application with full bucket access."],
+a:[1],
+e:"<b>S3 Access Points</b> נותנים לכל אפליקציה נקודת גישה משלה עם <b>policy</b> ייעודי ופשוט, וניתן להגביל access point ל־<b>VPC origin</b> ספציפי. זה מפרק bucket policy ענק ומורכב לחלקים מנוהלים בנפרד, בלי לפצל את הדאטה בפועל.",
+w:["פיצול לבאקטים נפרדים מכפיל את הדאטה ומסבך ניהול — לא נדרש.","","bucket policy יחיד וענק עם עשרות תנאים הופך בלתי ניתן לתחזוקה — בדיוק הבעיה שהתרחיש מתאר.","IAM users עם גישה מלאה לבאקט הוא anti-pattern של over-permissioning."]},
+
+{i:133,d:1,t:"Cross-Account",lv:3,ty:"s",
+q:"A third-party SaaS monitoring vendor needs an IAM role in a customer's AWS account to collect metrics. The customer is concerned about the 'confused deputy' problem, where another AWS customer of the same vendor could try to assume the role. What should be required in the role's trust policy?",
+o:["Restrict the trust policy to the vendor's account ID only.",
+"Require the vendor to include a unique ExternalId in the AssumeRole call, and validate it via a condition in the trust policy.",
+"Require the vendor to use IAM Identity Center instead of a role.",
+"Encrypt the role's trust policy with a customer managed KMS key."],
+a:[1],
+e:"בעיית ה־<b>confused deputy</b> נפתרת עם <b>ExternalId</b> ייחודי: הספק שומר מזהה שונה לכל לקוח, ו־trust policy עם תנאי <code>sts:ExternalId</code> מבטיח שרק קריאה שמכילה את המזהה הנכון תתקבל — גם אם צד שלישי זדוני מנסה לנחש את ARN ה־role של הספק.",
+w:["הגבלה לפי account ID של הספק בלבד אינה מספיקה — אותו חשבון ספק משמש את כל לקוחותיו, וזו בדיוק בעיית ה־confused deputy.","","Identity Center מיועד לעובדים דרך IdP ארגוני, לא לגישת SaaS צד שלישי בין חשבונות.","הצפנת trust policy אינה מנגנון קיים ואינה פותרת את בעיית האימות."]},
+
+{i:134,d:1,t:"ACM Private CA",lv:2,ty:"s",
+q:"An enterprise needs to issue private TLS certificates for thousands of internal microservices and IoT devices that are not exposed to the public internet, with full control over the certificate hierarchy. Which solution should be used?",
+o:["AWS Certificate Manager public certificates","AWS Private Certificate Authority (Private CA)","Self-signed certificates generated per service","AWS Secrets Manager to store shared certificates"],
+a:[1],
+e:"<b>AWS Private CA</b> מקימה היררכיית CA פרטית (root/subordinate) להנפקת תעודות פנימיות למספר רב של שירותים ומכשירים, משתלבת עם ACM לחידוש אוטומטי, ומתאימה בדיוק ל־mTLS פנימי ו־IoT ללא חשיפה לאינטרנט.",
+w:["תעודות ACM ציבוריות מיועדות לנקודות קצה חשופות לאינטרנט ומאומתות דרך DNS/Email — לא לשירותים פנימיים בלבד.","","ניהול ידני של תעודות self-signed לאלפי שירותים אינו ניתן להרחבה וחסר אמון מרכזי.","Secrets Manager מאחסן סודות אך אינו מנפיק או מנהל היררכיית תעודות."]},
+
+{i:135,d:1,t:"GuardDuty",lv:2,ty:"s",
+q:"A company wants to detect malware, such as ransomware, on Amazon EBS volumes attached to EC2 instances and on objects uploaded to specific S3 buckets, without deploying and managing antivirus agents. Which feature should be enabled?",
+o:["Amazon Inspector deep scanning","GuardDuty Malware Protection","AWS Config managed rules","Amazon Macie sensitive data discovery"],
+a:[1],
+e:"<b>GuardDuty Malware Protection</b> סורק snapshots של EBS volumes ואובייקטים ב־S3 בזמן שהם עולים, מזהה קבצים זדוניים (כולל ransomware) ללא agent מותקן על המכונה, ומופעל אוטומטית כשיש ממצא חשוד מ־GuardDuty הבסיסי.",
+w:["Inspector עוסק בסריקת CVE וחשיפת רשת — לא סריקת malware בקבצים.","","Config בודק תצורה מול כללים — לא תוכן קבצים.","Macie מזהה מידע רגיש (PII), לא תוכנה זדונית."]},
+
+{i:136,d:1,t:"Security Hub",lv:2,ty:"s",
+q:"A company uses GuardDuty, Inspector, Macie, and AWS Config across 50 accounts and wants a single, prioritized, aggregated view of security findings mapped to a standard like CIS AWS Foundations Benchmark. Which service should be used?",
+o:["AWS Security Hub","Amazon Detective","AWS Audit Manager","AWS Systems Manager Explorer"],
+a:[0],
+e:"<b>Security Hub</b> מרכז ממצאים מ־GuardDuty, Inspector, Macie, Config ומקורות שותפים לפורמט אחיד (<code>AWS Security Finding Format</code>), מדרג לפי חומרה, ובודק תאימות מול תקנים כמו <b>CIS</b>, <b>PCI DSS</b> ו־<b>AWS Foundational Security Best Practices</b> — הכל בין חשבונות דרך Organizations.",
+w:["","Detective מבצע חקירת שורש לממצא בודד — לא ריכוז ודירוג כלל-ארגוני.","Audit Manager אוסף ראיות לביקורת רגולטורית, לא ניקוד אבטחה בזמן אמת.","Systems Manager Explorer מרכז נתוני תפעול, לא ממצאי אבטחה."]},
+
+{i:137,d:1,t:"S3 Object Lambda",lv:3,ty:"s",
+q:"An application must redact credit card numbers from documents before they are returned to callers of a GetObject request, without creating and maintaining a separate redacted copy of every object in S3. What should a solutions architect implement?",
+o:["An S3 Lifecycle rule that transforms objects on a schedule.",
+"An S3 Object Lambda access point that invokes a Lambda function to redact data on each GetObject request.",
+"A CloudFront function that modifies the response body.",
+"A scheduled Lambda function that rewrites all objects nightly."],
+a:[1],
+e:"<b>S3 Object Lambda</b> מוסיף שכבת Lambda שמעבדת את האובייקט <b>בזמן אמת</b> בעת קריאת <code>GetObject</code> — מושלם להסתרת שדות רגישים, המרת פורמט או סינון — בלי לשמור עותק שני של הדאטה ובלי לשנות את הקובץ המקורי.",
+w:["Lifecycle מעביר רמות אחסון או מוחק — אינו משנה תוכן אובייקט.","","CloudFront function מוגבל ל־HTTP headers/URL קלים ואינו מתאים לעיבוד תוכן מסמכים מורכב.","עיבוד לילי יוצר עותק כפול שדורש תחזוקה וסנכרון מתמיד."]},
+
+{i:138,d:1,t:"CloudFront",lv:3,ty:"s",
+q:"A media company must grant a paying subscriber access to an entire folder of related video segments and manifest files behind CloudFront, valid only for the length of their viewing session, without generating a separate signed URL for every file. What should be used?",
+o:["A signed URL for each individual file","CloudFront signed cookies scoped to the folder path with an expiration time","A public bucket policy with a time-limited condition","AWS WAF with a custom rule per session"],
+a:[1],
+e:"<b>Signed Cookies</b> מתאימים כאשר צריך לתת גישה למספר רב של קבצים (כמו קטעי וידאו + manifest) תחת אותה מדיניות בלי לחתום כל URL בנפרד — הדפדפן שולח את העוגיות אוטומטית עם כל בקשה תואמת path. <b>Signed URLs</b> מתאימים לגישה לאובייקט בודד.",
+w:["חתימה לכל קובץ בנפרד אינה ניתנת להרחבה עבור עשרות קטעי streaming.","","bucket ציבורי חושף את התוכן ישירות, עוקף לגמרי את CloudFront ואת השליטה בגישה.","WAF מסנן בקשות לפי חוקים — אינו מנגנון להענקת הרשאת גישה לתוכן."]},
+
+{i:139,d:1,t:"KMS Multi-Region",lv:3,ty:"s",
+q:"An application encrypts data client-side with AWS KMS in us-east-1 and must be able to decrypt the same data after a disaster recovery failover to eu-west-1, without re-encrypting existing data or making cross-Region KMS API calls at decrypt time. What should be used?",
+o:["A single-Region customer managed key, replicated manually via Lambda.",
+"AWS KMS multi-Region keys, with a replica key created in eu-west-1 sharing the same key material and key ID.",
+"AWS KMS with an AWS managed key in each Region.",
+"Envelope encryption using a static local AES key."],
+a:[1],
+e:"<b>Multi-Region keys</b> ב־KMS יוצרים set של מפתחות (primary + replicas) ש<b>חולקים אותו key material</b> ומזהה דומה — דאטה שהוצפנה במפתח הראשי ניתנת לפענוח ישירות עם ה־replica באזור אחר, ללא קריאת API חוצת אזור וללא הצפנה מחדש. משמש בדיוק לתרחישי DR ולאחסון גלובלי מבוזר.",
+w:["שכפול ידני של key material הוא לא נתמך ולא מאובטח.","","מפתחות AWS managed נפרדים לכל אזור לא חולקים key material — לא ניתן לפענח דאטה שהוצפנה במפתח של אזור אחר.","מפתח AES סטטי מקומי הוא כשל אבטחה וללא ניהול מחזור חיים."]},
+
+{i:140,d:1,t:"IAM Policy Evaluation",lv:3,ty:"s",
+q:"A developer has an IAM identity-based policy that allows s3:GetObject on a bucket, and the bucket's resource-based policy does not mention the developer at all. A separate SCP at the organization level explicitly denies s3:GetObject for the entire OU the account belongs to. Can the developer read the object?",
+o:["Yes, because the identity-based policy allows it.",
+"No, because an explicit SCP deny always overrides any Allow, regardless of IAM or resource policies.",
+"Yes, because SCPs only apply to root user actions.",
+"It depends on whether MFA was used during the API call."],
+a:[1],
+e:"סדר הערכת ההרשאות ב־AWS: תחילה נבדק אם קיים <b>explicit deny</b> בכל שכבה (SCP, resource policy, permissions boundary, identity policy) — ואם כן, הוא <b>גובר תמיד</b> על כל Allow, בלי קשר למקור ה־Allow. SCP הוא תקרת ההרשאות המקסימלית לכל ה־principals בחשבון, כולל ה־root.",
+w:["ה־Allow ב־identity policy אינו רלוונטי כשקיים explicit deny בשכבה כלשהי — ה־deny תמיד מנצח.","","SCPs חלים על כל ה־principals בחשבון, כולל IAM users ו־roles — לא רק root.","MFA הוא תנאי אפשרי בתוך policy, אך אינו רלוונטי לשאלה כאן — יש explicit deny מוחלט."]},
+
+{i:141,d:1,t:"Security Groups",lv:3,ty:"s",
+q:"A three-tier application has web, application, and database EC2 instances, each in its own security group. The company wants each tier to accept traffic only from the tier directly above it, without hardcoding IP addresses or CIDR ranges that will change as instances scale. What is the BEST approach?",
+o:["Hardcode the private IP address of every instance in each security group's rules.",
+"Reference the upstream tier's security group ID as the source in each security group's inbound rule.",
+"Use a single security group shared by all three tiers.",
+"Use network ACLs exclusively and remove all security groups."],
+a:[1],
+e:"<b>Security Groups יכולות להפנות לקבוצת אבטחה אחרת כמקור</b> (לא רק CIDR) — כך ה־DB tier מתיר תעבורה מכל מכונה שחברה ב־SG של ה־App tier, אוטומטית ובלי תלות ב־IP, גם כשמכונות מתווספות או מוחלפות על ידי Auto Scaling.",
+w:["IP קשיח נשבר בכל scale-out/in — תחזוקה בלתי אפשרית.","","SG משותפת לכל השכבות מבטלת את ההפרדה בין שכבות — כל תעבורה מותרת בין כולן.","NACL בלבד הוא stateless ומסורבל בהרבה מ־SG chaining לתרחיש הזה, וגם פחות מדויק."]},
+
+{i:142,d:1,t:"WAF",lv:3,ty:"m",sel:2,
+q:"A public web login page is suffering from credential-stuffing attacks (automated bots trying many username/password combinations) as well as a high volume of requests from a small number of source IPs. Which TWO AWS WAF features should be combined to mitigate this?",
+o:["A rate-based rule limiting requests per IP","AWS WAF Bot Control / Account Takeover Prevention (ATP)","An S3 Lifecycle rule","A gateway VPC endpoint","AWS Direct Connect"],
+a:[0,1],
+e:"<b>Rate-based rule</b> חוסם/מגביל מקורות ששולחים נפח בקשות חריג. <b>Bot Control</b> ו־<b>Account Takeover Prevention</b> (בתוך WAF) מזהים ומחסלים ניסיונות credential stuffing אוטומטיים על ידי בדיקת חתימות בוטים והתנהגות login חריגה — שילוב מדויק לתרחיש המתואר.",
+w:["","","Lifecycle rule שייך ל־S3 storage, לא קשור כלל להגנת אפליקציית web.","VPC endpoint משפר קישוריות פנימית, לא מגן מפני בוטים חיצוניים.","Direct Connect הוא קישוריות היברידית ולא קשור להגנה מפני בוטים."]},
+
+{i:143,d:1,t:"ACM",lv:2,ty:"s",
+q:"A company requested a public ACM certificate using DNS validation for its ALB, but six months later the certificate failed to renew automatically and the site started showing a certificate error. What is the MOST likely cause?",
+o:["The ALB was replaced with an NLB.",
+"The CNAME validation record was deleted from Route 53 (or the DNS zone) after initial issuance.",
+"The certificate was issued in the wrong Region.",
+"ACM certificates always expire after 90 days and must be requested manually each time."],
+a:[1],
+e:"חידוש אוטומטי של תעודת ACM עם אימות DNS דורש שרשומת ה־<code>CNAME</code> של האימות תישאר קיימת ב־DNS <b>לצמיתות</b> — אם היא נמחקה (לרוב בניקוי שגוי של רשומות DNS), ACM לא יכול להוכיח בעלות מחדש והחידוש נכשל בשקט עד שהתעודה פגה.",
+w:["סוג ה־load balancer אינו משפיע על חידוש תעודה.","","תעודת ACM חייבת להיות באותו אזור כמו ה־ALB — אם הייתה באזור שגוי, ה־ALB כלל לא היה יכול לצרף אותה מלכתחילה, לא תרחיש של כישלון אחרי חצי שנה.","תעודות ACM ציבוריות תקפות ל־13 חודשים ומתחדשות אוטומטית — אינן דורשות בקשה ידנית חוזרת בכל 90 יום."]},
+
+{i:144,d:1,t:"S3 VPC Endpoint",lv:3,ty:"s",
+q:"A company must ensure that a sensitive S3 bucket can be accessed ONLY from within its own VPC via a gateway VPC endpoint, and never over the public internet — even with valid, leaked IAM credentials. What should be added to the bucket policy?",
+o:["A statement allowing access only from the company's office CIDR range.",
+"A statement that denies all access unless the request's aws:SourceVpce condition matches the specific VPC endpoint ID.",
+"Enable S3 Transfer Acceleration to restrict public routes.",
+"Enable MFA Delete on the bucket."],
+a:[1],
+e:"תנאי <code>aws:SourceVpce</code> (או <code>aws:SourceVpc</code>) ב־bucket policy עם <code>Deny</code> על כל בקשה שלא מגיעה מה־endpoint הספציפי חוסם גם credentials תקפים שדלפו והופעלו מחוץ ל־VPC — זהו ה־defense-in-depth הרשמי ל־\"access only via VPC endpoint\".",
+w:["הגבלה לפי CIDR משרדי עדיין מאפשרת גישה דרך האינטרנט הציבורי ממקורות מורשים — לא חוסמת credentials דולפים ממקום אחר.","","Transfer Acceleration משפר מהירות העלאה דרך CloudFront edge — אינו קשור להגבלת מקור.","MFA Delete מגן על מחיקת גרסאות, לא על ערוץ הגישה."]},
+
+{i:145,d:1,t:"KMS Grants",lv:3,ty:"s",
+q:"An application needs to delegate temporary, fine-grained permission to use a specific KMS key to a short-lived Lambda function invocation, without modifying the key policy or creating a new IAM policy for every invocation. What KMS feature should be used?",
+o:["A new customer managed key per invocation","A KMS grant that specifies the operations and retiring principal for temporary delegation","A KMS alias","Publishing the key ID to Amazon SNS"],
+a:[1],
+e:"<b>Grants</b> מאפשרים האצלה זמנית ומדויקת של הרשאות שימוש במפתח KMS ל־principal ספציפי (למשל role של הרצת Lambda), בלי לגעת ב־key policy או ב־IAM policy, וניתנים לביטול (<code>RetireGrant</code>/<code>RevokeGrant</code>) ברגע שההרשאה אינה נחוצה עוד — מתאים בדיוק להאצלה זמנית וממוקדת.",
+w:["יצירת מפתח חדש לכל הפעלה יקרה ולא ניתנת לניהול בקנה מידה.","","Alias הוא רק שם ידידותי למפתח — אינו מנגנון הרשאות.","SNS הוא שירות התראות, לא רלוונטי לניהול הרשאות KMS."]},
+
+{i:146,d:1,t:"IAM Identity Center",lv:3,ty:"s",
+q:"A company using IAM Identity Center wants finance team members to automatically get access only to accounts tagged Department=Finance, without creating a separate permission set assignment for every new account added to that department. What approach scales best?",
+o:["Manually assign the permission set to every new account as it's created.",
+"Use attribute-based access control (ABAC) with tags on accounts/principals and a permission set whose policy references those tags in conditions.",
+"Create a new IAM Identity Center instance per department.",
+"Give the finance team AdministratorAccess in the management account."],
+a:[1],
+e:"<b>ABAC</b> — הגדרת policy עם תנאים המבוססים על <b>tags</b> (למשל <code>aws:PrincipalTag/Department</code> מול <code>aws:ResourceTag/Department</code>) — מאפשרת שהרשאות יחולו אוטומטית על כל משאב/חשבון עם התג הנכון, גם עתידיים, בלי לעדכן assignment ידנית בכל פעם. זהו הפתרון שמצטרף כברירת מחדל ל־RBAC כשמספר הצירופים גדל.",
+w:["הקצאה ידנית לכל חשבון חדש היא תקורה מתמשכת ולא ניתנת להרחבה.","","אין צורך וגם אין תמיכה ביצירת מספר instances של Identity Center לכל מחלקה.","הרשאת Administrator מלאה בחשבון הניהול היא הפרת עקרון least privilege חמורה."]},
+
+{i:147,d:1,t:"Config Remediation",lv:2,ty:"s",
+q:"A security team wants any S3 bucket that becomes publicly accessible to be automatically reconfigured to block public access within minutes, without manual intervention. Which combination should be implemented?",
+o:["An AWS Config rule (s3-bucket-public-read-prohibited) with an automatic remediation action using an SSM Automation document.",
+"A daily manual review of the S3 console.",
+"An Amazon CloudWatch alarm that only sends an email notification.",
+"AWS Trusted Advisor weekly email digest."],
+a:[0],
+e:"<b>AWS Config rule</b> מזהה את הסטייה מהתצורה הרצויה, ו<b>Remediation Action</b> אוטומטית (מסמך SSM Automation, למשל <code>AWS-DisableS3BucketPublicReadWrite</code>) מתקנת אותה תוך דקות ללא מגע יד אדם — זהו ה־self-healing pattern הקלאסי לאכיפת תאימות.",
+w:["","סקירה ידנית יומית איטית מדי ומועדת לטעויות אנוש עבור חשיפה שקורית ברגע.","התראת אימייל בלבד דורשת פעולה אנושית — אינה \"אוטומטית תוך דקות\".","Trusted Advisor מספק תובנות תקופתיות — לא תיקון בזמן אמת."]},
+
+{i:148,d:1,t:"Detective",lv:2,ty:"s",
+q:"After GuardDuty raises a finding about an EC2 instance communicating with a known command-and-control IP address, a security analyst needs to visually explore related API calls, network flows, and other resources involved, to determine the scope of the incident. Which service should be used?",
+o:["Amazon Detective","AWS Config","Amazon CloudWatch Synthetics","AWS Trusted Advisor"],
+a:[0],
+e:"<b>Amazon Detective</b> בונה גרף התנהגות מ־VPC Flow Logs, CloudTrail ו־GuardDuty לאורך זמן, ומאפשר לחקור ויזואלית קשרים בין משאבים, IPs ופעולות API סביב ממצא — בדיוק לצורך <b>root-cause / scope investigation</b> אחרי אירוע.",
+w:["","Config עוקב אחר תצורה, לא חוקר קשרים בין אירועי אבטחה.","CloudWatch Synthetics בודק זמינות אתרים סינתטית — לא רלוונטי לחקירה פלילית.","Trusted Advisor נותן בדיקות best-practice כלליות."]},
+
+{i:149,d:1,t:"Nitro Enclaves",lv:3,ty:"s",
+q:"A financial services company must process highly sensitive data (such as private cryptographic keys) in complete isolation, so that even the EC2 instance's own operating system, other applications on the instance, and administrators with shell access cannot inspect the data or the code processing it. What should be used?",
+o:["Standard EC2 instance with restrictive IAM policies","AWS Nitro Enclaves","A dedicated host with no other tenants","EC2 instance store encryption"],
+a:[1],
+e:"<b>Nitro Enclaves</b> יוצר סביבת compute מבודדת לחלוטין (CPU/memory ייעודיים, ללא אחסון מתמשך, ללא גישת רשת חיצונית, ללא גישת SSH) מתוך מכונת EC2 — גם למי שיש גישה מלאה ל־instance המארח אין יכולת לצפות בזיכרון או בעיבוד בתוך ה־enclave. מתאים בדיוק לעיבוד קריפטוגרפי רגיש ואימות עם attestation.",
+w:["מכונה רגילה עם IAM מגביל עדיין חשופה למי שיש גישת מערכת הפעלה (root/admin) על המכונה עצמה.","","Dedicated host מבודד ברמת חומרה משוכרים אחרים — אך לא מבודד את ה־OS של המכונה עצמה מתהליכי ה־enclave.","הצפנת instance store מגנה על דאטה במנוחה בלבד — לא על עיבוד בזיכרון בזמן ריצה."]},
+
+{i:150,d:1,t:"S3 Ownership",lv:2,ty:"s",
+q:"Multiple AWS accounts upload objects to a shared central S3 bucket owned by a security account. The bucket owner needs full control over every object, including ones uploaded by other accounts, without each uploading account manually granting an ACL on every object. What should be configured?",
+o:["Ask every uploading account to set bucket-owner-full-control ACL on each upload.",
+"Enable S3 Object Ownership with the Bucket owner enforced setting, which disables ACLs entirely.",
+"Enable S3 Versioning on the bucket.",
+"Create a separate bucket per uploading account and replicate to the central bucket."],
+a:[1],
+e:"<b>Bucket owner enforced</b> (ברירת המחדל כיום לבאקטים חדשים) מבטל ACLs לגמרי — כל אובייקט שמועלה שייך אוטומטית לבעלי ה־bucket, ללא תלות במי שהעלה אותו ובלי צורך שכל צד יגדיר ACL נכון בכל העלאה. זה פותר את בעיית ה'אובייקטים יתומים' הקלאסית בבאקטים משותפים בין חשבונות.",
+w:["הסתמכות על כל צד מעלה להגדיר ACL נכון בכל פעם היא שברירית וגורמת לטעויות בעלות נפוצות.","","Versioning שומר גרסאות אך אינו נוגע לבעלות על אובייקטים.","ריבוי באקטים ורפליקציה מוסיף מורכבות ועיכוב מיותרים לבעיה שנפתרת בהגדרת ownership אחת."]},
 ];
 
 /* ===== Domain 2 — Design Resilient Architectures (26%) ===== */
@@ -722,6 +903,165 @@ o:["The cluster becomes unavailable until an administrator restores from a snaps
 a:[1],
 e:"ב־Aurora שכבת האחסון מופרדת מהמכונות ומשוכפלת ב־6 עותקים על פני 3 AZs. בכשל של ה־writer, Aurora מקדם <b>Aurora Replica</b> אוטומטית ומעדכן את ה־<b>cluster (writer) endpoint</b> — בדרך כלל תוך כ־30 שניות, ללא שינוי בצד האפליקציה.",
 w:["Aurora אינו דורש שחזור ידני מ־snapshot בכשל writer — הקידום אוטומטי.","","הנתונים אינם על המכונה אלא בשכבת אחסון משותפת ומשוכפלת.","ה־writer endpoint מתעדכן אוטומטית — אין צורך בשינוי ידני."]},
+
+{i:227,d:2,t:"RDS Proxy",lv:3,ty:"s",
+q:"A Lambda-based application opens a new database connection on every invocation, exhausting the connection limit of an Amazon RDS for MySQL instance during traffic spikes and causing failovers to take longer because connections are not drained gracefully. What should a solutions architect implement?",
+o:["Increase the RDS instance size to allow more raw connections.",
+"Place Amazon RDS Proxy in front of the database and have Lambda connect through it.",
+"Switch the database to Amazon DynamoDB.",
+"Add a read replica and send all Lambda connections there."],
+a:[1],
+e:"<b>RDS Proxy</b> מנהל <b>connection pooling</b> משותף ברמת ה־fleet, מונע exhaustion מ־Lambda שפותח חיבורים רבים ובמקביל, ומקצר דרמטית את זמן ה־failover כי הוא שומר את החיבורים ברמת ה־proxy ומעביר אותם חלק בין מופעים בלי שהאפליקציה תרגיש.",
+w:["הגדלת מכונה מייקרת ואינה פותרת את בעיית ניהול חיבורים היסודית.","","מעבר ל־DynamoDB הוא שינוי ארכיטקטוני מיותר ולא רלוונטי לבעיית pooling.","Read replica פותר עומס קריאה, לא ניהול חיבורים או failover."]},
+
+{i:228,d:2,t:"ElastiCache",lv:2,ty:"s",
+q:"A company runs Amazon ElastiCache for Redis as a session store and requires automatic failover to a replica if the primary node fails, with minimal application changes. What should be enabled?",
+o:["ElastiCache for Redis with Multi-AZ and automatic failover enabled",
+"ElastiCache for Memcached with more nodes",
+"A single-node Redis cluster with manual snapshots",
+"Amazon S3 as the session store instead"],
+a:[0],
+e:"<b>Redis Multi-AZ עם automatic failover</b> מקדם replica לתפקיד primary אוטומטית תוך שניות ומעדכן את ה־endpoint הראשי — האפליקציה ממשיכה להתחבר לאותו endpoint בלי שינוי קוד. Memcached לעומת זאת <b>אינו תומך ב־replication</b> כלל.",
+w:["","Memcached לא תומך ב־replication/failover באופן מובנה — הוספת nodes רק מפזרת עומס, לא נותנת עמידות.","נוד יחיד ללא replica הוא נקודת כשל בודדת.","S3 מתאים לאחסון קבצים סטטי, לא ל־session store עם latency נמוך."]},
+
+{i:229,d:2,t:"Route 53 ARC",lv:3,ty:"s",
+q:"A critical application must be able to shift traffic away from a failed Region within seconds via a simple, reliable, highly available control that does not depend on DNS propagation delays or on the AWS Management Console being available during the incident. What should be used?",
+o:["Manually edit Route 53 record weights through the console during the incident.",
+"Amazon Route 53 Application Recovery Controller with pre-configured routing controls and a highly available data plane API.",
+"Wait for Route 53 health checks to naturally detect the failure and fail over.",
+"Use AWS Systems Manager Run Command to update DNS."],
+a:[1],
+e:"<b>Route 53 Application Recovery Controller (ARC)</b> מספק <b>routing controls</b> בינאריים שניתן להפעיל/לכבות תוך שניות דרך data plane נפרד וזמין מאוד (לא תלוי בקונסולה), עם safety rules שמונעות טעויות אנוש — מיועד בדיוק לשליטה ידנית ואמינה במעברי DR.",
+w:["עריכה ידנית דרך הקונסולה תלויה בזמינות הקונסולה עצמה בזמן אירוע — נקודת כשל.","","הסתמכות פסיבית על health checks בלבד אינה נותנת שליטה מיידית ומכוונת.","Run Command אינו מנגנון ייעודי לניתוב DNS ואינו מספק את ה־data plane הייעודי של ARC."]},
+
+{i:230,d:2,t:"EFS Replication",lv:2,ty:"s",
+q:"A company needs its Amazon EFS file system's data to be available in a second Region within minutes if the primary Region becomes unavailable, without building custom rsync scripts. What should be configured?",
+o:["EFS replication to a second Region, creating a read-only replica file system.",
+"EFS Infrequent Access storage class.",
+"Manual nightly rsync from an EC2 instance.",
+"EFS One Zone storage."],
+a:[0],
+e:"<b>EFS Replication</b> (מובנה) משכפל שינויים באופן רציף לקובץ־מערכת replica באזור אחר, טיפוסית עם lag של דקות בודדות, ומאפשר קידום (promote) ל־read/write בעת DR — ללא כתיבת סקריפטים מותאמים אישית.",
+w:["","Infrequent Access היא רמת מחיר, לא מנגנון שכפול חוצה־אזורים.","rsync ידני מכניס פערי זמן גדולים וסיכון תפעולי.","One Zone מפחית עמידות בתוך אזור בודד — לא פותר הפצה בין־אזורית."]},
+
+{i:231,d:2,t:"DynamoDB",lv:2,ty:"s",
+q:"A retail application's DynamoDB table experiences highly unpredictable traffic spikes during flash sales, and the company does not want to manage or tune capacity settings. Which capacity mode should be selected?",
+o:["Provisioned capacity with manually set RCUs/WCUs","On-demand capacity mode","Provisioned capacity with Auto Scaling set to a fixed narrow range","Reserved capacity purchased a year in advance"],
+a:[1],
+e:"<b>On-demand mode</b> מתאים אוטומטית לעומס בזמן אמת ללא צורך בהגדרת יחידות קיבולת מראש — משלמים לפי בקשה בפועל. מתאים בדיוק לעומס בלתי צפוי כמו מכירות פלאש, כשהעדיפות היא אפס תחזוקה, לא המחיר הנמוך ביותר לעומס יציב.",
+w:["דורש הערכה מדויקת מראש — לא מתאים לעומס בלתי צפוי.","","Auto Scaling עדיין מגיב בפיגור (דקות) לזינוקים חדים ודורש כוונון.","קיבולת שמורה מתאימה לעומס בסיס יציב וידוע מראש, לא לזינוקים."]},
+
+{i:232,d:2,t:"SNS",lv:2,ty:"s",
+q:"A system publishes order events to an SNS topic, but only order events with status=SHIPPED should be delivered to a specific downstream SQS queue, without the consumer having to filter messages itself. What should be configured?",
+o:["A separate SNS topic for every possible status value.",
+"An SNS subscription filter policy on the queue's subscription that matches status=SHIPPED.",
+"A Lambda function between SNS and SQS that discards non-matching messages.",
+"Ask the publisher to send status=SHIPPED events directly to the queue, bypassing SNS."],
+a:[1],
+e:"<b>Filter policies</b> ב־SNS subscription מאפשרים לכל צרכן לקבל רק את ההודעות הרלוונטיות לו לפי attributes של ההודעה — SNS עצמו לא ידחוף הודעות שלא תואמות. פותר סינון בלי קוד נוסף ובלי לבזבז throughput על הצרכן.",
+w:["ריבוי topics לכל ערך אפשרי אינו ניתן להרחבה ומסבך את הפרסום.","","Lambda מתווך מוסיף עלות, latency ונקודת כשל מיותרת כש־SNS פותר זאת באופן מובנה.","עקיפת SNS מבטלת את יתרון ה־fan-out לצרכנים אחרים שכן צריכים את כל ההודעות."]},
+
+{i:233,d:2,t:"Step Functions",lv:3,ty:"s",
+q:"A multi-step order fulfillment workflow (payment, inventory, shipping) runs as a chain of Lambda functions invoked directly from one another. A failure in the shipping step currently leaves the order in an inconsistent state with no automatic retry or compensating actions. What should a solutions architect recommend?",
+o:["Increase the timeout of each Lambda function.",
+"Orchestrate the workflow with AWS Step Functions, using built-in retry, catch, and compensating-transaction states.",
+"Combine all three steps into a single larger Lambda function.",
+"Add more concurrent executions to each Lambda function."],
+a:[1],
+e:"<b>Step Functions</b> מספק אורקסטרציה גלויה עם <b>Retry</b> ו־<b>Catch</b> מובנים לכל צעד, מעקב אחר מצב ה־workflow, ותמיכה בדפוסי <b>compensating transaction</b> (Saga) לביטול צעדים קודמים בכשל — פותר בדיוק את בעיית עקביות ה־state בין שירותים מקושרים.",
+w:["הארכת timeout לא פותרת חוסר retry/compensation ברמת התהליך.","","איחוד לפונקציה אחת ענקית מגדיל צימוד ומקשה על ניפוי שגיאות וסקיילינג עצמאי.","concurrency נוספת לא קשורה לטיפול בכשל תהליכי."]},
+
+{i:234,d:2,t:"ASG Lifecycle",lv:3,ty:"s",
+q:"Before a new EC2 instance launched by an Auto Scaling group starts receiving production traffic, the company needs to run a custom bootstrap script that pulls secrets and warms an application cache — a process that can take several minutes. What ASG feature ensures traffic is not sent to the instance until this completes?",
+o:["Increase the ALB's health check grace period only.",
+"Use an Auto Scaling lifecycle hook (Pending:Wait) that holds the instance out of service until the bootstrap process signals completion.",
+"Use EC2 termination protection.",
+"Lower the ALB's healthy threshold count."],
+a:[1],
+e:"<b>Lifecycle hooks</b> (מצב <code>Pending:Wait</code>) עוצרים את המכונה במצב ביניים לפני שהיא הופכת <code>InService</code>, עד שהתהליך המותאם שולח <code>CompleteLifecycleAction</code> — כך ניתן להריץ bootstrap ארוך (כולל משיכת סודות וחימום cache) לפני קבלת תעבורה, גם אם הוא אורך דקות.",
+w:["Grace period רק דוחה את תחילת בדיקות התקינות — לא מבטיח שהמכונה מוכנה בפועל.","","Termination protection מונע סגירה, לא קשור לשלב ה־launch.","הורדת threshold מקלה מדי מהר ואינה קשורה להשהיית תעבורה עד סיום bootstrap."]},
+
+{i:235,d:2,t:"Elastic Disaster Recovery",lv:3,ty:"s",
+q:"A company wants to migrate its on-premises servers to a DR posture in AWS with continuous, near real-time block-level replication and the ability to launch fully provisioned recovery instances within minutes when needed, minimizing ongoing compute cost while idle. Which service fits best?",
+o:["AWS Elastic Disaster Recovery (AWS DRS)","Amazon S3 Cross-Region Replication","AWS Database Migration Service","AWS Snowball Edge"],
+a:[0],
+e:"<b>AWS Elastic Disaster Recovery (DRS)</b> משכפל שרתים ברמת הבלוק באופן רציף לתשתית staging זולה (מכונות קטנות), ומאפשר <b>launch</b> מהיר של מכונות recovery מלאות תוך דקות בעת אירוע — משלב עלות נמוכה בזמן שקט עם RTO של דקות. זה השירות הייעודי שהחליף את CloudEndure Disaster Recovery.",
+w:["","CRR מתאים לאובייקטי S3, לא לשרתים שלמים ברמת בלוק.","DMS מיועד להגירת מסדי נתונים, לא לשכפול שרתים כלליים.","Snowball Edge מיועד להעברת דאטה פיזית/edge compute, לא ל־DR רציף."]},
+
+{i:236,d:2,t:"Backup Vault Lock",lv:2,ty:"s",
+q:"A company must guarantee that backups created by AWS Backup cannot be deleted early or have their retention shortened, even by an AWS account administrator, to satisfy a WORM (write once, read many) compliance requirement. What should be enabled?",
+o:["AWS Backup vault lock in compliance mode","S3 Versioning on the backup vault","IAM policies denying backup:DeleteRecoveryPoint","AWS Config rule to alert on deletions"],
+a:[0],
+e:"<b>Backup Vault Lock</b> במצב <b>compliance</b> נועל את מדיניות ה־retention באופן בלתי הפיך — אף אחד, כולל root, אינו יכול לקצר retention או למחוק recovery points לפני תום הזמן. זהו מנגנון ה־WORM הרשמי של AWS Backup.",
+w:["","Vault הוא ישות ניהולית של AWS Backup — Versioning הוא מנגנון S3 ואינו חל עליו ישירות.","IAM policy יכולה תמיד להשתנות בידי administrator — אינה נעילה בלתי הפיכה.","Config מזהה ומתריע בדיעבד — אינו מונע את המחיקה מלכתחילה."]},
+
+{i:237,d:2,t:"ECS Deployment",lv:3,ty:"s",
+q:"An ECS service running on Fargate behind an ALB occasionally deploys a broken task definition, and unhealthy tasks keep receiving traffic for several minutes before anyone notices. What should be configured to automatically stop a bad deployment and roll back?",
+o:["Increase the desired task count.",
+"Enable ECS deployment circuit breaker with rollback, tied to the ALB target group health checks.",
+"Disable health checks so tasks are never marked unhealthy.",
+"Manually monitor CloudWatch dashboards during every deployment."],
+a:[1],
+e:"<b>ECS deployment circuit breaker</b> עוקב אחר תקינות המשימות החדשות מול health checks; אם משימות חדשות לא מגיעות למצב בריא בתוך סף מוגדר, ECS <b>עוצר את הפריסה ומחזיר אוטומטית</b> לגרסה היציבה הקודמת — ללא צורך בהתערבות אנושית.",
+w:["הגדלת כמות המשימות לא מונעת תעבורה למשימות פגומות.","","ביטול health checks מסתיר את הבעיה ומחמיר אותה — תעבורה תמשיך להגיע למשימות שבורות.","ניטור ידני איטי ולא אמין בהשוואה למנגנון rollback אוטומטי."]},
+
+{i:238,d:2,t:"Global Accelerator",lv:2,ty:"s",
+q:"A company runs an application behind Application Load Balancers in two Regions and wants faster failover than DNS-based routing can provide (which can be delayed by client and resolver DNS caching), while keeping two fixed IP addresses that never change. What should be added?",
+o:["Amazon Route 53 with a very low TTL only.",
+"AWS Global Accelerator in front of both ALBs.",
+"An additional CloudFront distribution.",
+"A third Region with weighted routing."],
+a:[1],
+e:"<b>Global Accelerator</b> נותן <b>שתי כתובות IP anycast קבועות</b> ומבצע ניתוב/failover ברמת הרשת של AWS תוך שניות, ללא תלות ב־TTL של DNS או במטמון resolver בצד הלקוח — פותר בדיוק את בעיית ה־DNS caching שמעכבת failover.",
+w:["TTL נמוך עדיין תלוי בציות resolvers/דפדפנים למטמון — לא מובטח.","","CloudFront מטמין תוכן HTTP/HTTPS — לא פותר failover ברמת IP לאפליקציה כללית.","הוספת אזור שלישי לא פותרת את בעיית מהירות ה־failover עצמה."]},
+
+{i:239,d:2,t:"RDS Multi-AZ Cluster",lv:3,ty:"s",
+q:"A company runs Amazon RDS for PostgreSQL with classic Multi-AZ (one standby) and wants to also offload some read traffic to the standby resources, plus reduce failover time to under 35 seconds. Which deployment option should be selected?",
+o:["Classic Multi-AZ with a single standby instance",
+"Multi-AZ DB cluster deployment with two readable standby instances",
+"A single-AZ instance with a read replica",
+"Aurora Serverless v1"],
+a:[1],
+e:"<b>Multi-AZ DB cluster</b> (החדש, שונה מ־Multi-AZ הקלאסי) מספק <b>שני standby ניתנים לקריאה</b> בנוסף ל־writer, שכפול semi-synchronous, ו־failover טיפוסי של <b>פחות מ־35 שניות</b> — עונה גם על דרישת offloading קריאה וגם על זמן failover קצר יותר מה־Multi-AZ הקלאסי (60–120 שניות, standby לא נגיש לקריאה).",
+w:["ב־Multi-AZ קלאסי ה־standby אינו נגיש לקריאה כלל.","","Read replica בודד ב־AZ יחיד אינו נותן failover אוטומטי לזמינות.","Aurora Serverless v1 שייך למנוע Aurora, לא RDS for PostgreSQL הקלאסי, ואינו רלוונטי לתרחיש."]},
+
+{i:240,d:2,t:"ASG Warm Pools",lv:3,ty:"s",
+q:"An Auto Scaling group runs instances with a lengthy application initialization process (10+ minutes), causing slow scale-out response during sudden traffic spikes. Instances must still start in a stopped, low-cost state most of the time. What should be used?",
+o:["Increase the minimum capacity to always run extra fully active instances.",
+"Configure an Auto Scaling warm pool with instances kept pre-initialized in a stopped state.",
+"Use Spot Instances exclusively for faster launch.",
+"Reduce the health check grace period to zero."],
+a:[1],
+e:"<b>Warm pools</b> שומרים מכונות שעברו כבר את שלב ה־bootstrap הארוך במצב <code>Stopped</code> (או Hibernated) בעלות נמוכה, ומוציאות אותן ל־running תוך שניות בעת scale-out — במקום להמתין 10+ דקות לאתחול מלא בכל אירוע עומס.",
+w:["הרצת מכונות נוספות פעילות תמיד מבטלת את החיסכון ואינה 'low-cost'.","","Spot לא פותר את זמן האתחול הארוך של האפליקציה עצמה, וגם עלול להיות מופסק.","הורדת grace period ל־0 רק גורמת למכונה להיכשל בבדיקת תקינות מוקדם מדי, לא מזרזת את ה־bootstrap עצמו."]},
+
+{i:241,d:2,t:"S3 Replication",lv:2,ty:"m",sel:2,
+q:"A company enabled S3 Cross-Region Replication (CRR) from bucket A to bucket B but notices that objects deleted with a specific version ID in bucket A are not being removed from bucket B, and pre-existing objects that were in bucket A before CRR was enabled never appeared in bucket B. Which TWO facts explain this expected behavior?",
+o:["By default, CRR does not replicate delete markers or permanent deletions of specific object versions.",
+"CRR only replicates new objects created after replication was enabled, not existing ones (batch replication or an initial sync must be used to backfill them).",
+"CRR requires the destination bucket to be in the same Region as the source.",
+"S3 does not support replication at all.",
+"CRR always deletes the source object after replication."],
+a:[0,1],
+e:"התנהגות ברירת המחדל של CRR: (1) מחיקות (כולל מחיקת גרסה ספציפית) <b>אינן</b> משוכפלות כברירת מחדל — יש להפעיל <code>DeleteMarkerReplication</code> במפורש, ומחיקת גרסה ספציפית לעולם לא משוכפלת. (2) CRR משכפל רק אובייקטים <b>חדשים</b> מרגע ההפעלה — לאובייקטים קיימים נדרש <b>S3 Batch Replication</b> להשלמה רטרואקטיבית.",
+w:["","","CRR הוא <b>Cross-Region</b> במפורש — היעד חייב להיות באזור <b>שונה</b> (Same-Region Replication הוא SRR).","S3 בהחלט תומך ב־replication — זה בדיוק מנגנון CRR/SRR.","CRR מעתיק — אינו מוחק את אובייקט המקור."]},
+
+{i:242,d:2,t:"VPC Endpoint HA",lv:2,ty:"s",
+q:"A company created a single interface VPC endpoint for Amazon S3 in one Availability Zone subnet. Instances in other AZs experience increased latency and a risk of an AZ-level single point of failure when accessing S3 through the endpoint. What should be done?",
+o:["Create the interface endpoint in only the largest subnet.",
+"Enable the interface endpoint in a subnet in each Availability Zone that has instances needing access.",
+"Switch to a NAT gateway instead.",
+"Use a single endpoint and rely on cross-AZ data transfer."],
+a:[1],
+e:"Interface Endpoints (PrivateLink) מקבלים ENI <b>לכל AZ</b> שבו הם מופעלים. כדי למנוע latency חוצה־AZ ונקודת כשל אזורית, יש להפעיל את ה־endpoint ב<b>כל AZ</b> שיש בו מכונות שצריכות גישה — כל AZ פונה ל־ENI המקומי שלו.",
+w:["הגבלה לתת־רשת אחת בלבד משאירה בדיוק את אותה בעיית זמינות אזורית ו־latency לשאר ה־AZs.","","NAT Gateway מוציא תעבורה לאינטרנט הציבורי ויקר יותר — לא הפתרון לזמינות endpoint.","הסתמכות על AZ בודד פוגעת גם בזמינות וגם מוסיפה עלות/latency של תעבורה חוצה־AZ."]},
+
+{i:243,d:2,t:"RTO/RPO",lv:2,ty:"s",
+q:"A company can tolerate losing up to 15 minutes of transaction data and needs the application restored within 4 hours after a Regional disaster, at the lowest possible ongoing cost. Snapshots are taken every 15 minutes and copied cross-Region; compute is not pre-provisioned in the DR Region. Which DR strategy does this describe?",
+o:["Multi-site active/active","Pilot light","Backup and restore","Warm standby"],
+a:[2],
+e:"RPO של 15 דקות מושג על ידי snapshots תדירים המועתקים חוצה־אזור, ו־RTO של 4 שעות (הקמת תשתית מאפס משחזור) עם <b>עלות מזערית</b> (ללא compute פעיל כלל בזמן שקט) הוא בדיוק הפרופיל של <b>Backup and Restore</b> — האסטרטגיה הזולה ביותר עם ה־RTO/RPO הגבוהים ביותר מבין הארבע.",
+w:["Active/active עולה הרבה יותר ונותן RTO/RPO כמעט אפסי — לא מתאים לדרישת 'עלות נמוכה ביותר'.","Pilot light מחזיק שכבת דאטה חמה כל הזמן — עדיין יקר יותר מגיבוי בלבד, ו-RTO טיפוסי קצר יותר מ-4 שעות.","","Warm standby מחזיק סביבה פעילה מוקטנת — לא תואם 'compute is not pre-provisioned'."]},
 ];
 
 /* ===== Domain 3 — Design High-Performing Architectures (24%) ===== */
@@ -920,6 +1260,154 @@ o:["Amazon EFS with Max I/O","Amazon FSx for Lustre","Amazon FSx for Windows Fil
 a:[1],
 e:"<b>FSx for Lustre</b> נבנה ל־HPC ולעומסי ML: מאות GB/s תפוקה, latency תת־מילישנייה, ויכולת <b>קישור ישיר ל־S3 bucket</b> כך שאובייקטים מוצגים כקבצים ותוצאות נכתבות חזרה. זו התשובה ל־\"HPC\" + \"S3-linked\".",
 w:["EFS לא מגיע לרמות תפוקה של Lustre.","","FSx for Windows הוא SMB לעומסי Windows.","EBS אינו file system משותף."]},
+
+{i:325,d:3,t:"API Gateway",lv:2,ty:"s",
+q:"A REST API backed by Lambda returns the same product catalog response for identical requests thousands of times per minute, adding unnecessary Lambda invocations and latency. What should a solutions architect enable to improve performance and reduce backend load?",
+o:["API Gateway request throttling only","API Gateway response caching with an appropriate TTL","AWS WAF in front of the API","Increase the Lambda function's memory"],
+a:[1],
+e:"<b>API Gateway caching</b> שומר תשובות לפי מפתח cache (path + query params) ל־TTL מוגדר (עד שעה), ומחזיר תשובות ישירות מה־cache הניהולי בלי לקרוא ל־Lambda בכלל — מפחית עומס ו־latency לבקשות זהות וחוזרות.",
+w:["Throttling מגביל קצב אך לא חוסך קריאות עבור תוכן זהה שחוזר על עצמו.","","WAF מגן מפני תעבורה זדונית — אינו משפר ביצועים לבקשות לגיטימיות חוזרות.","הגדלת זיכרון מאיצה כל הפעלה בודדת אך לא מבטלת הפעלות מיותרות."]},
+
+{i:326,d:3,t:"Lambda SnapStart",lv:3,ty:"s",
+q:"A Java-based Lambda function suffers from cold starts of several seconds due to JVM initialization, causing latency spikes for infrequent invocations. The team cannot rewrite the function in another language. What should be enabled to reduce cold start latency with the LEAST code change?",
+o:["Increase the function's reserved concurrency to 1.",
+"Enable AWS Lambda SnapStart, which restores execution from a pre-initialized, encrypted snapshot instead of running full JVM init.",
+"Convert the function to a container image.",
+"Reduce the function's timeout value."],
+a:[1],
+e:"<b>SnapStart</b> מבצע אתחול מלא פעם אחת בזמן פרסום, שומר snapshot מוצפן של ה־memory ו־disk state לאחר האתחול, ומשחזר ממנו ב־invocation הבא — מקצץ cold start של Java (ושפות נתמכות נוספות) מ־שניות למילישניות, כמעט ללא שינוי קוד.",
+w:["Reserved concurrency שומר קיבולת אך לא מקצר את זמן ה־cold start עצמו.","","המרה ל־container image לא פותרת את זמן אתחול ה־JVM.","הקטנת timeout רק גורמת לכשלים מוקדמים יותר — לא משפרת latency."]},
+
+{i:327,d:3,t:"DynamoDB",lv:3,ty:"s",
+q:"A DynamoDB table uses a coarse partition key such as a fixed date string, causing all writes for a given day to land on the same partition and throttle, even though total provisioned throughput is sufficient. What is the MOST effective fix?",
+o:["Increase the table's provisioned write capacity units further.",
+"Redesign the partition key to include a random or calculated suffix (write sharding) for higher cardinality.",
+"Switch to a Global Secondary Index with the same partition key.",
+"Enable DynamoDB Accelerator (DAX)."],
+a:[1],
+e:"<b>Write sharding</b> — הוספת סיומת אקראית/מחושבת (למשל hash mod N) למפתח המחיצה — מפזרת כתיבות על פני מספר רב יותר של partitions פיזיים, פותרת hot partition שנגרם ממפתח בעל cardinality נמוך. הגדלת קיבולת גולמית לא עוזרת כי המגבלה היא <b>לכל partition</b>, לא לטבלה כולה.",
+w:["מגבלת התפוקה היא ברמת partition בודד — הגדלה כללית לא פותרת hot partition.","","GSI עם אותו partition key סובל מאותה בעיה בדיוק.","DAX מאיץ קריאות — אינו פותר throttling בכתיבה."]},
+
+{i:328,d:3,t:"Kinesis",lv:3,ty:"s",
+q:"An Amazon Kinesis Data Streams application is experiencing ProvisionedThroughputExceededException during peak hours because incoming data volume exceeds the stream's current capacity. What is the MOST direct fix?",
+o:["Switch consumers to enhanced fan-out only.",
+"Increase the number of shards (reshard) to raise the stream's total ingestion throughput.",
+"Increase the data retention period.",
+"Add more Kinesis Data Firehose delivery streams."],
+a:[1],
+e:"כל shard ב־Kinesis Data Streams תומך ב־<code>1MB/s</code> או 1,000 רשומות לשנייה בכתיבה. חריגה מהתפוקה הכוללת דורשת <b>resharding</b> (split) להוספת shards ולפיזור העומס. Enhanced fan-out משפר את צד ה־<b>קריאה</b> (consumers), לא את קיבולת הכתיבה.",
+w:["Enhanced fan-out מספק רוחב פס ייעודי לצרכנים — לא פותר throttling בכתיבה.","","Retention קובע כמה זמן דאטה נשמר — לא קשור לתפוקה.","Firehose הוא שירות מסירה נפרד — אינו מגדיל את קיבולת ה־stream הקיים."]},
+
+{i:329,d:3,t:"Firehose",lv:2,ty:"s",
+q:"A company streams clickstream data and wants it delivered to Amazon S3 in batched, compressed files every 5 minutes or when 5 MB accumulates, with automatic format conversion to Parquet, and with minimal custom code. What should be used?",
+o:["Amazon Kinesis Data Streams with a custom Lambda consumer writing to S3","Amazon Kinesis Data Firehose with a buffering hint and Parquet conversion enabled","Amazon SQS with a scheduled Lambda batch job","AWS DataSync scheduled tasks"],
+a:[1],
+e:"<b>Kinesis Data Firehose</b> הוא שירות <b>ניהולי לחלוטין</b> למסירה: מגדירים <b>buffering hints</b> (גודל/זמן) והוא כותב אצווה מרוכזת ל־S3, כולל המרת פורמט מובנית ל־<b>Parquet/ORC</b> — ללא כתיבת קוד custom לניהול batching.",
+w:["Data Streams דורש קוד consumer מותאם לניהול batching והמרת פורמט בעצמך.","","SQS + Lambda מתוזמן דורשים בניית לוגיקת buffering ידנית — תקורה מיותרת.","DataSync מיועד להעברת קבצים/אחסון, לא לעיבוד stream בזמן אמת."]},
+
+{i:330,d:3,t:"EFS Performance",lv:3,ty:"s",
+q:"A big-data analytics workload on EFS performs highly parallel I/O from thousands of concurrent NFS clients (typical of HPC-style access patterns), but is currently on General Purpose performance mode and experiencing higher-than-expected latency at high aggregate throughput. What should change?",
+o:["Switch to Max I/O performance mode, which trades a bit of per-operation latency for much higher aggregate throughput and parallelism.",
+"Switch to Bursting Throughput mode.",
+"Move to EFS One Zone storage class.",
+"Enable S3 Transfer Acceleration on the file system."],
+a:[0],
+e:"<b>Max I/O</b> performance mode תוכנן בדיוק לעומסים עם אלפי clients מקבילים — מוסיף latency זעיר לכל פעולה בודדת אך מאפשר לרמות התפוקה הכוללות והמקבילות לגדול בהרבה יותר מ־<b>General Purpose</b>, שמוגבל ב־operations-per-second לכל file system.",
+w:["","Throughput mode (bursting/provisioned/elastic) קובע רוחב פס — לא את יכולת המקביליות של performance mode.","One Zone הוא שיקול עמידות/עלות — לא ביצועים למקביליות גבוהה.","Transfer Acceleration הוא מנגנון S3 בלבד ואינו קיים עבור EFS."]},
+
+{i:331,d:3,t:"S3 Multipart",lv:2,ty:"s",
+q:"An application uploads video files of 5–20 GB each to S3 from a data center with a fast but sometimes unstable connection, and a single failed upload currently forces a complete restart. What should be used to improve upload speed and resilience?",
+o:["S3 multipart upload, uploading parts in parallel and retrying only failed parts.",
+"A single PutObject call with a longer timeout.",
+"S3 Select.",
+"Reduce the file size by compressing before upload only."],
+a:[0],
+e:"<b>Multipart Upload</b> מפצל אובייקט גדול לחלקים שמועלים <b>במקביל</b> (מהיר יותר) ומאפשר <b>retry רק לחלק שנכשל</b> ולא לכל הקובץ — AWS ממליצה עליו החל מ־100MB וחובה מעל 5GB. פותר גם מהירות וגם עמידות בפני חיבור לא יציב.",
+w:["","PutObject בודד לא מנצל מקביליות וכשל דורש התחלה מחדש מלאה.","S3 Select מבצע שאילתות SQL על תוכן אובייקט קיים — לא רלוונטי להעלאה.","דחיסה יכולה לעזור אך לא פותרת את בעיית restart-מלא-בכשל."]},
+
+{i:332,d:3,t:"ElastiCache",lv:3,ty:"s",
+q:"An ElastiCache for Redis workload has outgrown a single primary node's write throughput and memory capacity, and the team needs to scale writes horizontally across multiple nodes while keeping the ability to run multi-key operations within each shard. What should be enabled?",
+o:["Add more read replicas to the existing single shard.",
+"Enable Redis Cluster Mode (sharding) to partition data across multiple shards, each with its own primary.",
+"Switch to Memcached for built-in sharding.",
+"Increase the node type size only."],
+a:[1],
+e:"<b>Cluster Mode Enabled</b> מחלק את מרחב המפתחות ל־<b>shards מרובים</b>, כל אחד עם ה־primary וה־replicas שלו — כתיבות מתפזרות במקביל בין ה־shards, וקיבולת הזיכרון/כתיבה גדלה ליניארית עם מספר ה־shards. Memcached אמנם sharding-native, אך מוותר על persistence, replication ופעולות multi-key מורכבות.",
+w:["Replicas נוספים משפרים קריאה, לא כתיבה — ה־primary עדיין צוואר בקבוק יחיד.","","Memcached לא תומך במבני נתונים מתקדמים/עסקאות שנדרשות כאן.","הגדלת node בודד מוגבלת בתקרה — אינה פותרת סקיילינג אופקי אמיתי."]},
+
+{i:333,d:3,t:"Placement Groups",lv:2,ty:"s",
+q:"A tightly-coupled HPC workload using MPI requires the lowest possible inter-node network latency and the highest throughput between EC2 instances, and can tolerate the instances being on shared underlying hardware. Which placement group strategy should be used?",
+o:["Spread placement group","Partition placement group","Cluster placement group within a single Availability Zone","No placement group, spread across multiple Regions"],
+a:[2],
+e:"<b>Cluster placement group</b> ממקם מכונות קרוב פיזית ככל האפשר על אותה תשתית רשת בתוך AZ בודד, ומספק latency נמוך ביותר ותפוקת רשת גבוהה (עד 400 Gbps עם EFA) — בדיוק המתאים לעומסי MPI/HPC הדוקים.",
+w:["Spread מפזר מכונות על פני חומרה שונה למקסום עמידות — פוגע ב־latency בין מכונות, הפוך מהדרישה.","Partition מיועד ליישומים מבוזרים גדולים (Hadoop/Cassandra) המודעים ל־topology — לא latency מינימלי.","","עומס HPC הדוק דורש קרבה פיזית מרבית — פיזור בין אזורים יהרוס לחלוטין את דרישת ה־latency."]},
+
+{i:334,d:3,t:"ALB gRPC",lv:2,ty:"s",
+q:"A microservices platform is migrating internal service-to-service calls to gRPC over HTTP/2 for lower latency and needs a managed load balancer that natively supports gRPC request routing and response streaming. Which load balancer should be used?",
+o:["Classic Load Balancer","Application Load Balancer with gRPC protocol support enabled on the listener","Network Load Balancer only","Gateway Load Balancer"],
+a:[1],
+e:"<b>ALB</b> תומך באופן מובנה בפרוטוקול <b>gRPC</b> (מעל HTTP/2), כולל ניתוב לפי method ו־streaming דו־כיווני, ומאפשר ניתוח מטריקות ברמת בקשת gRPC. זהו ה־load balancer המנוהל המיועד לתרחיש הזה.",
+w:["CLB הוא דור ישן ואינו תומך ב־gRPC.","","NLB פועל בשכבה 4 ואינו מבין את פרוטוקול gRPC ברמת האפליקציה לצורך ניתוב חכם, אף שהוא יכול להעביר תעבורת TCP גולמית.","GWLB מיועד להזרמת תעבורה דרך appliances של צד שלישי, לא לניתוב gRPC."]},
+
+{i:335,d:3,t:"Aurora Reader Endpoint",lv:2,ty:"s",
+q:"An application connects directly to individual Aurora Replica instance endpoints for read queries, and whenever a replica is added or removed the application must be manually reconfigured. What should be used instead to automatically load-balance read traffic across all current replicas?",
+o:["The cluster's writer endpoint for all traffic.",
+"The Aurora reader endpoint, which automatically load-balances connections across all available Aurora Replicas.",
+"A hardcoded list of replica IPs refreshed nightly.",
+"Route 53 weighted routing to each replica's endpoint."],
+a:[1],
+e:"<b>Reader endpoint</b> הוא endpoint יחיד ומנוהל שמפזר חיבורים חדשים בין כל ה־Aurora Replicas הזמינים אוטומטית, ומתעדכן מעצמו כשמוסיפים/מסירים replicas — האפליקציה מתחברת פעם אחת ולא צריכה לדעת כמה replicas קיימים.",
+w:["Writer endpoint מפנה תמיד למופע writer בלבד — לא מפזר בין replicas לקריאה.","","רשימת IP קשיחה נשברת מיד עם כל שינוי טופולוגיה.","Route 53 אינו מודע לבריאות/מספר ה־replicas הפנימי של Aurora בזמן אמת כמו ה־reader endpoint המובנה."]},
+
+{i:336,d:3,t:"SQS Batching",lv:2,ty:"s",
+q:"A high-throughput application calls SendMessage to SQS once per message, one at a time, and API call overhead has become the main bottleneck limiting overall throughput. What should be changed with the LEAST added complexity?",
+o:["Switch to an SQS FIFO queue.",
+"Use SendMessageBatch (and ReceiveMessage with MaxNumberOfMessages) to send/receive up to 10 messages per API call.",
+"Increase the message retention period.",
+"Add more SQS queues and round-robin between them."],
+a:[1],
+e:"<b>Batch operations</b> (<code>SendMessageBatch</code>/<code>DeleteMessageBatch</code>, ו־<code>ReceiveMessage</code> עם <code>MaxNumberOfMessages</code> עד 10) מצרפים עד 10 הודעות לקריאת API אחת — מפחית דרמטית את מספר הקריאות ואת ה־overhead בלי לשנות ארכיטקטורה.",
+w:["FIFO לא פותר תפוקת קריאות API — ואף עלול להגביל תפוקה בהשוואה ל-standard.","","Retention קובע כמה זמן הודעה נשמרת — לא קשור לתפוקת שליחה.","ריבוי תורים מוסיף מורכבות ניהולית בלי לטפל בבעיית ה־overhead לכל קריאה."]},
+
+{i:337,d:3,t:"CloudFront Cache",lv:3,ty:"s",
+q:"A CloudFront distribution has a low cache hit ratio because the origin includes many unique query string parameters (such as session tracking IDs) that do not affect the actual response content, causing CloudFront to treat nearly every request as unique. What should a solutions architect do to improve the cache hit ratio?",
+o:["Disable caching entirely to simplify behavior.",
+"Create a cache policy that excludes the irrelevant query string parameters from the cache key, while still forwarding them to the origin if needed.",
+"Reduce the TTL to 0.",
+"Move the origin closer to CloudFront's edge locations."],
+a:[1],
+e:"<b>Cache Policy</b> מאפשרת לבחור בדיוק אילו headers/cookies/query strings נכנסים ל־<b>cache key</b>. הסרת פרמטרים לא-רלוונטיים (כמו tracking IDs) מה־cache key גורמת לבקשות זהות מבחינת תוכן להיחשב כ־cache hit, גם אם ה־URL המלא שונה בכל פעם — משפר hit ratio דרמטית בלי לוותר על מידע לצורך אנליטיקס ב־origin.",
+w:["ביטול caching לגמרי מבטל את כל היתרון של CDN — הפוך מהמטרה.","","TTL אפס מבטל cache למעשה — מחמיר את הבעיה.","מיקום ה־origin לא משפיע על cache key/hit ratio — רק על latency ל־origin fetch."]},
+
+{i:338,d:3,t:"Enhanced Networking",lv:3,ty:"s",
+q:"A trading application on EC2 requires the highest possible packets-per-second and the lowest network jitter between instances within the same VPC. Which combination should a solutions architect ensure is in place?",
+o:["Any instance type with a standard network interface.",
+"An instance type and AMI that support Elastic Network Adapter (ENA) enhanced networking, placed in a cluster placement group.",
+"A larger EBS volume for more IOPS.",
+"An internet gateway with a wider CIDR block."],
+a:[1],
+e:"<b>Enhanced Networking עם ENA</b> נותן packets-per-second גבוה יותר, bandwidth גבוה יותר ו־latency נמוך ועקבי יותר בהשוואה לרשת הרגילה, ובשילוב עם <b>cluster placement group</b> (קרבה פיזית) מגיע ל־jitter המינימלי האפשרי בין מכונות.",
+w:["ממשק רשת סטנדרטי אינו ממוטב לביצועי רשת קיצוניים.","","EBS IOPS נוגע לאחסון, לא לרשת בין מכונות.","Internet Gateway ורוחב CIDR לא משפיעים על latency/PPS פנימי בין מכונות באותו VPC."]},
+
+{i:339,d:3,t:"DynamoDB GSI",lv:3,ty:"s",
+q:"A DynamoDB table stores orders with partition key CustomerId and sort key OrderId. A new requirement needs efficient queries for 'all orders with a given Status, sorted by OrderDate', which the current key schema cannot support without scanning the entire table. What should be added, with the LEAST disruption to the existing table?",
+o:["Delete and recreate the table with Status as the partition key.",
+"Add a Global Secondary Index with Status as the partition key and OrderDate as the sort key.",
+"Add a Local Secondary Index with Status as the sort key.",
+"Enable DynamoDB Streams."],
+a:[1],
+e:"<b>GSI</b> ניתן להוספה <b>בכל עת</b> על טבלה קיימת, עם partition/sort key שונים לחלוטין מהטבלה הראשית, ומאפשר תבנית שאילתה חדשה (<code>Status</code> + <code>OrderDate</code>) ללא שינוי או מחיקה של הטבלה המקורית — בדיוק לתרחיש של דפוס גישה חדש שלא נתמך במפתח הקיים.",
+w:["מחיקה ויצירה מחדש מוחקת דאטה קיים וגורמת downtime — הרסני ולא נחוץ.","","LSI ניתן להגדרה <b>רק בזמן יצירת הטבלה</b> ומוגבל לאותו partition key — לא ניתן להוסיף בדיעבד.","Streams מתעד שינויים לצריכה חיצונית — אינו פותר תבנית שאילתה."]},
+
+{i:340,d:3,t:"S3 Transfer Acceleration",lv:2,ty:"s",
+q:"Field offices around the world upload large raw video files directly to a single S3 bucket in one Region, and uploads from distant offices are slow due to standard internet routing. Minimal application changes are acceptable. What should be enabled to speed up these long-distance uploads?",
+o:["S3 Transfer Acceleration, which routes uploads through the nearest CloudFront edge location onto the AWS backbone.",
+"S3 Cross-Region Replication to a bucket near each office.",
+"A VPN connection from every office to the bucket's Region.",
+"Amazon S3 Glacier for faster ingestion."],
+a:[0],
+e:"<b>S3 Transfer Acceleration</b> מנתב העלאות דרך <b>edge location</b> קרוב גיאוגרפית למשתמש ולאורך ה־AWS backbone המהיר במקום האינטרנט הציבורי — משפר משמעותית מהירות העלאה למרחקים ארוכים, תוך שינוי endpoint URL בלבד באפליקציה.",
+w:["","CRR מיועד לגיבוי/עמידות של דאטה קיים בבאקט, לא להאצת העלאה ראשונית ומוסיף עלות אחסון כפולה.","VPN לא פותר את בעיית המרחק/ניתוב לאינטרנט — רק מוסיף הצפנה.","Glacier מיועד לארכיון עם אחזור איטי — לא רלוונטי להעלאה מהירה."]},
 ];
 
 /* ===== Domain 4 — Design Cost-Optimized Architectures (20%) ===== */
@@ -1091,40 +1579,164 @@ o:["AWS DataSync over the existing internet connection","AWS Snowball Edge devic
 a:[1],
 e:"בחישוב מהיר: 400TB על 200Mbps ⇐ למעלה מ־<b>180 יום</b> של רוויה מלאה, וזאת בלי לפגוע בעסק. <b>Snowball Edge</b> מעביר את הנתונים פיזית תוך ימים ובעלות נמוכה בהרבה. כלל אצבע למבחן: מעל ~10TB עם קו צר ⇐ Snow Family.",
 w:["DataSync היה רווי את הקו לחודשים ופוגע בפעילות העסקית.","","הקמת Direct Connect אורכת שבועות עד חודשים ואינה מוצדקת להעברה חד־פעמית.","Transfer Acceleration מוגבל באותו רוחב פס פיזי."]},
+
+{i:421,d:4,t:"Capacity Reservations",lv:3,ty:"s",
+q:"A company needs guaranteed EC2 capacity in a specific Availability Zone for a mandatory launch event, plus the billing discount of a 1-year commitment, without being locked into a specific AZ for the entire commitment period. What should be combined?",
+o:["A Standard Reserved Instance only.",
+"An On-Demand Capacity Reservation (for the guaranteed AZ capacity) combined with a Savings Plan (for the billing discount, decoupled from AZ).",
+"Spot Instances with a capacity-optimized allocation strategy.",
+"Dedicated Hosts reserved for 3 years."],
+a:[1],
+e:"<b>Capacity Reservation</b> נותנת ביטחון קיבולת ב־AZ ספציפי ללא הנחה מובנית. <b>Savings Plan</b> נותן הנחה על ההתחייבות הכספית בלי להיות קשור ל־AZ. השילוב נותן גם קיבולת מובטחת לאירוע וגם הנחת מחיר — שני מנגנונים משלימים ונפרדים לגמרי.",
+w:["RI סטנדרטי נותן הנחה אך לא בהכרח קיבולת מובטחת ברמת AZ ספציפי ללא Capacity Reservation נלווית.","","Spot לא מבטיח קיבולת — ההפך: יכול להיות מופסק.","Dedicated Hosts יקרים משמעותית ומיועדים לרישוי BYOL, לא לתרחיש זה."]},
+
+{i:422,d:4,t:"S3 Intelligent-Tiering",lv:2,ty:"s",
+q:"A company stores millions of small objects (a few KB each) with completely unpredictable and changing access patterns, and wants automatic cost optimization without a monitoring fee that could exceed the savings on such small objects. What should be considered before choosing S3 Intelligent-Tiering?",
+o:["Intelligent-Tiering has no fees at all, so it is always the best choice.",
+"Intelligent-Tiering charges a small monitoring and automation fee per object, which can outweigh the savings for very small, low-cost objects — Lifecycle rules to Standard-IA may be more cost-effective if the access pattern is roughly known.",
+"Intelligent-Tiering only works with objects larger than 1 GB.",
+"Intelligent-Tiering requires manual approval before each tier transition."],
+a:[1],
+e:"ל־<b>Intelligent-Tiering</b> יש עמלת <b>ניטור ואוטומציה חודשית לכל אובייקט</b> — עבור אובייקטים רבים וזעירים העמלה עלולה לבלוע את החיסכון בפועל. כאשר דפוס הגישה ידוע ולו בקירוב, <b>Lifecycle rules</b> ידניים לרמת אחסון מתאימה עשויים להיות זולים יותר. זו נקודת דיוק שהמבחן אוהב לבדוק.",
+w:["לא נכון — Intelligent-Tiering כן גובה עמלת ניטור ואוטומציה לכל אובייקט, וזו בדיוק הנקודה שיש לשקול.","","אין מגבלת גודל אובייקט מינימלי כזו — המגבלה הרלוונטית היא כלכלית, לא טכנית.","המעברים בין רמות ב־Intelligent-Tiering אוטומטיים לחלוטין, ללא אישור ידני."]},
+
+{i:423,d:4,t:"Graviton",lv:2,ty:"s",
+q:"A company runs a fleet of EC2 instances for a stateless web tier that is compatible with ARM64 and wants to reduce compute cost without reducing performance or committing to Reserved Instances. What is the SIMPLEST first step?",
+o:["Switch to Graviton (ARM-based) instance types, which offer better price-performance than comparable x86 instances for compatible workloads.",
+"Switch every instance to Dedicated Hosts.",
+"Purchase a 3-year All Upfront Standard RI.",
+"Move the workload to bare-metal instances."],
+a:[0],
+e:"מכונות <b>Graviton</b> (מעבדי Arm של AWS) מציעות בדרך כלל עד כ־<b>40% יחס מחיר/ביצועים טוב יותר</b> מהמקבילות מבוססות x86, ללא כל התחייבות רכישה — רק דורשות תאימות ARM64 (רוב ה־runtimes המודרניים תומכים). זהו הצעד הפשוט והמיידי ביותר לחיסכון בעומס תואם.",
+w:["","Dedicated Hosts יקרים משמעותית ומיועדים לרישוי, לא לחיסכון כללי.","התחייבות RI ל-3 שנים היא צעד כבד ואינה 'הכי פשוטה' כשהיעד הוא הפחתת עלות בלי התחייבות.","בר metal בדרך כלל יקר יותר ומיועד לעומסים ספציפיים הדורשים גישה ישירה לחומרה."]},
+
+{i:424,d:4,t:"Spot Fleet",lv:3,ty:"s",
+q:"A batch-processing workload runs on Spot Instances but suffers frequent interruptions because it depends on a single instance type that is often in short supply in the Region. The company wants to keep using Spot for cost savings while reducing interruption frequency. What should be done?",
+o:["Switch entirely to On-Demand Instances.",
+"Use an EC2 Fleet or Auto Scaling group with Spot allocation across multiple instance types and Availability Zones (capacity-optimized allocation).",
+"Use only the cheapest single Spot instance type available.",
+"Purchase Reserved Instances instead."],
+a:[1],
+e:"פיזור על פני <b>מספר סוגי מופעים ו־AZs</b> עם אסטרטגיית <b>capacity-optimized</b> מגדיל דרמטית את סיכויי קבלת קיבולת Spot יציבה, כי המערכת בוחרת תמיד מהבריכה עם הכי פחות סיכוי להפרעה — שומר על החיסכון של Spot תוך הפחתת תדירות ההפסקות.",
+w:["מעבר מלא ל־On-Demand מבטל את כל החיסכון — לא נדרש.","","הישענות על סוג מופע יחיד היא בדיוק הסיבה לבעיה המתוארת.","RI מבטל את גמישות וחיסכון ה־Spot; זה שינוי מודל תמחור שלם, לא פתרון מדורג."]},
+
+{i:425,d:4,t:"DynamoDB Cost",lv:2,ty:"s",
+q:"A DynamoDB table serves a well-understood, steady, predictable daily traffic pattern with only minor variation. The company wants the LOWEST cost while still tolerating small, gradual traffic growth automatically. Which capacity configuration is MOST cost-effective?",
+o:["On-demand capacity mode",
+"Provisioned capacity mode with Application Auto Scaling configured on a target utilization",
+"Maximum fixed provisioned capacity set once and never changed",
+"Reserved capacity purchased only for peak-hour traffic"],
+a:[1],
+e:"לעומס <b>יציב וצפוי</b>, <b>Provisioned עם Auto Scaling</b> זול משמעותית מ־on-demand (שמתומחר לפי בקשה בפרמיה עבור אי־ודאות) ומאפשר לקיבולת לגדול בעדינות עם הביקוש בלי לשלם על שיא קבוע כל הזמן. On-demand משתלם דווקא בעומס <b>בלתי צפוי</b> — ההפך מהתרחיש כאן.",
+w:["On-demand משלם פרמיה על גמישות שלא נדרשת כאן — יקר יותר לעומס יציב.","","קיבולת קבועה בשיא כל הזמן משלמת על יכולת שלא נוצלת רוב הזמן.","'קיבולת שמורה רק בשעות שיא' אינה קיימת כאפשרות תמחור עצמאית ב־DynamoDB — הקיבולת חייבת לכסות את כל שעות הפעילות."]},
+
+{i:426,d:4,t:"Cost Governance",lv:2,ty:"s",
+q:"A finance team wants to be alerted automatically when actual or forecasted AWS spend deviates unexpectedly from normal historical patterns (not just a fixed threshold), across specific cost categories. Which service should be used?",
+o:["AWS Budgets with a fixed monthly threshold only","AWS Cost Anomaly Detection","Amazon CloudWatch billing alarms only","AWS Trusted Advisor cost checks"],
+a:[1],
+e:"<b>Cost Anomaly Detection</b> משתמש ב־machine learning כדי ללמוד את דפוס ההוצאה הרגיל ולזהות <b>סטיות חריגות</b> — לא רק חצייה של סף קבוע — ושולח התראות ממוקדות לפי שירות/חשבון/תג. זה שונה מ־Budgets שמתריע על סף שנקבע מראש בלבד.",
+w:["Budgets מתריע לפי סף <b>קבוע</b> שהוגדר מראש — לא מזהה אנומליה יחסית להיסטוריה.","","CloudWatch billing alarms מוגבל גם הוא לסף סטטי פשוט.","Trusted Advisor נותן המלצות תקופתיות כלליות, לא זיהוי אנומליות בזמן אמת."]},
+
+{i:427,d:4,t:"EC2 Hibernate",lv:3,ty:"s",
+q:"A development team stops EC2 instances every night to save cost, but each morning the application takes 20 minutes to warm up its in-memory cache and reload state before it can serve requests. The team wants to eliminate this daily warm-up delay while still avoiding charges for compute when not in use. What should be used?",
+o:["Keep the instances running 24/7 instead.",
+"Use EC2 Hibernate, which persists RAM contents to the root EBS volume and restores them on start, avoiding compute charges while stopped.",
+"Use EC2 Auto Recovery.",
+"Take an AMI snapshot every night and terminate the instance."],
+a:[1],
+e:"<b>Hibernate</b> שומר את תוכן ה־RAM (כולל state באפליקציה וזיכרון cache) ל־<b>EBS root volume</b> בעצירה, ומשחזר אותו בהפעלה הבאה — האפליקציה חוזרת למצב שהייתה בו בדיוק, בלי warm-up מחדש, בעוד שבזמן העצירה משלמים רק על אחסון ה־EBS ולא על compute.",
+w:["הרצה 24/7 מבטלת את כל החיסכון היומי — הפוך מהמטרה.","","Auto Recovery מטפל בכשל חומרה, לא בזימון stop/start יומי.","AMI + terminate מאבד גם את מזהה המכונה וגם דורש תהליך provisioning מלא בכל בוקר — איטי יותר, לא פחות."]},
+
+{i:428,d:4,t:"Reserved Nodes",lv:2,ty:"s",
+q:"A company runs an Amazon Redshift cluster and an ElastiCache for Redis cluster with steady, predictable, long-term usage (over a year) and wants the deepest possible discount on both. What should be purchased for each?",
+o:["On-Demand pricing for both, since it's simplest.",
+"Reserved Nodes for Redshift and Reserved Nodes/Reserved Cache Nodes for ElastiCache, matched to the steady baseline usage.",
+"Spot pricing for both clusters.",
+"A single Savings Plan covering both services."],
+a:[1],
+e:"גם <b>Redshift</b> וגם <b>ElastiCache</b> תומכים ב־<b>Reserved Nodes</b> משלהם עם הנחה משמעותית (עד כ־%75-) עבור התחייבות של שנה או שלוש על עומס בסיס יציב וידוע — התאמה ישירה לתרחיש. Savings Plans לעומת זאת מכסים בעיקר EC2, Fargate ו־Lambda ואינם חלים על Redshift/ElastiCache.",
+w:["On-Demand הוא היקר ביותר לעומס יציב וארוך טווח — מבזבז חיסכון ודאי.","","Redshift ו־ElastiCache אינם תומכים ברכישת Spot כמו EC2.","Savings Plans אינם מכסים Redshift או ElastiCache — כל שירות דורש את מנגנון ה־Reserved שלו."]},
+
+{i:429,d:4,t:"S3 One Zone-IA",lv:2,ty:"s",
+q:"A company stores reproducible, easily regenerated derivative data (such as re-renderable image thumbnails) that is accessed infrequently, and wants the lowest possible storage cost while accepting the loss of the data if a single Availability Zone fails, since it can simply be regenerated. Which storage class fits best?",
+o:["S3 Standard","S3 Standard-IA","S3 One Zone-IA","S3 Glacier Deep Archive"],
+a:[2],
+e:"<b>One Zone-IA</b> מאחסן ב־AZ <b>בודד</b> בלבד (ולא שלושה) ולכן זול יותר מ־Standard-IA — מתאים בדיוק לדאטה משנית שניתנת לשחזור בקלות, כשהעדיפות היא המחיר הנמוך ביותר לאחסון גישה נדירה ואין בעיה באובדן נתונים בכשל AZ.",
+w:["Standard יקר מדי לגישה נדירה.","Standard-IA משוכפל בין 3 AZs — עמידות גבוהה יותר ומחיר גבוה יותר מהנדרש כאן.","","Deep Archive מתאים לארכיון עם שעות אחזור — לא לתמונות ממוזערות שצריך לגשת אליהן (גם אם לעיתים רחוקות) במהירות סבירה."]},
+
+{i:430,d:4,t:"RDS Licensing",lv:2,ty:"s",
+q:"A company wants to run Amazon RDS for SQL Server and minimize licensing cost, and does not have existing Microsoft SQL Server licenses it can reuse. Which licensing model should be selected?",
+o:["Bring Your Own License (BYOL), purchasing new SQL Server licenses separately.",
+"License Included, where the SQL Server license cost is bundled into the RDS hourly price.",
+"Deploy SQL Server manually on EC2 with a perpetual license.",
+"Use RDS for MySQL and rewrite the application."],
+a:[1],
+e:"כשאין רישיונות Microsoft קיימים לניצול מחדש, <b>License Included</b> הוא הזול והפשוט ביותר: עלות הרישיון כלולה בתעריף השעתי של RDS ללא רכישה נפרדת. <b>BYOL</b> משתלם רק כשיש כבר רישיונות זמינים (למשל דרך License Mobility).",
+w:["BYOL משתלם רק כשכבר יש רישיונות זמינים לניצול מחדש — כאן אין כאלה, כך שיש לרכוש רישיונות חדשים בנפרד ולשלם גם על RDS וגם על הרישיון.","","הקמה עצמית על EC2 מוסיפה תקורת ניהול ועדיין דורשת רכישת רישיון נפרד — יקר ומורכב יותר.","שינוי מנוע מסד הנתונים דורש פיתוח מחדש משמעותי — לא פתרון עלות ישיר וסביר לדרישה."]},
+
+{i:431,d:4,t:"Consolidated Billing",lv:2,ty:"s",
+q:"A company with 15 AWS accounts under AWS Organizations wants Reserved Instance and Savings Plan discounts purchased in any one account to automatically benefit matching usage in other accounts, to maximize utilization of the commitment. What must be true?",
+o:["Each account must purchase its own separate Reserved Instances; sharing is not possible.",
+"Consolidated billing (via AWS Organizations) is enabled, which by default shares RI and Savings Plan discounts across accounts with matching usage, unless sharing is explicitly turned off.",
+"The accounts must all be merged into a single AWS account.",
+"Only the AWS Organizations management account is ever allowed to benefit from any RI discount."],
+a:[1],
+e:"תחת <b>Organizations עם consolidated billing</b>, הנחות RI ו־Savings Plans <b>משותפות אוטומטית</b> בין כל החשבונות בארגון עבור שימוש תואם — כברירת מחדל שיתוף פעיל, וניתן לכבות אותו ברמת חשבון בודד אם רוצים בידוד. זה ממקסם ניצול ההתחייבות בלי לרכז שימוש בחשבון אחד.",
+w:["לא נכון — consolidated billing תחת Organizations כן מאפשר שיתוף הנחות RI/Savings Plans בין חשבונות כברירת מחדל.","","מיזוג חשבונות אינו נדרש ואינו מעשי — consolidated billing פותר את הבעיה בלי מיזוג.","כל חשבון בארגון יכול ליהנות מהנחה משותפת, לא רק חשבון הניהול."]},
+
+{i:432,d:4,t:"Cost Allocation",lv:2,ty:"s",
+q:"A company with dozens of teams sharing the same AWS accounts needs to charge back cloud costs accurately per team and per project, using detailed, queryable, line-item billing data. What combination should be implemented?",
+o:["Read the AWS Billing console dashboard manually every month.",
+"Apply consistent cost allocation tags (e.g., team, project) to resources, and analyze the AWS Cost and Usage Report (CUR) using Amazon Athena or QuickSight.",
+"Create a separate AWS account per team only, with no tagging.",
+"Rely solely on Trusted Advisor cost recommendations."],
+a:[1],
+e:"<b>Cost allocation tags</b> עקביים על המשאבים + <b>Cost and Usage Report (CUR)</b> — הדוח המפורט ביותר של AWS ברמת שורת חיוב — מאפשרים ניתוח SQL עם <b>Athena</b> או דוחות עם QuickSight לחיוב חוזר (chargeback) מדויק לפי צוות/פרויקט, גם כשחשבונות משותפים.",
+w:["קריאה ידנית של דשבורד לא נותנת רזולוציה של per-team/per-project ואינה ניתנת להרחבה.","","חשבון נפרד לכל צוות ללא תיוג פותר בעיה אחת (בידוד) אך לא פותר צוותים שכבר משותפים באותם חשבונות, וגם מוסיף תקורת ניהול.","Trusted Advisor נותן המלצות חיסכון כלליות — לא נתוני חיוב מפורטים לצורך chargeback."]},
+
+{i:433,d:4,t:"Scheduled Scaling",lv:2,ty:"s",
+q:"An Auto Scaling group serves a workload with a highly predictable pattern: traffic reliably increases every weekday at 8 AM and drops every weekday at 6 PM. The company wants capacity ready exactly when needed, without paying for reactive scaling delay or for idle capacity overnight. What should be configured?",
+o:["Target tracking scaling based on CPU utilization only.",
+"Scheduled scaling actions that increase desired capacity just before 8 AM and decrease it just after 6 PM on weekdays.",
+"A fixed capacity sized for peak traffic, running at all times.",
+"Simple scaling with a long cooldown period."],
+a:[1],
+e:"כשדפוס העומס <b>ידוע וחוזר על עצמו</b> בזמנים קבועים, <b>Scheduled Scaling</b> מגדיל קיבולת <b>לפני</b> שהעומס בפועל מגיע — מבטל את פיגור התגובה של scaling ריאקטיבי, ונותן קיבולת מדויקת בדיוק כשצריך, כולל הקטנה מתוזמנת בלילה לחיסכון. ניתן לשלב עם target tracking לתנודות בלתי צפויות בתוך היום.",
+w:["Target tracking בלבד מגיב <b>אחרי</b> שהעומס כבר עלה — יש פיגור תגובה, לא קיבולת מוכנה מראש.","","קיבולת קבועה לשיא כל הזמן מבזבזת כסף על שעות שקטות/לילה.","Simple scaling עם cooldown ארוך עדיין ריאקטיבי ואיטי יותר מתזמון ידוע מראש."]},
 ];
 
 /* ===== Flashcards: decision rules & service comparisons ===== */
 const CARDS = [
-{c:"Compute",f:"Multi-AZ vs Read Replica ב־RDS",b:"<b>Multi-AZ</b> = זמינות. שכפול <b>סינכרוני</b>, standby לא נגיש לקריאה, failover אוטומטי, RPO≈0.<br><b>Read Replica</b> = ביצועים. שכפול <b>א־סינכרוני</b>, נגיש לקריאה, קידום ידני, יכול להיות חוצה־אזור."},
-{c:"Storage",f:"gp2 מול gp3",b:"<b>gp2</b>: IOPS צמודים לגודל (3/GB), מקס' 16,000.<br><b>gp3</b>: 3,000 IOPS + 125MB/s בבסיס, ניתן להגדלה <b>ללא תלות בגודל</b>, זול בכ־20%.<br>כלל: \"ניפחנו נפח כדי לקבל IOPS\" ⇐ עבור ל־gp3."},
-{c:"Storage",f:"מתי io2 Block Express?",b:"כשצריך מעל 16,000 IOPS לנפח בודד, latency תת־מילישנייה, או עמידות 99.999%. מסדי נתונים קריטיים בלבד — יקר."},
-{c:"Networking",f:"Gateway Endpoint מול Interface Endpoint",b:"<b>Gateway</b>: רק S3 ו־DynamoDB. <b>חינם</b>. מוסיף route ל־route table.<br><b>Interface (PrivateLink)</b>: כמעט כל שירות. ENI עם IP פרטי. <b>עלות שעתית + לכל GB</b>.<br>שאלת עלות ⇐ Gateway."},
-{c:"Networking",f:"NLB מול ALB מול GWLB",b:"<b>ALB</b> — L7, HTTP/HTTPS, path/host routing, WAF.<br><b>NLB</b> — L4, TCP/UDP/TLS, מיליוני RPS, שומר source IP, <b>Elastic IP סטטי</b>.<br><b>GWLB</b> — פריסת appliances לבדיקת תעבורה (GENEVE)."},
-{c:"Networking",f:"CloudFront מול Global Accelerator",b:"<b>CloudFront</b> — CDN, מטמין תוכן, HTTP/HTTPS בלבד.<br><b>Global Accelerator</b> — אין cache, <b>IP anycast סטטי</b>, TCP <b>וגם UDP</b>, failover אזורי בשניות.<br>UDP/gaming/IoT ⇐ Global Accelerator."},
-{c:"Security",f:"Security Group מול NACL",b:"<b>SG</b>: stateful, ברמת ENI, <b>Allow בלבד</b>, כל הכללים נבדקים.<br><b>NACL</b>: stateless, ברמת subnet, Allow <b>ו־Deny</b>, נבדק לפי מספר סידורי עולה.<br>חסימת IP ספציפי ⇐ NACL."},
-{c:"Security",f:"Secrets Manager מול Parameter Store",b:"<b>Secrets Manager</b>: <b>rotation אוטומטי מובנה</b> ל־RDS/Redshift/DocumentDB, cross-account, בתשלום.<br><b>Parameter Store</b>: חינם (Standard), SecureString עם KMS, ללא rotation מובנה.<br>המילה \"automatic rotation\" ⇐ Secrets Manager."},
-{c:"Security",f:"KMS מול CloudHSM",b:"<b>KMS</b>: מנוהל, multi-tenant, משולב בכל שירותי AWS, FIPS 140-3 L3 במודולים.<br><b>CloudHSM</b>: אשכול HSM <b>ייעודי ובלעדי</b>, FIPS 140-2 Level 3, AWS ללא גישה למפתחות.<br>\"dedicated / exclusive control\" ⇐ CloudHSM."},
-{c:"Security",f:"GuardDuty / Inspector / Macie / Detective",b:"<b>GuardDuty</b> — זיהוי איומים (CloudTrail, DNS, Flow Logs), ללא agent.<br><b>Inspector</b> — פגיעויות CVE ב־EC2/ECR/Lambda.<br><b>Macie</b> — גילוי PII ב־S3.<br><b>Detective</b> — חקירת שורש ממצא.<br><b>Security Hub</b> — ריכוז כל הממצאים."},
-{c:"Security",f:"מניעת SSRF שגונב credentials",b:"אכוף <b>IMDSv2</b> (token מבוסס PUT) + <code>hop-limit=1</code>. זו התשובה הרשמית של AWS מול SSRF על metadata."},
-{c:"Resilience",f:"ארבע אסטרטגיות DR",b:"<b>Backup & Restore</b> — RTO/RPO שעות. הזול ביותר.<br><b>Pilot Light</b> — נתונים חמים, compute כבוי. RTO עשרות דקות.<br><b>Warm Standby</b> — סביבה מוקטנת ופעילה. RTO דקות.<br><b>Multi-site active/active</b> — RTO/RPO כמעט 0. היקר ביותר."},
-{c:"Resilience",f:"מדיניות ניתוב ב־Route 53",b:"<b>Simple</b>, <b>Weighted</b> (חלוקה יחסית / canary), <b>Latency</b> (הביצועים הטובים ביותר), <b>Failover</b> (active/passive), <b>Geolocation</b> (לפי מיקום/רגולציה), <b>Geoproximity</b> (עם bias), <b>Multivalue</b> (עד 8 תשובות תקינות)."},
-{c:"Resilience",f:"Placement Groups",b:"<b>Cluster</b> — קרבה מרבית, latency נמוך, HPC. סיכון כשל משותף.<br><b>Spread</b> — חומרה נפרדת, עד 7 מכונות ל־AZ. עמידות מרבית.<br><b>Partition</b> — קבוצות גדולות מודעות topology: HDFS, Kafka, Cassandra."},
-{c:"Integration",f:"SQS מול SNS מול EventBridge מול Kinesis",b:"<b>SQS</b> — תור, צרכן אחד לכל הודעה, buffering.<br><b>SNS</b> — pub/sub, fan-out, push.<br><b>EventBridge</b> — ניתוב אירועים לפי תוכן, schema registry, SaaS partners, מתוזמן.<br><b>Kinesis</b> — streaming עם סדר, מספר צרכנים, <b>replay</b>."},
-{c:"Integration",f:"מתי SQS FIFO?",b:"כשצריך סדר מדויק ו/או exactly-once. <code>MessageGroupId</code> שומר סדר בתוך קבוצה ומאפשר מקביליות בין קבוצות. תפוקה נמוכה יותר מ־standard."},
-{c:"Integration",f:"Visibility Timeout",b:"הזמן שבו הודעה שנמשכה מוסתרת משאר הצרכנים. קצר מדי ⇐ עיבוד כפול. ברירת מחדל 30 שניות, מקסימום 12 שעות. ניתן להארכה דינמית ב־<code>ChangeMessageVisibility</code>."},
-{c:"Cost",f:"Savings Plans מול Reserved Instances",b:"<b>Compute SP</b> — הגמיש ביותר: EC2 בכל משפחה/אזור + Fargate + Lambda (~66%).<br><b>EC2 Instance SP</b> — נעול למשפחה ואזור (~72%).<br><b>Standard RI</b> — הנחה מרבית, נוקשה. <b>Convertible RI</b> — ניתן להחלפה, הנחה נמוכה יותר."},
-{c:"Cost",f:"מחלקות אחסון S3 לפי עלות",b:"Standard ← Intelligent-Tiering ← Standard-IA ← One Zone-IA ← Glacier Instant (min 90d) ← Glacier Flexible (min 90d) ← <b>Deep Archive</b> (min 180d, אחזור 12–48 שעות, הזול ביותר)."},
-{c:"Cost",f:"כלל האצבע להעברת נתונים גדולה",b:"חשב: TB × 8000 / (Mbps) = שניות. אם התוצאה שבועות/חודשים ⇐ <b>Snow Family</b>. עד ~10TB עם קו רחב ⇐ DataSync / Direct Connect."},
-{c:"Cost",f:"שלושת החשדים המיידיים לחיסכון",b:"1. <b>NAT Gateway</b> ⇐ החלף ב־Gateway Endpoints ל־S3/DynamoDB (חינם).<br>2. <b>gp2</b> ⇐ gp3.<br>3. <b>data transfer out</b> ⇐ CloudFront."},
-{c:"Performance",f:"DAX מול ElastiCache",b:"<b>DAX</b> — רק ל־DynamoDB, <b>תואם API</b> (בלי שינוי קוד), מיקרו־שניות.<br><b>ElastiCache</b> — כללי (Redis/Memcached), דורש לוגיקת cache-aside בקוד."},
-{c:"Performance",f:"Redis מול Memcached",b:"<b>Redis</b>: replication, persistence, Multi-AZ + failover, sorted sets, pub/sub, transactions.<br><b>Memcached</b>: multi-threaded, sharding פשוט, ללא persistence או replication."},
-{c:"Performance",f:"GSI מול LSI ב־DynamoDB",b:"<b>GSI</b>: partition key שונה, ניתן ליצירה <b>בכל עת</b>, קיבולת נפרדת, eventually consistent.<br><b>LSI</b>: אותו partition key, sort key שונה, <b>רק בזמן יצירת הטבלה</b>, מגבלת 10GB לפרטישן."},
-{c:"Performance",f:"FSx — איזה סוג?",b:"<b>Windows File Server</b> — SMB, NTFS, Active Directory.<br><b>Lustre</b> — HPC/ML, מאות GB/s, מקושר ל־S3.<br><b>NetApp ONTAP</b> — רב־פרוטוקולי (NFS+SMB+iSCSI), snapshots.<br><b>OpenZFS</b> — NFS עם snapshots ו־cloning."},
-{c:"Identity",f:"Cognito User Pool מול Identity Pool",b:"<b>User Pool</b> = אימות. ספריית משתמשים, sign-up/sign-in, social IdP ⇐ מחזיר JWT.<br><b>Identity Pool</b> = הרשאה. ממיר token ל־credentials זמניים של AWS דרך STS."},
-{c:"Identity",f:"SCP מול Permissions Boundary מול IAM Policy",b:"<b>SCP</b> — תקרה ברמת חשבון/OU בארגון. לא מעניקה, רק מגבילה.<br><b>Permissions Boundary</b> — תקרה ל־identity בודד (מאפשר האצלת יצירת roles).<br><b>IAM Policy</b> — ההרשאה בפועל. ההרשאה האפקטיבית = החיתוך של כולן."},
-{c:"Ops",f:"גישה למכונות בלי bastion",b:"<b>Systems Manager Session Manager</b>: אין פורטים נכנסים, אין מפתחות SSH, בקרה ב־IAM, הקלטת סשן ל־S3/CloudWatch. תשובה קבועה ל־\"eliminate bastion hosts\"."},
-{c:"Ops",f:"CloudTrail מול Config מול CloudWatch",b:"<b>CloudTrail</b> — <b>מי</b> עשה <b>מה</b> (API calls).<br><b>Config</b> — <b>מה מצב</b> המשאב ואיך השתנה + תאימות.<br><b>CloudWatch</b> — מטריקות, לוגים והתראות ביצועים."},
-{c:"Ops",f:"Organizations / Control Tower / RAM",b:"<b>Organizations</b> — מבנה חשבונות, OUs, SCPs, חיוב מאוחד.<br><b>Control Tower</b> — landing zone מוכן: guardrails, לוגים מרוכזים, Account Factory.<br><b>RAM</b> — שיתוף משאבים (subnets, TGW, Route53 rules) בין חשבונות."},
+{id:1,c:"Compute",f:"Multi-AZ vs Read Replica ב־RDS",b:"<b>Multi-AZ</b> = זמינות. שכפול <b>סינכרוני</b>, standby לא נגיש לקריאה, failover אוטומטי, RPO≈0.<br><b>Read Replica</b> = ביצועים. שכפול <b>א־סינכרוני</b>, נגיש לקריאה, קידום ידני, יכול להיות חוצה־אזור."},
+{id:2,c:"Storage",f:"gp2 מול gp3",b:"<b>gp2</b>: IOPS צמודים לגודל (3/GB), מקס' 16,000.<br><b>gp3</b>: 3,000 IOPS + 125MB/s בבסיס, ניתן להגדלה <b>ללא תלות בגודל</b>, זול בכ־20%.<br>כלל: \"ניפחנו נפח כדי לקבל IOPS\" ⇐ עבור ל־gp3."},
+{id:3,c:"Storage",f:"מתי io2 Block Express?",b:"כשצריך מעל 16,000 IOPS לנפח בודד, latency תת־מילישנייה, או עמידות 99.999%. מסדי נתונים קריטיים בלבד — יקר."},
+{id:4,c:"Networking",f:"Gateway Endpoint מול Interface Endpoint",b:"<b>Gateway</b>: רק S3 ו־DynamoDB. <b>חינם</b>. מוסיף route ל־route table.<br><b>Interface (PrivateLink)</b>: כמעט כל שירות. ENI עם IP פרטי. <b>עלות שעתית + לכל GB</b>.<br>שאלת עלות ⇐ Gateway."},
+{id:5,c:"Networking",f:"NLB מול ALB מול GWLB",b:"<b>ALB</b> — L7, HTTP/HTTPS, path/host routing, WAF.<br><b>NLB</b> — L4, TCP/UDP/TLS, מיליוני RPS, שומר source IP, <b>Elastic IP סטטי</b>.<br><b>GWLB</b> — פריסת appliances לבדיקת תעבורה (GENEVE)."},
+{id:6,c:"Networking",f:"CloudFront מול Global Accelerator",b:"<b>CloudFront</b> — CDN, מטמין תוכן, HTTP/HTTPS בלבד.<br><b>Global Accelerator</b> — אין cache, <b>IP anycast סטטי</b>, TCP <b>וגם UDP</b>, failover אזורי בשניות.<br>UDP/gaming/IoT ⇐ Global Accelerator."},
+{id:7,c:"Security",f:"Security Group מול NACL",b:"<b>SG</b>: stateful, ברמת ENI, <b>Allow בלבד</b>, כל הכללים נבדקים.<br><b>NACL</b>: stateless, ברמת subnet, Allow <b>ו־Deny</b>, נבדק לפי מספר סידורי עולה.<br>חסימת IP ספציפי ⇐ NACL."},
+{id:8,c:"Security",f:"Secrets Manager מול Parameter Store",b:"<b>Secrets Manager</b>: <b>rotation אוטומטי מובנה</b> ל־RDS/Redshift/DocumentDB, cross-account, בתשלום.<br><b>Parameter Store</b>: חינם (Standard), SecureString עם KMS, ללא rotation מובנה.<br>המילה \"automatic rotation\" ⇐ Secrets Manager."},
+{id:9,c:"Security",f:"KMS מול CloudHSM",b:"<b>KMS</b>: מנוהל, multi-tenant, משולב בכל שירותי AWS, FIPS 140-3 L3 במודולים.<br><b>CloudHSM</b>: אשכול HSM <b>ייעודי ובלעדי</b>, FIPS 140-2 Level 3, AWS ללא גישה למפתחות.<br>\"dedicated / exclusive control\" ⇐ CloudHSM."},
+{id:10,c:"Security",f:"GuardDuty / Inspector / Macie / Detective",b:"<b>GuardDuty</b> — זיהוי איומים (CloudTrail, DNS, Flow Logs), ללא agent.<br><b>Inspector</b> — פגיעויות CVE ב־EC2/ECR/Lambda.<br><b>Macie</b> — גילוי PII ב־S3.<br><b>Detective</b> — חקירת שורש ממצא.<br><b>Security Hub</b> — ריכוז כל הממצאים."},
+{id:11,c:"Security",f:"מניעת SSRF שגונב credentials",b:"אכוף <b>IMDSv2</b> (token מבוסס PUT) + <code>hop-limit=1</code>. זו התשובה הרשמית של AWS מול SSRF על metadata."},
+{id:12,c:"Resilience",f:"ארבע אסטרטגיות DR",b:"<b>Backup & Restore</b> — RTO/RPO שעות. הזול ביותר.<br><b>Pilot Light</b> — נתונים חמים, compute כבוי. RTO עשרות דקות.<br><b>Warm Standby</b> — סביבה מוקטנת ופעילה. RTO דקות.<br><b>Multi-site active/active</b> — RTO/RPO כמעט 0. היקר ביותר."},
+{id:13,c:"Resilience",f:"מדיניות ניתוב ב־Route 53",b:"<b>Simple</b>, <b>Weighted</b> (חלוקה יחסית / canary), <b>Latency</b> (הביצועים הטובים ביותר), <b>Failover</b> (active/passive), <b>Geolocation</b> (לפי מיקום/רגולציה), <b>Geoproximity</b> (עם bias), <b>Multivalue</b> (עד 8 תשובות תקינות)."},
+{id:14,c:"Resilience",f:"Placement Groups",b:"<b>Cluster</b> — קרבה מרבית, latency נמוך, HPC. סיכון כשל משותף.<br><b>Spread</b> — חומרה נפרדת, עד 7 מכונות ל־AZ. עמידות מרבית.<br><b>Partition</b> — קבוצות גדולות מודעות topology: HDFS, Kafka, Cassandra."},
+{id:15,c:"Integration",f:"SQS מול SNS מול EventBridge מול Kinesis",b:"<b>SQS</b> — תור, צרכן אחד לכל הודעה, buffering.<br><b>SNS</b> — pub/sub, fan-out, push.<br><b>EventBridge</b> — ניתוב אירועים לפי תוכן, schema registry, SaaS partners, מתוזמן.<br><b>Kinesis</b> — streaming עם סדר, מספר צרכנים, <b>replay</b>."},
+{id:16,c:"Integration",f:"מתי SQS FIFO?",b:"כשצריך סדר מדויק ו/או exactly-once. <code>MessageGroupId</code> שומר סדר בתוך קבוצה ומאפשר מקביליות בין קבוצות. תפוקה נמוכה יותר מ־standard."},
+{id:17,c:"Integration",f:"Visibility Timeout",b:"הזמן שבו הודעה שנמשכה מוסתרת משאר הצרכנים. קצר מדי ⇐ עיבוד כפול. ברירת מחדל 30 שניות, מקסימום 12 שעות. ניתן להארכה דינמית ב־<code>ChangeMessageVisibility</code>."},
+{id:18,c:"Cost",f:"Savings Plans מול Reserved Instances",b:"<b>Compute SP</b> — הגמיש ביותר: EC2 בכל משפחה/אזור + Fargate + Lambda (~66%).<br><b>EC2 Instance SP</b> — נעול למשפחה ואזור (~72%).<br><b>Standard RI</b> — הנחה מרבית, נוקשה. <b>Convertible RI</b> — ניתן להחלפה, הנחה נמוכה יותר."},
+{id:19,c:"Cost",f:"מחלקות אחסון S3 לפי עלות",b:"Standard ← Intelligent-Tiering ← Standard-IA ← One Zone-IA ← Glacier Instant (min 90d) ← Glacier Flexible (min 90d) ← <b>Deep Archive</b> (min 180d, אחזור 12–48 שעות, הזול ביותר)."},
+{id:20,c:"Cost",f:"כלל האצבע להעברת נתונים גדולה",b:"חשב: TB × 8000 / (Mbps) = שניות. אם התוצאה שבועות/חודשים ⇐ <b>Snow Family</b>. עד ~10TB עם קו רחב ⇐ DataSync / Direct Connect."},
+{id:21,c:"Cost",f:"שלושת החשדים המיידיים לחיסכון",b:"1. <b>NAT Gateway</b> ⇐ החלף ב־Gateway Endpoints ל־S3/DynamoDB (חינם).<br>2. <b>gp2</b> ⇐ gp3.<br>3. <b>data transfer out</b> ⇐ CloudFront."},
+{id:22,c:"Performance",f:"DAX מול ElastiCache",b:"<b>DAX</b> — רק ל־DynamoDB, <b>תואם API</b> (בלי שינוי קוד), מיקרו־שניות.<br><b>ElastiCache</b> — כללי (Redis/Memcached), דורש לוגיקת cache-aside בקוד."},
+{id:23,c:"Performance",f:"Redis מול Memcached",b:"<b>Redis</b>: replication, persistence, Multi-AZ + failover, sorted sets, pub/sub, transactions.<br><b>Memcached</b>: multi-threaded, sharding פשוט, ללא persistence או replication."},
+{id:24,c:"Performance",f:"GSI מול LSI ב־DynamoDB",b:"<b>GSI</b>: partition key שונה, ניתן ליצירה <b>בכל עת</b>, קיבולת נפרדת, eventually consistent.<br><b>LSI</b>: אותו partition key, sort key שונה, <b>רק בזמן יצירת הטבלה</b>, מגבלת 10GB לפרטישן."},
+{id:25,c:"Performance",f:"FSx — איזה סוג?",b:"<b>Windows File Server</b> — SMB, NTFS, Active Directory.<br><b>Lustre</b> — HPC/ML, מאות GB/s, מקושר ל־S3.<br><b>NetApp ONTAP</b> — רב־פרוטוקולי (NFS+SMB+iSCSI), snapshots.<br><b>OpenZFS</b> — NFS עם snapshots ו־cloning."},
+{id:26,c:"Identity",f:"Cognito User Pool מול Identity Pool",b:"<b>User Pool</b> = אימות. ספריית משתמשים, sign-up/sign-in, social IdP ⇐ מחזיר JWT.<br><b>Identity Pool</b> = הרשאה. ממיר token ל־credentials זמניים של AWS דרך STS."},
+{id:27,c:"Identity",f:"SCP מול Permissions Boundary מול IAM Policy",b:"<b>SCP</b> — תקרה ברמת חשבון/OU בארגון. לא מעניקה, רק מגבילה.<br><b>Permissions Boundary</b> — תקרה ל־identity בודד (מאפשר האצלת יצירת roles).<br><b>IAM Policy</b> — ההרשאה בפועל. ההרשאה האפקטיבית = החיתוך של כולן."},
+{id:28,c:"Ops",f:"גישה למכונות בלי bastion",b:"<b>Systems Manager Session Manager</b>: אין פורטים נכנסים, אין מפתחות SSH, בקרה ב־IAM, הקלטת סשן ל־S3/CloudWatch. תשובה קבועה ל־\"eliminate bastion hosts\"."},
+{id:29,c:"Ops",f:"CloudTrail מול Config מול CloudWatch",b:"<b>CloudTrail</b> — <b>מי</b> עשה <b>מה</b> (API calls).<br><b>Config</b> — <b>מה מצב</b> המשאב ואיך השתנה + תאימות.<br><b>CloudWatch</b> — מטריקות, לוגים והתראות ביצועים."},
+{id:30,c:"Ops",f:"Organizations / Control Tower / RAM",b:"<b>Organizations</b> — מבנה חשבונות, OUs, SCPs, חיוב מאוחד.<br><b>Control Tower</b> — landing zone מוכן: guardrails, לוגים מרוכזים, Account Factory.<br><b>RAM</b> — שיתוף משאבים (subnets, TGW, Route53 rules) בין חשבונות."},
 ];
 
 /* ===== Exam meta (verified against the official AWS exam guide) ===== */
@@ -1142,16 +1754,34 @@ domains:[
 
 /* ================= storage layer ================= */
 const Store=(()=>{
-  const KEY="saa_c03_state_v1"; let mem=null;
-  const blank=()=>({ans:{},sessions:[],cards:{},streak:{last:null,n:0},v:1});
+  const KEY="saa_c03_state_v1"; const STATE_V=2; let mem=null;
+  const blank=()=>({ans:{},sessions:[],cards:{},streak:{last:null,n:0},exam:null,v:STATE_V});
+  /* Defends against corrupted or partial localStorage data (manual edits, a browser
+     extension, or a future schema change) — JSON.parse succeeding does NOT guarantee
+     the shape is valid, so every field is defensively checked. Without this, a value
+     like "{}" would make Store.s.ans undefined and crash the whole app on the next
+     answer (record() does Store.s.ans[qid]=...). This always returns a fully-shaped
+     state object, silently repairing anything missing or malformed. */
+  function normalize(raw){
+    const b=blank();
+    if(!raw||typeof raw!=="object") return b;
+    return {
+      ans:(raw.ans&&typeof raw.ans==="object")?raw.ans:b.ans,
+      sessions:Array.isArray(raw.sessions)?raw.sessions:b.sessions,
+      cards:(raw.cards&&typeof raw.cards==="object")?raw.cards:b.cards,
+      streak:(raw.streak&&typeof raw.streak==="object")?{last:raw.streak.last??null,n:raw.streak.n||0}:b.streak,
+      exam:(raw.exam&&typeof raw.exam==="object")?raw.exam:b.exam,
+      v:STATE_V
+    };
+  }
   async function load(){
     if(mem) return mem;
     try{
       if(window.storage&&window.storage.get){
-        const r=await window.storage.get(KEY); mem=r&&r.value?JSON.parse(r.value):blank(); return mem;
+        const r=await window.storage.get(KEY); mem=normalize(r&&r.value?JSON.parse(r.value):null); return mem;
       }
     }catch(e){}
-    try{ const s=localStorage.getItem(KEY); mem=s?JSON.parse(s):blank(); }catch(e){ mem=blank(); }
+    try{ const s=localStorage.getItem(KEY); mem=normalize(s?JSON.parse(s):null); }catch(e){ mem=blank(); }
     return mem;
   }
   let t=null;
@@ -1175,6 +1805,18 @@ const LET="ABCDE";
 /* ================= helpers ================= */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+/* Defense-in-depth for question explanations (q.e/q.w) and flashcard text (c.f/c.b):
+   all of it is developer-authored and shipped inside this same file today, so there is
+   no live injection path — but these fields intentionally render a *few* formatting
+   tags (<b>, <code>, <br>, <i>) via innerHTML rather than being fully escaped like
+   option text. safeHTML() strips anything outside a small allowlist (and all
+   attributes on the tags it keeps), so a stray "<script>"/"<img onerror=...>" pasted
+   into future content — e.g. from an unreviewed contribution — can never execute. */
+const SAFE_TAGS=new Set(["b","code","br","i","em","strong"]);
+const safeHTML=s=>s==null?"":String(s).replace(/<(\/?)([a-zA-Z0-9]+)[^>]*>/g,(m,slash,tag)=>{
+  tag=tag.toLowerCase();
+  return SAFE_TAGS.has(tag)?`<${slash}${tag}>`:"";
+});
 const eq=(a,b)=>a.length===b.length&&[...a].sort().every((v,i)=>v===[...b].sort()[i]);
 const pct=(a,b)=>b?Math.round(a/b*100):0;
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -1317,7 +1959,21 @@ function buildExam(){
 }
 R.exam=()=>{ if(!EX) renderExamIntro(); else if(EX.done) renderResults(); else renderExamQ(); };
 
+/* Persist in-progress exam state so a refresh, tab close, or phone lock mid-exam
+   never silently discards up to 65 answered questions — Store.s.exam holds a plain,
+   serializable snapshot of EX (everything except the setInterval handle). Cleared
+   once the exam finishes or the user explicitly discards it.
+   Uses Store.save() directly (not the 400ms-debounced Store.flush()) — this fires on
+   every question navigation, so a refresh a moment after the last click must not lose
+   it to an in-flight debounce timer. */
+function persistExam(){
+  if(!EX||EX.done){ Store.s.exam=null; } else { const {timer,...rest}=EX; Store.s.exam=rest; }
+  Store.save();
+}
+window.persistExam=persistExam;
+
 function renderExamIntro(){
+  const resume=Store.s.exam;
   $("#v-exam").innerHTML=`
   <div class="card">
     <h3>מבחן סימולציה מלא</h3>
@@ -1325,8 +1981,12 @@ function renderExamIntro(){
     <div class="chips">
       ${EXAM.domains.map(d=>`<span class="chip"><span class="tag d${d.id}">D${d.id}</span> ${d.w}%</span>`).join("")}
     </div>
-    <div class="note">טיפ ניהול זמן: ${EXAM.minutes} דקות ל־${EXAM.questions} שאלות = כ־<b>2 דקות לשאלה</b>. אם שאלה תקועה מעל 3 דקות — סמן דגל, נחש, והמשך.</div>
-    <button class="btn wide" onclick="EX=buildExam();startTimer();renderExamQ()" style="margin-top:6px">התחל מבחן</button>
+    ${resume?`<div class="note">נמצא מבחן פתוח מהפעם הקודמת — נענו ${Object.keys(resume.pick).length}/${resume.qs.length} שאלות, נותרו ${fmt(resume.left)}. אפשר להמשיך אותו או למחוק ולהתחיל מחדש.</div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn wide" onclick="EX=Store.s.exam;startTimer();renderExamQ()">המשך מבחן פתוח</button>
+      <button class="btn ghost wide" onclick="if(confirm('למחוק את המבחן הפתוח ולהתחיל חדש?')){Store.s.exam=null;Store.flush();EX=buildExam();persistExam();startTimer();renderExamQ();}">מבחן חדש</button>
+    </div>`:`<div class="note">טיפ ניהול זמן: ${EXAM.minutes} דקות ל־${EXAM.questions} שאלות = כ־<b>2 דקות לשאלה</b>. אם שאלה תקועה מעל 3 דקות — סמן דגל, נחש, והמשך.</div>
+    <button class="btn wide" onclick="EX=buildExam();persistExam();startTimer();renderExamQ()" style="margin-top:6px">התחל מבחן</button>`}
   </div>`;
 }
 function startTimer(){
@@ -1337,10 +1997,12 @@ function startTimer(){
     const el=$("#timer");
     if(el){ el.textContent=fmt(EX.left);
       el.className="t"+(EX.left<300?" crit":EX.left<900?" warn":""); }
+    if(EX.left%15===0) persistExam();
     if(EX.left<=0){ clearInterval(EX.timer); finishExam(); }
   },1000);
 }
 function renderExamQ(){
+  persistExam();
   const q=EX.qs[EX.cur], sel=EX.pick[q.i]||[];
   const answered=Object.keys(EX.pick).length;
   $("#v-exam").innerHTML=`
@@ -1358,9 +2020,9 @@ function renderExamQ(){
   <div class="card">
     <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
       ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
-    <div class="stem">${q.q}</div>
-    <div class="opts">${q.o.map((o,i)=>
-      `<button class="opt ${sel.includes(i)?"sel":""}" onclick="pickOpt(${q.i},${i})">
+    <div class="stem">${safeHTML(q.q)}</div>
+    <div class="opts" role="group" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>
+      `<button class="opt ${sel.includes(i)?"sel":""}" role="${q.ty==="m"?"checkbox":"radio"}" aria-checked="${sel.includes(i)}" onclick="pickOpt(${q.i},${i})">
         <span class="k">${LET[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
   </div>
   <div class="row">
@@ -1393,7 +2055,7 @@ function finishExam(){
   });
   EX.res={ok,d,secs:Math.round((Date.now()-EX.t0)/1000)};
   Store.s.sessions.push({at:Date.now(),ok,total:EX.qs.length,score:scaled(ok,EX.qs.length),secs:EX.res.secs});
-  Store.flush(); renderResults();
+  Store.s.exam=null; Store.flush(); renderResults();
 }
 function renderResults(){
   const {ok,d,secs}=EX.res, sc=scaled(ok,EX.qs.length), pass=sc>=EXAM.pass;
@@ -1439,17 +2101,17 @@ function qReviewHTML(q,sel,good){
   return `<div class="card">
     <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
       ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
-    <div class="stem">${q.q}</div>
+    <div class="stem">${safeHTML(q.q)}</div>
     <div class="opts">${q.o.map((o,i)=>{
       const isA=q.a.includes(i), isS=sel.includes(i);
       return `<div class="opt ${isA?"good":isS?"bad":"dim"}">
         <span class="k">${LET[i]}</span><span>${esc(o)}${isA?"  ✓":isS?"  ✗":""}</span></div>`;
     }).join("")}</div>
-    <div class="expl ${good?"ok":"no"}">
+    <div class="expl ${good?"ok":"no"}" role="status" aria-live="polite">
       <div class="hd">${good?"✓ תשובה נכונה":"✗ תשובה שגויה"} — ${q.a.map(i=>LET[i]).join(", ")}</div>
-      <div class="body">${q.e}</div>
+      <div class="body">${safeHTML(q.e)}</div>
       ${q.w&&q.w.some(x=>x)?`<div class="whywrong">${q.w.map((x,i)=>x
-        ?`<div><b>${LET[i]}</b> — ${x}</div>`:"").join("")}</div>`:""}
+        ?`<div><b>${LET[i]}</b> — ${safeHTML(x)}</div>`:"").join("")}</div>`:""}
     </div>
   </div>`;
 }
@@ -1503,9 +2165,9 @@ function renderPr(){
   <div class="card">
     <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
       ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}</div>
-    <div class="stem">${q.q}</div>
-    <div class="opts">${q.o.map((o,i)=>
-      `<button class="opt ${PR.sel.includes(i)?"sel":""}" onclick="prPick(${i})">
+    <div class="stem">${safeHTML(q.q)}</div>
+    <div class="opts" role="group" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>
+      `<button class="opt ${PR.sel.includes(i)?"sel":""}" role="${q.ty==="m"?"checkbox":"radio"}" aria-checked="${PR.sel.includes(i)}" onclick="prPick(${i})">
         <span class="k">${LET[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
   </div>`}
   <div class="row">
@@ -1541,24 +2203,39 @@ function topicPills(tp){
 let CD={cat:"all",i:0,flip:false};
 R.cards=()=>renderCards();
 function cardPool(){ return CD.cat==="all"?CARDS:CARDS.filter(c=>c.c===CD.cat); }
+function cardStat(id){ return Store.s.cards[id]||null; }
+function cardMark(ok){
+  const pool=cardPool(), c=pool[CD.i]; if(!c) return;
+  const m=Store.s.cards, r=m[c.id]||{n:0,ok:0,box:1,last:0};
+  r.n++; if(ok){r.ok++; r.box=Math.min(3,r.box+1);} else {r.box=1;}
+  r.last=Date.now(); m[c.id]=r; Store.flush();
+  CD.i=(CD.i+1)%pool.length; CD.flip=false; renderCards();
+}
+window.cardMark=cardMark;
 function renderCards(){
   const cats=[...new Set(CARDS.map(c=>c.c))];
   const pool=cardPool(); if(CD.i>=pool.length) CD.i=0;
-  const c=pool[CD.i];
+  const c=pool[CD.i], st=cardStat(c.id);
+  const seen=pool.filter(x=>cardStat(x.id)).length;
   $("#v-cards").innerHTML=`
   <div class="card tight">
     <div class="chips">
       <button class="chip ${CD.cat==="all"?"on":""}" onclick="CD.cat='all';CD.i=0;CD.flip=false;renderCards()">הכל</button>
       ${cats.map(x=>`<button class="chip ${CD.cat===x?"on":""}" onclick="CD.cat='${x}';CD.i=0;CD.flip=false;renderCards()">${x}</button>`).join("")}
     </div>
+    <div class="muted" style="margin-top:8px">נסקרו ${seen}/${pool.length} בבחירה הנוכחית${st?` · הכרטיסייה הזו: ${st.ok}/${st.n} ידעת`:""}</div>
   </div>
   <div class="fc" onclick="CD.flip=!CD.flip;renderCards()">
-    <div class="front">${c.f}</div>
-    ${CD.flip?`<div class="back">${c.b}</div>`:`<div class="hint">הקש לחשיפת התשובה</div>`}
+    <div class="front">${safeHTML(c.f)}</div>
+    ${CD.flip?`<div class="back">${safeHTML(c.b)}</div>`:`<div class="hint">הקש לחשיפת התשובה</div>`}
   </div>
+  ${CD.flip?`<div class="row" style="margin-top:10px">
+    <button class="btn ghost" style="flex:1" onclick="event.stopPropagation();cardMark(false)">לא ידעתי</button>
+    <button class="btn" style="flex:1" onclick="event.stopPropagation();cardMark(true)">ידעתי ✓</button>
+  </div>`:""}
   <div class="row" style="margin-top:14px">
     <button class="btn ghost" onclick="CD.i=(CD.i-1+${pool.length})%${pool.length};CD.flip=false;renderCards()">הקודם</button>
-    <button class="btn" onclick="CD.i=(CD.i+1)%${pool.length};CD.flip=false;renderCards()">הבא</button>
+    <button class="btn ghost" onclick="CD.i=(CD.i+1)%${pool.length};CD.flip=false;renderCards()">הבא (בלי לסמן)</button>
     <span class="muted" style="align-self:center;font-family:var(--mono)">${CD.i+1}/${pool.length}</span>
   </div>
   <div class="note">הכרטיסיות האלה הן <b>כללי הכרעה</b>, לא הגדרות. במבחן רוב השאלות נפתרות בזיהוי מילת מפתח אחת בתרחיש — למשל "no operational overhead", "interruptible", "lowest cost", "sub-millisecond".</div>`;
@@ -1588,6 +2265,13 @@ R.stats=()=>{
     <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">תרגל את הטעויות שלי</button></div>`:""}
   <h2 class="sec">שליטה לפי נושא</h2>
   <div class="card">${topicPills(o.tp)}</div>
+  <h2 class="sec">כרטיסיות</h2>
+  <div class="card tight">
+    ${(()=>{ const seen=CARDS.filter(c=>Store.s.cards[c.id]).length,
+              tot=CARDS.reduce((a,c)=>{const s=Store.s.cards[c.id];if(s){a[0]+=s.ok;a[1]+=s.n;}return a;},[0,0]);
+      return `<div class="muted">${seen}/${CARDS.length} כרטיסיות נסקרו${tot[1]?` · ${pct(tot[0],tot[1])}% ידעת מתוך ${tot[1]} סקירות`:""}</div>`; })()}
+    <button class="btn wide ghost" style="margin-top:10px" onclick="go('cards')">לתרגול כרטיסיות</button>
+  </div>
   ${ses.length?`<h2 class="sec">היסטוריית מבחנים</h2>
   <div class="card tight">${ses.map(s=>
     `<div class="kv"><span>${new Date(s.at).toLocaleDateString("he-IL")}</span>

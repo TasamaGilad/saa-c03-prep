@@ -1,5 +1,10 @@
-/* Cache-first service worker — makes the app fully usable offline. */
-const CACHE = "saa-c03-v1";
+/* Cache-first service worker — makes the app fully usable offline.
+   IMPORTANT: bump the CACHE version string on every content/code release. Because
+   this is cache-first, a stale service worker keeps serving the OLD index.html
+   (old question bank, old bug fixes) to returning users until the browser's own
+   byte-diff update cycle happens to run — which can take a while for a PWA that's
+   opened infrequently. Bumping the name forces immediate cache invalidation. */
+const CACHE = "saa-c03-v2";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", e => {

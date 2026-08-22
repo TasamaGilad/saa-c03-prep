@@ -190,6 +190,14 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 .trbtn:hover{border-color:var(--dim2);color:var(--txt)}
 .trbtn.on{background:var(--vio);color:#fff;border-color:var(--vio)}
 html[data-t="light"] .trbtn.on{color:#000;font-weight:800}
+/* AA-safe small-text color variants: --acc (3.4:1) and --amber (3.8:1) pass WCAG AA only at
+   large-text sizes (≥24px or ≥18.66px bold) in light mode. Any SMALL text (topic rows, section
+   labels) that colors itself "success green" or "warning amber" must use these classes instead
+   of the raw CSS vars directly, so it stays ≥4.5:1 in both themes. Dark mode already clears
+   4.5:1 with the raw vars (8.77:1 / 8.42:1), so only light mode needs an override. */
+.acc-txt{color:var(--acc)} .amber-txt{color:var(--amber)}
+html[data-t="light"] .acc-txt{color:#0C8268}
+html[data-t="light"] .amber-txt{color:#A36704}
 .qmeta .trbtn{margin-inline-start:auto;margin-inline-end:0}
 .pauseCard{text-align:center;padding:34px 20px}
 .pauseIc{font-size:38px;margin-bottom:8px;opacity:.85}
@@ -220,6 +228,9 @@ html[data-t="light"] .trbtn.on{color:#000;font-weight:800}
 .navgrid button.cur{border-color:var(--acc);color:var(--acc);font-weight:700}
 .navgrid button.ok{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
 .navgrid button.no{background:var(--red-d);border-color:var(--red);color:var(--red)}
+.navgrid button.skip{background:var(--surf2);border-color:var(--dim);color:var(--dim);position:relative}
+.navgrid button.skip::after{content:"×";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:18px;font-weight:700;color:var(--dim)}
 
 /* flashcard */
 .fc{border:1px solid var(--line);border-radius:14px;background:linear-gradient(160deg,var(--surf),var(--surf2));
@@ -251,7 +262,7 @@ select,input[type=number]{background:var(--surf2);border:1px solid var(--line);c
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03</span></div>
+    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v7</span></div>
     <div class="spacer"></div>
     <button class="icobtn" id="themeBtn" title="מצב תצוגה">◐</button>
   </div>
@@ -787,6 +798,48 @@ o:["Install the Amazon Inspector agent on the instance to capture a full packet 
 a:[1],
 e:"<b>VPC Flow Logs</b> לוכדים מטא-דאטה של תעבורת IP - IP מקור/יעד, פורטים, פרוטוקול, ACCEPT או REJECT, כמות bytes - ברמת ENI, subnet או VPC שלם, וניתן לשלוח אותם ל-<code>CloudWatch Logs</code> או ל-<code>S3</code> ולשמור לפרק זמן ארוך. שאילתות על 30 יום אחורה, כולל ניסיונות שנחסמו, מתבצעות בנוחות עם CloudWatch Logs Insights או Athena. תבנית זיהוי: 'חקירת תעבורת רשת בזמן עבר, בלי payload' = VPC Flow Logs.",
 w:["Amazon Inspector מבצע הערכת פגיעויות וחשיפת רשת - הוא לא מבצע לכידת חבילות (packet capture) רציפה ולא שומר PCAP גולמי ל-30 יום.","","CloudTrail מתעד קריאות API לניהול AWS (management/data events של שירותים נתמכים) - הוא לא מתעד תעבורת רשת IP בין instances.","GuardDuty מנתח כקלט VPC Flow Logs, DNS logs ו-CloudTrail כדי לייצר ממצאי threat intelligence - הוא לא שומר או חושף לוג חבילות גולמי בעצמו; המקור לפרטי ה-IP הוא בדיוק ה-Flow Logs."]},
+{i:161,d:1,t:"CloudTrail",lv:2,ty:"s",
+q:"A security team must be able to determine which IAM principal deleted a specific Amazon S3 bucket last Tuesday, including the source IP address of the request. Which AWS service provides this information?",
+o:["Amazon CloudWatch Logs","AWS CloudTrail","Amazon S3 Server Access Logging","AWS Config"],
+a:[1],
+e:"<b>AWS CloudTrail</b> מתעד כל קריאת API שבוצעה בחשבון - כולל <code>DeleteBucket</code> - יחד עם ה־IAM principal, ה־source IP, וה־timestamp. זה בדיוק כלי ה־audit-trail למי-עשה-מה. תבנית זיהוי במבחן: 'מי ביצע פעולה X ומתי' → CloudTrail. לעומת זאת CloudWatch עוסק במטריקות/לוגים תפעוליים, ו-Config עוסק בהיסטוריית תצורה (לא זהות המבצע).",
+w:["CloudWatch Logs שומר לוגים תפעוליים של אפליקציות/שירותים - הוא לא מתעד קריאות API לניהול משאבים כמו מחיקת bucket.","","S3 Server Access Logging מתעד בקשות גישה ל-objects בתוך ה-bucket (GET/PUT), אך לא את פעולת ה-API של מחיקת ה-bucket עצמו ולא IAM principal ברמה שימושית לחקירה כזו.","AWS Config עוקב אחר שינויי תצורה לאורך זמן (מה השתנה), אך לא מספק את זהות המבצע ואת ה-source IP באותה צורה ישירה שCloudTrail מספק."]},
+
+{i:162,d:1,t:"Control Tower",lv:3,ty:"s",
+q:"A company is expanding from a single AWS account to a multi-account structure for different business units. They need to automatically provision new accounts with pre-approved security guardrails, a centralized logging account, and a standardized account baseline, with minimal ongoing manual setup. What should a solutions architect recommend?",
+o:["Use AWS Organizations alone to create a Service Control Policy (SCP) for every new account manually.","Use AWS Control Tower to set up a landing zone with account factory and mandatory guardrails.","Create a CloudFormation template that provisions a new AWS account through the AWS CLI for each business unit.","Use AWS IAM Identity Center only, and rely on each business unit to configure its own account security."],
+a:[1],
+e:"<b>AWS Control Tower</b> בונה \"landing zone\" מעל AWS Organizations: הוא כולל <b>Account Factory</b> ליצירת חשבונות חדשים בצורה אוטומטית וסטנדרטית, guardrails מובנים (מבוססי SCP + AWS Config rules) שנאכפים אוטומטית על כל חשבון חדש, ו-חשבון logging/audit מרוכז. זה בדיוק הפתרון ל'multi-account governance עם מינימום תחזוקה ידנית'.",
+w:["Organizations לבד יכול ליצור SCPs, אך אין בו account factory אוטומטי או guardrails מובנים מראש - התחזוקה הידנית לכל חשבון חדש נשארת גבוהה.","","CloudFormation יכול ליצור משאבים בתוך חשבון, אך יצירת חשבונות AWS עצמם ואכיפת guardrails דורשת שכבת ניהול ייעודית (Control Tower) - זה פתרון חלקי ומורכב לתחזק.","IAM Identity Center מנהל SSO וגישה בין חשבונות, אך אינו כולל account factory או guardrails ברמת חשבון."]},
+
+{i:163,d:1,t:"ElastiCache Redis vs Memcached",lv:2,ty:"s",
+q:"An application requires an in-memory cache that supports automatic failover with a read replica, data persistence via snapshots, and Pub/Sub messaging. Which Amazon ElastiCache engine should a solutions architect choose?",
+o:["Memcached, because it supports multi-threading for higher throughput.","Redis, because it supports replication, persistence, and Pub/Sub.","Memcached, because it natively supports automatic failover across Availability Zones.","Redis, because it is the only engine ElastiCache offers."],
+a:[1],
+e:"<b>Redis</b> ב-ElastiCache תומך ב-replication (עם read replicas ו-automatic failover דרך Multi-AZ), persistence (RDB snapshots / AOF), ו-Pub/Sub messaging. Memcached הוא engine פשוט יותר - מהיר ל-cache פשוט (multi-threaded) אך ללא replication, persistence או Pub/Sub. תבנית זיהוי: כל דרישה ל'failover', 'persistence' או 'pub/sub' → Redis.",
+w:["Memcached אכן תומך multi-thread, אך זה לא רלוונטי לדרישות replication/persistence/pub-sub שבשאלה - Memcached לא תומך בהן כלל.","","Memcached הוא engine ללא state משותף בין nodes ואינו תומך ב-automatic failover - כל node עצמאי לחלוטין.","ElastiCache מציע גם Redis וגם Memcached - הבחירה תלויה בדרישות (persistence/replication מול פשטות/מהירות טהורה)."]},
+
+{i:164,d:1,t:"VPC Endpoints",lv:3,ty:"s",
+q:"A company runs workloads in a private subnet with no internet access (no NAT Gateway or Internet Gateway). Applications on EC2 instances must read and write objects to Amazon S3 and read items from a DynamoDB table, without traversing the public internet. Which solution meets these requirements with the LOWEST cost?",
+o:["Create Interface VPC Endpoints for both S3 and DynamoDB.","Create Gateway VPC Endpoints for both S3 and DynamoDB.","Deploy a NAT Gateway in a public subnet and route all traffic through it.","Use AWS PrivateLink with a Network Load Balancer in front of S3."],
+a:[1],
+e:"S3 ו-DynamoDB הם שני השירותים היחידים שתומכים ב-<b>Gateway VPC Endpoints</b> - אלה נוספים כ-route בטבלת הניתוב (route table) ואינם גובים תשלום שעתי או לפי GB כמו Interface Endpoints. לכל שאר השירותים (כמו SNS, SQS, KMS) נדרש Interface VPC Endpoint (מבוסס ENI + PrivateLink) שגובה תשלום. תבנית זיהוי: 'S3 או DynamoDB + private subnet + LOWEST cost' → Gateway Endpoint.",
+w:["Interface VPC Endpoints עובדים גם ל-S3/DynamoDB אך גובים תשלום שעתי + per-GB לכל endpoint - יקר יותר מ-Gateway Endpoint שהוא חינמי.","","NAT Gateway מוסיף עלות שעתית + per-GB, ועדיין מנתב דרך האינטרנט הציבורי (גם אם ל-AWS API endpoints) - לא עומד בדרישת 'ללא אינטרנט' ולא הכי זול.","PrivateLink רלוונטי לחיבור לשירותי SaaS/צד ג' או Interface Endpoints - הוא לא הפתרון הזול ביותר עבור S3/DynamoDB ספציפית."]},
+
+{i:165,d:1,t:"Secrets Manager",lv:2,ty:"s",
+q:"An application stores a database password in AWS Systems Manager Parameter Store as a SecureString parameter. Security policy now requires automatic rotation of this credential every 30 days without any application downtime or manual intervention. What is the LEAST operationally complex way to meet this requirement?",
+o:["Write a custom Lambda function that updates the SecureString parameter every 30 days using an EventBridge scheduled rule.","Migrate the credential to AWS Secrets Manager and enable automatic rotation with a native RDS/Aurora rotation Lambda.","Keep the credential in Parameter Store and manually rotate it every 30 days.","Store the password in an encrypted S3 object and rotate it using S3 Lifecycle rules."],
+a:[1],
+e:"<b>AWS Secrets Manager</b> תומך ב-<u>automatic rotation מובנה</u> עם Lambda functions מוכנים מראש (managed) עבור RDS, Aurora, DocumentDB, Redshift ועוד - כולל תיאום בין הסוד לבין מסד הנתונים בלי downtime. זה בדיוק ה'least operational overhead' - אין צורך לכתוב קוד rotation בעצמך. Parameter Store לעומת זאת אינו כולל rotation מובנה - חייבים לבנות אותו ידנית.",
+w:["זה פתרון עובד אך דורש לכתוב, לתחזק ולנפות שגיאות בקוד Lambda מותאם אישית - תקורה תפעולית גבוהה יותר מפתרון מנוהל.","","סיבוב ידני כל 30 יום הוא בדיוק מה שהדרישה מבקשת למנוע - תקורה תפעולית גבוהה וסיכון לטעויות אנוש.","S3 Lifecycle מיועד למחזור אחסון (מעבר class/מחיקה), לא לסיבוב credentials - זה לא פתרון תקין כלל."]},
+
+{i:166,d:1,t:"Well-Architected",lv:1,ty:"s",
+q:"A solutions architect is reviewing an existing workload against the AWS Well-Architected Framework and wants to use a free, AWS-provided tool that generates a report of risks against the framework's pillars and provides improvement recommendations. Which tool should be used?",
+o:["AWS Trusted Advisor","AWS Well-Architected Tool","Amazon Inspector","AWS Config"],
+a:[1],
+e:"<b>AWS Well-Architected Tool</b> הוא כלי חינמי שמנחה את הבדיקה מול ששת עמודי ה-Well-Architected Framework (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability), ומפיק דוח סיכונים (high/medium risk) עם המלצות שיפור ממוקדות לכל עמוד. Trusted Advisor נותן בדיקות אוטומטיות כלליות (לא מובנה סביב ה-framework המלא ולא כולל את כל העמודים באותה עומק).",
+w:["","","Inspector בודק פגיעויות תוכנה וחשיפת רשת - לא סקירה כללית מול Well-Architected Framework.","AWS Config עוקב אחר תאימות תצורה לכללים מוגדרים - לא כלי סקירה מובנה מול עמודי ה-framework."]},
+
 ];
 
 /* ===== Domain 2 — Design Resilient Architectures (26%) ===== */
@@ -1235,6 +1288,41 @@ o:["AWS Transit Gateway, acting as a central hub that each VPC and the Direct Co
 a:[0,4],
 e:"<b>AWS Transit Gateway</b> פועל כ-hub מרכזי: כל VPC (וחיבור ה-Direct Connect) מתחבר אליו פעם אחת בלבד, במקום ליצור <code>O(n²)</code> חיבורי peering בין כל זוג VPCs — כך התבנית עוברת מ-full mesh לא סקיילבילית ל-hub-and-spoke שגדל בקלות עם עשרות ומאות attachments. בנוסף, Transit Gateway תומך ב-<b>transitive routing</b>: תעבורה מ-VPC מחובר אחד יכולה לעבור דרך ה-gateway ל-VPC מחובר אחר או ל-Direct Connect בלי לדרוש חיבור peering ייעודי בין כל זוג — יכולת שאין ב-VPC peering הרגיל, שהוא non-transitive מטבעו.",
 w:["","בדיוק להפך — הרעיון המרכזי ב-Transit Gateway הוא <b>לבטל</b> את הצורך בפיירינג מלא בין כל זוג VPCs: הניתוב מתבצע דרך טבלאות הניתוב של ה-Transit Gateway עצמו, לא דרך peering.","VPC Peering לא 'מתרחב אוטומטית' — הוא נשאר מודל point-to-point לא-טרנזיטיבי בכל היקף, ולכן דורש N×(N-1)/2 חיבורים ידניים; זו בדיוק הבעיה שהתיאור מתאר.","AWS PrivateLink נועד לחשוף שירות בודד באופן חד-כיווני בין VPCs (endpoint services), לא לספק קישוריות full-mesh כללית בין רשתות.",""]},
+{i:253,d:2,t:"Aurora Global Database",lv:3,ty:"s",
+q:"A company runs an Amazon Aurora MySQL database in us-east-1 serving a global application. They need disaster recovery to a secondary AWS Region with a Recovery Time Objective (RTO) under 1 minute and Recovery Point Objective (RPO) under 1 second, and want the secondary Region to also serve low-latency local reads. Which solution meets these requirements?",
+o:["Set up a standard Aurora Read Replica in the secondary Region using asynchronous MySQL replication.","Use Aurora Global Database with a secondary Region cluster for fast local reads and rapid promotion during a disaster.","Use AWS DMS to continuously replicate the primary Aurora cluster to a secondary Region database.","Configure Amazon RDS Multi-AZ across two Regions using a single Aurora cluster."],
+a:[1],
+e:"<b>Aurora Global Database</b> נבנה בדיוק לתרחיש הזה: הוא משכפל מ-Region ראשי למספר Regions משניים באמצעות storage-based replication עם latency טיפוסי מתחת לשנייה (עומד ב-RPO<1s), ומאפשר promotion של Region משני תוך פחות מדקה (RTO<1min) - הרבה יותר מהיר מ-read replica רגיל. בנוסף, ה-Region המשני משרת קריאות מקומיות באיכות נמוכת-latency כל הזמן.",
+w:["Read Replica חוצה-Region רגיל (cross-Region) משתמש ב-replication אסינכרוני איטי יותר ואין לו promotion מהיר מובנה כמו Global Database - ה-RTO/RPO לא יעמדו בדרישה.","","DMS מיועד להעברת/הגירת נתונים בין מסדי נתונים שונים, לא לפתרון DR מובנה עם promotion מהיר - תקורה תפעולית גבוהה בהרבה.","Multi-AZ הוא בתוך Region אחד בלבד (זמינות גבוהה) - הוא לא פותר דרישת DR חוצה-Regions."]},
+
+{i:254,d:2,t:"DynamoDB Global Tables",lv:2,ty:"s",
+q:"A gaming company has players across North America, Europe, and Asia. They need a DynamoDB table that is automatically replicated across three AWS Regions, supports active-active writes in any Region, and resolves write conflicts automatically, with minimal operational effort. Which feature should they use?",
+o:["DynamoDB Streams with a custom Lambda function to copy items between Regions.","DynamoDB Global Tables.","Cross-Region S3 Replication of DynamoDB exports.","A single-Region DynamoDB table with CloudFront caching."],
+a:[1],
+e:"<b>DynamoDB Global Tables</b> מספק replication מנוהל, multi-Region, active-active (כתיבה בכל Region), עם last-writer-wins conflict resolution אוטומטי - בדיוק מה שדרוש כאן ללא בניית קוד replication בעצמך. תבנית זיהוי: 'active-active + multi-Region + DynamoDB' → Global Tables.",
+w:["אפשר לבנות replication ידני עם Streams+Lambda, אבל זה בדיוק ה-'תפעול גבוה' שהשאלה מבקשת להימנע ממנו - Global Tables עושה זאת אוטומטית.","","S3 Replication ו-DynamoDB exports אינם מספקים replication בזמן-אמת (real-time) של טבלה חיה - זה לא פותר את הדרישה.","טבלה ב-Region יחיד לא עונה על דרישת ה-multi-Region כלל - CloudFront מטמין תוכן סטטי, לא נתוני כתיבה פעילים."]},
+
+{i:255,d:2,t:"ALB vs NLB vs GWLB",lv:2,ty:"s",
+q:"A solutions architect must choose a load balancer for a fleet of EC2 instances that must inspect and filter traffic through a fleet of third-party virtual security appliances transparently, at Layer 3/4, before the traffic reaches the application. Which AWS load balancer type is designed for this use case?",
+o:["Application Load Balancer (ALB)","Network Load Balancer (NLB)","Gateway Load Balancer (GWLB)","Classic Load Balancer (CLB)"],
+a:[2],
+e:"<b>Gateway Load Balancer (GWLB)</b> תוכנן במיוחד לפריסה, ניהול והרחבה (scale) של virtual appliances צד-שלישי (firewalls, IDS/IPS) בצורה שקופה - הוא משתמש בפרוטוקול GENEVE להעברת תעבורה דרך ה-appliances לפני שהיא מגיעה ליעד. ALB עובד ב-Layer 7 (HTTP/HTTPS, routing מבוסס תוכן), NLB עובד ב-Layer 4 (TCP/UDP, ביצועים גבוהים וIP קבוע) - אף אחד מהם אינו מיועד ל-traffic inspection appliances.",
+w:["ALB עובד ב-Layer 7 ומתמחה בניתוב HTTP/HTTPS מבוסס-תוכן (path/host based) - לא מיועד ל-appliances אבטחה שקופים.","NLB מספק ביצועים גבוהים ב-Layer 4 עם IP סטטי - מתאים ל-TCP/UDP throughput גבוה, אך לא לשכבת inspection appliance.","","CLB הוא דור קודם וגנרי - לא מיועד ל-use case הזה כלל ו-AWS ממליצה שלא להשתמש בו לפריסות חדשות."]},
+
+{i:256,d:2,t:"NAT Gateway",lv:1,ty:"s",
+q:"A company runs EC2 instances in a private subnet that need outbound internet access to download software updates, but must NOT be reachable from the internet. The solution must be highly available within the Availability Zone and require minimal management. What should a solutions architect deploy?",
+o:["A NAT instance running on a t3.micro EC2 instance in the public subnet.","A NAT Gateway in the public subnet, with a route from the private subnet's route table.","An Internet Gateway attached directly to the private subnet.","A bastion host configured to forward traffic for all private instances."],
+a:[1],
+e:"<b>NAT Gateway</b> הוא שירות מנוהל של AWS (לא EC2 instance) שמספק גישת יוצא (outbound-only) לאינטרנט מ-subnet פרטי, עם זמינות גבוהה בתוך ה-AZ, auto-scaling של bandwidth, וללא צורך בתחזוקה (patching, ניטור בריאות) - בניגוד ל-NAT instance שדורש ניהול ידני ומהווה single point of failure אם לא מוגדר עם auto-scaling/failover מותאם אישית.",
+w:["NAT instance עובד אך דורש ניהול, patching, בחירת instance size נכון, ואינו HA באופן מובנה - תחזוקה גבוהה בהרבה מ-NAT Gateway המנוהל.","","Internet Gateway מספק גישה דו-כיוונית (גם inbound) ולא ניתן לצרף אותו ישירות ל-subnet פרטי בלי NAT - זה יחשוף את ה-instances במקום להגן עליהם.","Bastion host משמש לגישת ניהול (SSH/RDP) ל-instances, לא לניתוב תעבורת אינטרנט יוצאת כללית."]},
+
+{i:257,d:2,t:"Snow Family",lv:2,ty:"s",
+q:"A media company must migrate 800 TB of video archives from an on-premises data center to Amazon S3. Their internet connection provides only 50 Mbps of available bandwidth, and the migration must complete within two weeks. What is the MOST practical solution?",
+o:["Use AWS DataSync over the existing internet connection.","Order an AWS Snowball Edge Storage Optimized device to transfer the data offline.","Increase the internet connection speed to 10 Gbps temporarily using AWS Direct Connect, provisioned within a day.","Compress the files and upload them using the S3 Transfer Acceleration feature over the same connection."],
+a:[1],
+e:"ב-50 Mbps, 800TB ייקח חודשים (בקירוב מעל 3.5 חודשים ברוחב פס תיאורטי מלא, ובפועל הרבה יותר). <b>AWS Snowball Edge</b> (Storage Optimized, עד 80TB ב-device, ניתן להזמין כמה) הוא הפתרון הקלאסי ל'המון TB + רוחב פס מוגבל + זמן קצר' - שולחים device פיזי, מעתיקים מקומית, ומחזירים ל-AWS להעלאה מהירה ל-S3. תבנית זיהוי מובהקת במבחן: bandwidth נמוך + נפח עצום + לוח זמנים קצר → Snow Family.",
+w:["DataSync מהיר ויעיל, אך עדיין תלוי ברוחב הפס הקיים (50Mbps) - לא יספיק לזמן של 2 שבועות.","","Direct Connect לוקח בדרך כלל שבועות עד חודשים להקמה פיזית - לא ניתן לספק תוך יום אחד, וגם אם היה ניתן, זו עלות תשתית גבוהה עבור migration חד-פעמי.","Transfer Acceleration משפר latency דרך CloudFront edge locations, אך עדיין מוגבל לרוחב הפס הקיים של 50Mbps - לא פותר את צוואר הבקבוק."]},
+
 ];
 
 /* ===== Domain 3 — Design High-Performing Architectures (24%) ===== */
@@ -1636,6 +1724,41 @@ o:["Amazon DynamoDB Accelerator (DAX)","Amazon ElastiCache for Redis configured 
 a:[0],
 e:"<b>DAX</b> הוא שכבת caching בזיכרון מנוהלת שנבנתה ספציפית עבור DynamoDB — היא תואמת ל-API של DynamoDB, כך שרוב האפליקציות צריכות רק להחליף את ה-endpoint כדי לקבל תשובות ברמת מיקרו-שניות לקריאות חוזרות, ללא שינוי לוגיקה. זה שונה מ-ElastiCache, שדורש מהאפליקציה לממש בעצמה לוגיקת cache-aside (בדיקה, כתיבה ותפוגה) מול מטמון נפרד.",
 w:["","ElastiCache אכן יכול לשמש כ-cache, אבל דורש מהמפתחים לממש ולתחזק לוגיקת cache-aside בעצמם — יותר שינוי קוד ותחזוקה לעומת DAX המובנה ותואם-API.","הגדלת RCU מגדילה תפוקה ועלות, אבל לא מורידה latency לרמת מיקרו-שניות — הבקשות עדיין מגיעות ישירות לטבלה.","Global Tables פותרות רפליקציה רב-אזורית לצורך זמינות/latency גיאוגרפי, לא caching של קריאות חוזרות באותו אזור."]},
+{i:349,d:3,t:"DynamoDB Streams",lv:2,ty:"s",
+q:"An e-commerce application must trigger a notification workflow whenever an item is added, modified, or deleted in a DynamoDB orders table, and process these changes in near real-time using AWS Lambda. Which feature enables this event-driven architecture?",
+o:["DynamoDB Accelerator (DAX)","DynamoDB Streams","DynamoDB Global Tables","Amazon Kinesis Data Firehose"],
+a:[1],
+e:"<b>DynamoDB Streams</b> לוכד רצף של שינויי item-level (INSERT/MODIFY/REMOVE) בטבלה בזמן קרוב-לאמיתי, וניתן לחבר אותו ישירות ל-Lambda function כ-trigger - זה הבסיס לכל ארכיטקטורת event-driven סביב שינויים ב-DynamoDB. תבנית זיהוי: 'תגובה לשינוי בטבלת DynamoDB' → DynamoDB Streams + Lambda.",
+w:["DAX הוא cache בזיכרון לשיפור ביצועי קריאה - הוא לא לוכד או מפיץ אירועי שינוי.","","Global Tables מספק replication בין Regions - זה לא מנגנון אירועים ל-Lambda triggers.","Kinesis Data Firehose מיועד להזרמת נתונים ל-data lakes/analytics - לא מנגנון native ללכידת שינויי DynamoDB item-level (אמנם ניתן לשלוח Streams ל-Kinesis Data Streams, אך Firehose עצמו אינו המנגנון הישיר)."]},
+
+{i:350,d:3,t:"S3 vs EFS vs FSx",lv:3,ty:"s",
+q:"A media rendering farm running on multiple Linux EC2 instances across several Availability Zones needs a shared file system with POSIX file semantics, supporting concurrent read/write access from all instances simultaneously, and elastically scaling storage capacity automatically. Which storage solution meets these requirements?",
+o:["Amazon S3 with S3 Transfer Acceleration.","Amazon EFS (Elastic File System).","Amazon EBS Multi-Attach volume shared across instances.","Amazon FSx for Windows File Server."],
+a:[1],
+e:"<b>Amazon EFS</b> הוא file system משותף עם סמנטיקת POSIX, נגיש בו-זמנית (concurrent) מ-אלפי instances Linux על פני מספר AZs, וגדל/מתכווץ אלסטית לפי השימוש בפועל ללא provisioning מראש. S3 הוא object storage (לא file system עם POSIX semantics), EBS Multi-Attach מוגבל ל-cluster בתוך אותו AZ ומיועד ל-cluster-aware file systems (לא לגישה חופשית רגילה), ו-FSx for Windows מיועד ל-SMB/Windows, לא ל-Linux POSIX.",
+w:["S3 הוא object storage הנגיש דרך API (לא mount POSIX רגיל), ולא מתאים לגישת קריאה/כתיבה בו-זמנית ברמת קובץ בסגנון file system מסורתי.","","EBS Multi-Attach מוגבל ל-io1/io2 volumes באותו AZ, ודורש file system מודע ל-cluster (כמו GFS2) - לא מתאים לגישה משותפת פשוטה בין AZs מרובים.","FSx for Windows File Server מספק SMB עבור workloads Windows - לא מתאים ל-Linux POSIX semantics."]},
+
+{i:351,d:3,t:"VPC Peering",lv:2,ty:"s",
+q:"Two VPCs in the same AWS Region, owned by the same account, need to communicate directly using private IP addresses. There is no requirement to connect more than these two VPCs, and no transitive routing is needed. What is the MOST cost-effective solution?",
+o:["AWS Transit Gateway connecting the two VPCs.","A VPC Peering connection between the two VPCs.","AWS Direct Connect between the two VPCs.","A Site-to-Site VPN connection between the two VPCs."],
+a:[1],
+e:"<b>VPC Peering</b> הוא הפתרון הפשוט והזול ביותר לחיבור point-to-point בין שני VPCs (ללא עלות נוספת מעבר לתעבורת נתונים בין AZs/Regions) - מתאים בדיוק כששני VPCs בלבד צריכים לתקשר, ללא צורך ב-transitive routing (Peering לא תומך transitive routing מטבעו - כל peering הוא ישיר). Transit Gateway עולה יותר (עלות שעתית + attachment) ומיועד לחיבור <b>הרבה</b> VPCs עם transitive routing.",
+w:["Transit Gateway מתאים כשיש הרבה VPCs לחבר עם ניתוב טרנזיטיבי - הוא יקר ומורכב מדי לחיבור שני VPCs בלבד.","","Direct Connect מחבר בין data center מקומי ל-AWS, לא בין שני VPCs ישירות.","VPN מיועד לחיבור בין רשתות מקומיות ל-VPC (או VPC-to-VPC דרך VPN gateway), אך עולה יותר ומורכב יותר מ-Peering לשני VPCs באותו Region/חשבון."]},
+
+{i:352,d:3,t:"CloudWatch",lv:2,ty:"s",
+q:"An operations team wants to be alerted only when BOTH CPU utilization is above 80% AND network traffic is above a defined threshold on the same set of EC2 instances at the same time, to avoid false alarms from either metric alone. What CloudWatch feature should they use?",
+o:["A single CloudWatch Alarm with a metric math expression averaging both metrics.","A CloudWatch Composite Alarm combining two individual alarms with an AND rule.","CloudWatch Anomaly Detection on the CPUUtilization metric only.","Two separate CloudWatch Alarms, each triggering its own independent SNS topic."],
+a:[1],
+e:"<b>CloudWatch Composite Alarm</b> משלב מספר alarms בודדים באמצעות ביטוי בוליאני (AND/OR/NOT) ליצירת התראה אחת שמופעלת רק כשהתנאי המשולב מתקיים - בדיוק מה שנדרש כאן ('גם...וגם' על שתי מטריקות נפרדות). זה מונע false positives מ-alarm בודד שמופעל ממטריקה אחת בלבד.",
+w:["Metric math יכול לשלב ערכים מספריים (כמו ממוצע), אך לא מייצג נכון לוגיקת 'שני תנאים סף נפרדים חייבים להתקיים יחד' כמו composite alarm.","","Anomaly Detection מזהה חריגות סטטיסטיות במטריקה יחידה - לא משלב שתי מטריקות בתנאי AND.","שני alarms נפרדים יפעילו כל אחד בנפרד - זה לא יוצר את הדרישה של 'גם וגם' יחד; יגרום להתראות כפולות ונפרדות במקום תנאי משולב."]},
+
+{i:353,d:3,t:"ElastiCache",lv:1,ty:"s",
+q:"A read-heavy web application queries the same set of product data from Amazon RDS thousands of times per second, causing high database load. Which caching strategy would MOST effectively reduce database load while keeping the architecture simple?",
+o:["Add more RDS read replicas and route all reads through them.","Place Amazon ElastiCache in front of RDS to cache frequently accessed query results.","Increase the RDS instance size to a larger instance class.","Enable RDS Performance Insights to analyze the slow queries."],
+a:[1],
+e:"<b>Amazon ElastiCache</b> (Redis או Memcached) שם בזיכרון מהיר תוצאות שאילתות נפוצות, ומפחית משמעותית את העומס על מסד הנתונים עבור נתונים שנקראים שוב ושוב - זה הפתרון הקלאסי ל'read-heavy + אותם נתונים נקראים חוזרות' Caching-first approach. Read Replicas מוסיפים קיבולת קריאה אך לא מפחיתים latency באותה מידה של in-memory cache ועדיין 'מכות' את מסד הנתונים בפועל.",
+w:["Read Replicas מגדילים capacity לקריאה אך עדיין 'פוגעים' במסד נתונים אמיתי לכל שאילתה - יקר יותר ופחות יעיל מ-cache עבור נתונים חוזרים.","","הגדלת instance size פותרת רק זמנית ועולה יותר - לא פותר את הבעיה השורשית של שאילתות חוזרות על אותו מידע.","Performance Insights הוא כלי ניתוח/דיאגנוסטיקה - הוא מזהה בעיות אך לא פותר אותן בעצמו."]},
+
 ];
 
 /* ===== Domain 4 — Design Cost-Optimized Architectures (20%) ===== */
@@ -2035,10 +2158,58 @@ const CARDS = [
 {id:50,c:"Networking",f:"Transit Gateway מול VPC Peering (רשת מלאה)",b:"<b>VPC Peering</b>: חיבור <b>נקודה-לנקודה</b> בין שני VPCs, <b>לא טרנזיטיבי</b> (A-B ו-B-C לא נותנים ל-A לגשת ל-C), מספר החיבורים גדל בקצב n×(n-1)/2, ללא עלות שעתית קבועה.<br><b>Transit Gateway</b>: <b>hub</b> מרכזי, ניתוב <b>טרנזיטיבי</b> בין כל ה-VPCs/VPN/Direct Connect המחוברים, קנה-מידה לאלפי צירופים, עלות שעתית + עיבוד נתונים.<br>\"הרבה VPCs שצריכים לדבר ביניהם / hub-and-spoke\" ⇐ Transit Gateway."},
 {id:51,c:"Auto Scaling",f:"Auto Scaling — Target Tracking מול Step Scaling",b:"<b>Target Tracking</b>: מגדירים יעד מדד (למשל CPU 50%) ו-Auto Scaling מתאים את הקיבולת אוטומטית כדי לשמור על היעד — הכי פשוט ומומלץ כברירת מחדל.<br><b>Step Scaling</b>: מגדירים <b>מדרגות</b> תגובה לפי חומרת החריגה מ-alarm (למשל +1 instance ב-CPU מעל 70%, +3 instances ב-CPU מעל 90%) — שליטה עדינה יותר בתגובה לא-לינארית.<br>\"פשוט, שמירה על יעד קבוע\" ⇐ Target Tracking. \"תגובה שונה לפי חומרת החריגה\" ⇐ Step Scaling."},
 {id:52,c:"Auto Scaling",f:"Auto Scaling — Simple Scaling מול Scheduled Scaling",b:"<b>Simple Scaling</b>: פעולת שינוי קיבולת <b>יחידה</b> בתגובה ל-alarm, עם תקופת <b>cooldown</b> לפני הפעולה הבאה — הגישה הבסיסית/הוותיקה ביותר.<br><b>Scheduled Scaling</b>: שינוי קיבולת בזמנים <b>ידועים מראש</b> (למשל הגדלה כל בוקר לפני עומס צפוי) — לא מגיב למדדים בזמן אמת אלא ללוח זמנים קבוע.<br>\"עומס חוזר וצפוי בזמן קבוע\" ⇐ Scheduled Scaling."},
+{i:441,d:4,t:"Snow Family",lv:2,ty:"s",
+q:"A remote research vessel with no reliable internet connectivity collects 200 TB of sensor data monthly and needs to run local data pre-processing (compute) before periodically shipping the aggregated results back to AWS for storage in S3. Which AWS service is designed for this disconnected edge compute AND storage use case?",
+o:["AWS Snowball Edge Compute Optimized","AWS Direct Connect with a backup link","Amazon S3 Transfer Acceleration","AWS Storage Gateway (Volume Gateway)"],
+a:[0],
+e:"<b>AWS Snowball Edge Compute Optimized</b> מספק גם אחסון וגם יכולת compute (EC2 instances, Lambda) במכשיר פיזי מנותק, מתאים בדיוק ל-'עיבוד מקומי + ללא אינטרנט אמין + שינוע תקופתי'. תבנית זיהוי: 'edge location מרוחקת ללא רשת + compute מקומי + נפחי נתונים גדולים' → Snow Family (Compute Optimized כשיש צורך גם ב-compute, לא רק Storage Optimized).",
+w:["","Direct Connect דורש קישוריות רשת יציבה - לא רלוונטי לספינה מרוחקת ללא אינטרנט אמין.","Transfer Acceleration משפר את מהירות ההעלאה לרשת קיימת - לא רלוונטי כשאין קישוריות בכלל.","Storage Gateway דורש חיבור לאינטרנט לסנכרון עם S3 - לא מתאים לתרחיש מנותק לחלוטין."]},
+
+{i:442,d:4,t:"EC2 Purchasing Options",lv:2,ty:"s",
+q:"A company runs a steady-state production workload that must run 24/7 for the next 3 years, with a known, predictable instance family and Region. They want the LARGEST possible discount compared to On-Demand pricing, and are willing to commit to specific instance attributes. Which purchasing option should they choose?",
+o:["Compute Savings Plans with a 1-year term.","Standard Reserved Instances with a 3-year term, All Upfront payment.","Spot Instances with a defined maximum price.","On-Demand Instances with Auto Scaling to match steady demand."],
+a:[1],
+e:"<b>Standard Reserved Instances</b> עם מחויבות 3 שנים ותשלום All Upfront מספקים את ההנחה הגדולה ביותר (עד ~72% מ-On-Demand) עבור workload יציב וידוע מראש (instance family + Region קבועים). Compute Savings Plans גמישים יותר (גם ל-EC2/Fargate/Lambda) אך בד\"כ ההנחה מעט נמוכה יותר מ-Standard RI 3-year All Upfront עבור אותה רמת מחויבות. Spot לא מתאים ל-'must run 24/7' יציב כי הוא יכול להיות reclaimed.",
+w:["","","Spot Instances יכולים להיפסק ע\"י AWS בהתראה קצרה - לא מתאימים ל-workload שחייב לרוץ 24/7 ברציפות.","On-Demand הוא התעריף הכי יקר ללא הנחת מחויבות - לא מתאים כשידוע מראש הצורך ל-3 שנים."]},
+
+{i:443,d:4,t:"Cost Governance",lv:1,ty:"s",
+q:"A finance team wants to receive an automated email alert when actual AWS spending is forecasted to exceed a monthly budget threshold, before the month even ends. Which AWS service should they configure?",
+o:["AWS Cost Explorer with a saved report.","AWS Budgets with a forecasted cost alert.","AWS Cost and Usage Report delivered to S3.","Amazon CloudWatch Billing Alarms only."],
+a:[1],
+e:"<b>AWS Budgets</b> מאפשר להגדיר budget חודשי ולקבל התראה מבוססת <u>תחזית</u> (forecasted) - כלומר AWS מזהה שההוצאה צפויה לחרוג עוד לפני שהיא בפועל חורגת, ושולח email/SNS. Cost Explorer מציג דוחות ומגמות אך אינו שולח התראות פרואקטיביות מבוססות-תחזית בעצמו; CUR הוא קובץ נתונים גולמי ל-ניתוח, לא מנגנון התראה.",
+w:["","","CUR מספק את הנתונים הגולמיים המפורטים ביותר לניתוח עלויות, אך אינו כולל מנגנון alert מובנה - צריך כלי נוסף לעבד אותו.","CloudWatch Billing Alarms מתריעים כשההוצאה בפועל חוצה סף (לא תחזית עתידית) - AWS Budgets הוא הכלי הייעודי והנפוץ יותר להתראות תחזית."]},
+
+{i:444,d:4,t:"Rightsizing",lv:2,ty:"s",
+q:"A company's AWS Cost and Usage data shows that several EC2 instances have averaged under 10% CPU utilization for the past 3 months. A solutions architect wants to identify and act on rightsizing opportunities with the LEAST manual analysis effort. What should they use?",
+o:["Manually review CloudWatch metrics for every instance one by one.","AWS Compute Optimizer for automated rightsizing recommendations.","AWS Trusted Advisor's basic checks only, available on the free tier.","Terminate all instances below 10% CPU utilization immediately."],
+a:[1],
+e:"<b>AWS Compute Optimizer</b> מנתח אוטומטית שימוש היסטורי (CPU, memory אם CloudWatch Agent מותקן, network) ומספק המלצות rightsizing ספציפיות (down-size / up-size / שינוי family) לכל instance - עם המעט ביותר מאמץ ידני. זה כלי ML ייעודי בדיוק ל-use case הזה, בשונה מסקירה ידנית שגוזלת זמן רב.",
+w:["","","Trusted Advisor הבסיסי (Free Tier) כולל רק בדיקות מוגבלות של cost optimization (Low Utilization EC2), אך אינו נותן את אותה עומק ניתוח מבוסס-ML כמו Compute Optimizer - וגם רוב הבדיקות המתקדמות דורשות Business/Enterprise support.","סגירת instances באופן גורף בלי ניתוח עלול לפגוע בזמינות (למשל instances שנועדו ל-burst מזדמן) - פעולה פזיזה שאינה 'rightsizing' אחראי."]},
+
 ];
 
 /* ===== Hebrew translations for question stems/options (offline, embedded — no network calls) ===== */
 const TR = {
+161: {q:"צוות אבטחה חייב לקבוע איזה IAM principal מחק Amazon S3 bucket ספציפי ביום שלישי שעבר, כולל כתובת ה-IP של מקור הבקשה. איזה שירות AWS מספק את המידע הזה?", o:["Amazon CloudWatch Logs","AWS CloudTrail","S3 Server Access Logging","AWS Config"]},
+162: {q:"חברה עוברת מחשבון AWS יחיד למבנה רב-חשבונות (multi-account) עבור יחידות עסקיות שונות. הם צריכים לספק אוטומטית חשבונות חדשים עם guardrails אבטחה מאושרים מראש, חשבון logging מרוכז, ובסיס תצורה סטנדרטי, עם מינימום הגדרה ידנית שוטפת. מה סוליושן ארכיטקט צריך להמליץ?", o:["שימוש ב-AWS Organizations לבד ליצירת Service Control Policy (SCP) עבור כל חשבון חדש ידנית.","שימוש ב-AWS Control Tower להקמת landing zone עם account factory וguardrails חובה.","יצירת תבנית CloudFormation שמספקת חשבון AWS חדש דרך AWS CLI עבור כל יחידה עסקית.","שימוש ב-AWS IAM Identity Center בלבד, והסתמכות על כל יחידה עסקית להגדיר את אבטחת החשבון שלה בעצמה."]},
+163: {q:"אפליקציה זקוקה ל-cache בזיכרון שתומך ב-automatic failover עם read replica, שמירת מידע (persistence) באמצעות snapshots, ו-messaging מסוג Pub/Sub. איזה מנוע Amazon ElastiCache סוליושן ארכיטקט צריך לבחור?", o:["Memcached, כי הוא תומך ב-multi-threading לתפוקה גבוהה יותר.","Redis, כי הוא תומך ב-replication, persistence, ו-Pub/Sub.","Memcached, כי הוא תומך באופן טבעי ב-automatic failover בין Availability Zones.","Redis, כי הוא המנוע היחיד ש-ElastiCache מציע."]},
+164: {q:"חברה מריצה עומסי עבודה ב-subnet פרטי ללא גישה לאינטרנט (ללא NAT Gateway או Internet Gateway). אפליקציות על EC2 instances חייבות לקרוא ולכתוב objects ל-Amazon S3 ולקרוא items מטבלת DynamoDB, ללא מעבר דרך האינטרנט הציבורי. איזה פתרון עונה על הדרישות הללו בעלות הנמוכה ביותר?", o:["יצירת Interface VPC Endpoints הן עבור S3 והן עבור DynamoDB.","יצירת Gateway VPC Endpoints הן עבור S3 והן עבור DynamoDB.","פריסת NAT Gateway ב-subnet ציבורי וניתוב כל התעבורה דרכו.","שימוש ב-AWS PrivateLink עם Network Load Balancer מול S3."]},
+165: {q:"אפליקציה שומרת סיסמת מסד נתונים ב-AWS Systems Manager Parameter Store כפרמטר SecureString. מדיניות אבטחה כעת דורשת סיבוב אוטומטי (rotation) של האישור הזה כל 30 יום ללא downtime של האפליקציה או התערבות ידנית. מהי הדרך הכי פחות מורכבת תפעולית לעמוד בדרישה הזו?", o:["כתיבת פונקציית Lambda מותאמת אישית שמעדכנת את פרמטר ה-SecureString כל 30 יום באמצעות כלל מתוזמן של EventBridge.","העברת האישור ל-AWS Secrets Manager והפעלת סיבוב אוטומטי עם Lambda מנוהל טבעי עבור RDS/Aurora.","השארת האישור ב-Parameter Store וסיבובו ידנית כל 30 יום.","אחסון הסיסמה כ-object מוצפן ב-S3 וסיבובה באמצעות כללי S3 Lifecycle."]},
+166: {q:"סוליושן ארכיטקט סוקר עומס עבודה קיים מול AWS Well-Architected Framework ורוצה להשתמש בכלי חינמי שסופק על ידי AWS שמפיק דוח סיכונים מול עמודי ה-framework ומספק המלצות שיפור. איזה כלי צריך להשתמש?", o:["AWS Trusted Advisor","AWS Well-Architected Tool","Amazon Inspector","AWS Config"]},
+253: {q:"חברה מריצה מסד נתונים Amazon Aurora MySQL ב-us-east-1 המשרת אפליקציה גלובלית. הם זקוקים ל-disaster recovery ל-Region משני עם Recovery Time Objective (RTO) מתחת לדקה אחת ו-Recovery Point Objective (RPO) מתחת לשנייה אחת, ורוצים שה-Region המשני ישרת גם קריאות מקומיות בזמן תגובה נמוך. איזה פתרון עונה על הדרישות הללו?", o:["הקמת Aurora Read Replica רגיל ב-Region המשני באמצעות replication אסינכרוני של MySQL.","שימוש ב-Aurora Global Database עם cluster ב-Region משני לקריאות מקומיות מהירות ו-promotion מהיר בזמן אסון.","שימוש ב-AWS DMS לשכפול רציף של ה-cluster הראשי של Aurora ל-מסד נתונים ב-Region משני.","הגדרת Amazon RDS Multi-AZ על פני שני Regions באמצעות cluster יחיד של Aurora."]},
+254: {q:"חברת גיימינג עם שחקנים בצפון אמריקה, אירופה ואסיה. הם זקוקים לטבלת DynamoDB שמשוכפלת אוטומטית על פני שלושה Regions, תומכת בכתיבות active-active בכל Region, ופותרת קונפליקטים בין כתיבות אוטומטית, עם מאמץ תפעולי מינימלי. באיזו תכונה עליהם להשתמש?", o:["DynamoDB Streams עם פונקציית Lambda מותאמת אישית להעתקת items בין Regions.","DynamoDB Global Tables.","שכפול Cross-Region של S3 עבור ייצוא (exports) של DynamoDB.","טבלת DynamoDB ב-Region יחיד עם caching של CloudFront."]},
+255: {q:"סוליושן ארכיטקט צריך לבחור load balancer עבור צי של EC2 instances שחייב לבדוק ולסנן תעבורה דרך צי של מכשירי אבטחה וירטואליים של צד שלישי בצורה שקופה, ברמת Layer 3/4, לפני שהתעבורה מגיעה לאפליקציה. איזה סוג load balancer של AWS מיועד ל-use case הזה?", o:["Application Load Balancer (ALB)","Network Load Balancer (NLB)","Gateway Load Balancer (GWLB)","Classic Load Balancer (CLB)"]},
+256: {q:"חברה מריצה EC2 instances ב-subnet פרטי שזקוקים לגישת יוצא לאינטרנט להורדת עדכוני תוכנה, אך אסור שיהיו נגישים מהאינטרנט. הפתרון חייב להיות בזמינות גבוהה בתוך ה-Availability Zone ולדרוש ניהול מינימלי. מה סוליושן ארכיטקט צריך לפרוס?", o:["NAT instance שרץ על EC2 instance מסוג t3.micro ב-subnet הציבורי.","NAT Gateway ב-subnet הציבורי, עם route מטבלת הניתוב של ה-subnet הפרטי.","Internet Gateway המחובר ישירות ל-subnet הפרטי.","Bastion host מוגדר להעביר תעבורה עבור כל ה-instances הפרטיים."]},
+257: {q:"חברת מדיה חייבת להעביר 800TB של ארכיוני וידאו ממרכז נתונים מקומי ל-Amazon S3. חיבור האינטרנט שלהם מספק רק 50Mbps רוחב פס זמין, וההעברה חייבת להסתיים תוך שבועיים. מהו הפתרון המעשי ביותר?", o:["שימוש ב-AWS DataSync על גבי חיבור האינטרנט הקיים.","הזמנת מכשיר AWS Snowball Edge Storage Optimized להעברת המידע במצב אופליין.","הגדלת מהירות חיבור האינטרנט ל-10Gbps זמנית באמצעות AWS Direct Connect, שיסופק תוך יום אחד.","דחיסת הקבצים והעלאתם באמצעות תכונת S3 Transfer Acceleration על גבי אותו חיבור."]},
+349: {q:"אפליקציית מסחר אלקטרוני חייבת להפעיל תהליך התראה בכל פעם ש-item נוסף, משתנה, או נמחק בטבלת הזמנות של DynamoDB, ולעבד את השינויים האלה כמעט בזמן אמת באמצעות AWS Lambda. איזו תכונה מאפשרת את ארכיטקטורת ה-event-driven הזו?", o:["DynamoDB Accelerator (DAX)","DynamoDB Streams","DynamoDB Global Tables","Amazon Kinesis Data Firehose"]},
+350: {q:"חוות רינדור מדיה שרצה על מספר EC2 instances מסוג Linux על פני כמה Availability Zones זקוקה למערכת קבצים משותפת עם סמנטיקת POSIX, התומכת בגישת קריאה/כתיבה בו-זמנית מכל ה-instances יחד, ומתרחבת אלסטית ביכולת האחסון אוטומטית. איזה פתרון אחסון עונה על הדרישות הללו?", o:["Amazon S3 עם S3 Transfer Acceleration.","Amazon EFS (Elastic File System).","Amazon EBS Multi-Attach volume משותף בין instances.","Amazon FSx for Windows File Server."]},
+351: {q:"שני VPCs באותו Region של AWS, בבעלות אותו חשבון, צריכים לתקשר ישירות באמצעות כתובות IP פרטיות. אין דרישה לחבר יותר משני VPCs אלה, ואין צורך בניתוב טרנזיטיבי (transitive routing). מהו הפתרון החסכוני ביותר?", o:["AWS Transit Gateway המחבר בין שני ה-VPCs.","חיבור VPC Peering בין שני ה-VPCs.","AWS Direct Connect בין שני ה-VPCs.","חיבור Site-to-Site VPN בין שני ה-VPCs."]},
+352: {q:"צוות תפעול רוצה לקבל התראה רק כאשר גם ניצול ה-CPU מעל 80% וגם תעבורת הרשת מעל סף מוגדר על אותו סט EC2 instances באותו זמן, כדי למנוע התראות שווא ממטריקה בודדת. באיזו תכונת CloudWatch עליהם להשתמש?", o:["CloudWatch Alarm בודד עם ביטוי metric math שמחשב ממוצע של שתי המטריקות.","CloudWatch Composite Alarm המשלב שני alarms נפרדים עם כלל AND.","CloudWatch Anomaly Detection על מטריקת ה-CPUUtilization בלבד.","שני CloudWatch Alarms נפרדים, כל אחד מפעיל נושא SNS עצמאי משלו."]},
+353: {q:"אפליקציית web עם עומס קריאה כבד (read-heavy) שואלת את אותו סט נתוני מוצרים מ-Amazon RDS אלפי פעמים בשנייה, וגורמת לעומס גבוה על מסד הנתונים. איזו אסטרטגיית caching תפחית בצורה היעילה ביותר את העומס על מסד הנתונים תוך שמירה על ארכיטקטורה פשוטה?", o:["הוספת עוד RDS read replicas וניתוב כל הקריאות דרכם.","הצבת Amazon ElastiCache מול RDS למטמון תוצאות שאילתות נפוצות.","הגדלת גודל instance ה-RDS למחלקת instance גדולה יותר.","הפעלת RDS Performance Insights לניתוח שאילתות איטיות."]},
+441: {q:"ספינת מחקר מרוחקת ללא קישוריות אינטרנט אמינה אוספת 200TB של נתוני חיישנים מדי חודש וזקוקה להרצת עיבוד מקדים (compute) מקומי לפני שינוע תקופתי של התוצאות המצטברות בחזרה ל-AWS לאחסון ב-S3. איזה שירות AWS מיועד ל-use case הזה של compute ו-storage מנותק בקצה הרשת (edge)?", o:["AWS Snowball Edge Compute Optimized","AWS Direct Connect עם קישור גיבוי","Amazon S3 Transfer Acceleration","AWS Storage Gateway (Volume Gateway)"]},
+442: {q:"חברה מריצה עומס עבודה יציב בפרודקשן שחייב לרוץ 24/7 במשך 3 השנים הקרובות, עם משפחת instance ו-Region ידועים וצפויים מראש. הם רוצים את ההנחה הגדולה ביותר האפשרית לעומת מחיר On-Demand, ומוכנים להתחייב למאפייני instance ספציפיים. באיזו אופציית רכישה עליהם לבחור?", o:["Compute Savings Plans עם תקופה של שנה אחת.","Standard Reserved Instances עם תקופה של 3 שנים, תשלום All Upfront.","Spot Instances עם מחיר מקסימלי מוגדר.","On-Demand Instances עם Auto Scaling להתאמה לביקוש היציב."]},
+443: {q:"צוות כספים רוצה לקבל התראת אימייל אוטומטית כאשר ההוצאה בפועל של AWS צפויה (forecast) לחרוג מסף תקציב חודשי, עוד לפני שהחודש מסתיים. איזה שירות AWS עליהם להגדיר?", o:["AWS Cost Explorer עם דוח שמור.","AWS Budgets עם התראת עלות מבוססת-תחזית.","AWS Cost and Usage Report המועבר ל-S3.","Amazon CloudWatch Billing Alarms בלבד."]},
+444: {q:"נתוני AWS Cost and Usage של חברה מראים שכמה EC2 instances ניצלו בממוצע פחות מ-10% CPU במשך 3 החודשים האחרונים. סוליושן ארכיטקט רוצה לזהות ולפעול על הזדמנויות rightsizing עם המאמץ הידני הנמוך ביותר. במה עליו להשתמש?", o:["סקירה ידנית של מטריקות CloudWatch עבור כל instance אחד אחד.","AWS Compute Optimizer להמלצות rightsizing אוטומטיות.","בדיקות הבסיס של AWS Trusted Advisor בלבד, הזמינות ב-free tier.","סגירת (termination) כל ה-instances מתחת ל-10% ניצול CPU מיידית."]},
 101: {q:"חברה מריצה אפליקציה על EC2 instances. האפליקציה צריכה לקרוא objects מ־S3 bucket ולכתוב items לטבלת DynamoDB. המפתחים כרגע שומרים IAM user access keys ארוכי־טווח בקובץ תצורה על כל instance. סוליושן ארכיטקט צריך להסיר את ה־credentials הסטטיים עם התקורה התפעולית הנמוכה ביותר. איזה פתרון עונה על הדרישות הללו?", o:["יצירת IAM role עם ההרשאות הנדרשות וצירוף instance profile ל־EC2 instances.","אחסון ה־access keys ב־AWS Secrets Manager והחזרת האפליקציה לאחזר אותם בהפעלה.","אחסון ה־access keys ב־AWS Systems Manager Parameter Store כפרמטרי SecureString וסיבובם כל 30 יום באמצעות פונקציית Lambda.","יצירת IAM user חדש לכל instance וסיבוב ה־access keys מדי שבוע באמצעות כלל מתוזמן של Amazon EventBridge."]},
 102: {q:"חברה מאחסנת מידע רגיש ב־Amazon S3 bucket המוצפן עם AWS KMS customer managed key. חשבון AWS של שותף חייב להיות מסוגל להוריד ולפענח objects ספציפיים. איזה שילוב פעולות נדרש? (בחר את התשובה הטובה ביותר.)", o:["הענקת גישה לחשבון השותף רק ב־bucket policy של S3.","הענקת גישה לחשבון השותף גם ב־bucket policy של S3 וגם ב־key policy של KMS, ווידוא שה־IAM principal של השותף מחזיק בהרשאות s3:GetObject וגם kms:Decrypt.","הפעלת S3 Cross-Region Replication ל־bucket בחשבון השותף.","שינוי ההצפנה של ה־bucket ל־SSE-S3 ושיתוף ה־bucket policy עם השותף."]},
 103: {q:"סוליושן ארכיטקט צריך לאפשר תעבורת HTTPS נכנסת לשרתי web ב־public subnet, תוך חסימת תעבורה מטווח ספציפי של כתובות IP זדוניות. ה־security groups כבר מוגדרות לאפשר HTTPS מ־0.0.0.0/0. במה צריך סוליושן ארכיטקט להשתמש כדי לחסום את טווח ה־IP הזדוני ברמת ה־subnet?", o:["הוספת כלל deny נכנס ל־security group.","הוספת כלל deny נכנס ל־network ACL המשויך ל־subnet.","יצירת כלל AWS WAF המצורף ל־security group.","שינוי טבלת ה־routes כדי לבלוע (blackhole) את טווח ה־IP."]},
@@ -2412,20 +2583,102 @@ function domainBars(d){
   }).join("");
 }
 
+/* ================= hidden clock (exam + practice) =================
+   Shown only when the user explicitly clicks the 🕐 icon — stays out of sight the rest
+   of the time so it doesn't add exam-like time pressure to practice sessions or nag
+   during the real exam. Displays elapsed time since start and the average time spent
+   per question actually answered so far, computed from the qTimes accumulator that
+   trackExamTime()/trackPrTime() maintain per question id. */
+function clockPanelHTML(qTimes,t0,total,answeredCount){
+  const elapsed=Math.round((Date.now()-t0)/1000);
+  const times=Object.values(qTimes||{});
+  const avg=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0;
+  return `<div class="card tight" style="text-align:center">
+    <div class="bigstat" style="justify-content:center">
+      <div><div class="n">${fmt(elapsed)}</div><div class="l">זמן שחלף</div></div>
+      <div><div class="n">${avg?avg+"s":"—"}</div><div class="l">ממוצע לשאלה</div></div>
+      <div><div class="n">${answeredCount}${total?"/"+total:""}</div><div class="l">נענו</div></div>
+    </div>
+  </div>`;
+}
+
+/* ================= topic × speed analysis =================
+   Combines two independent signals per topic — accuracy (right/wrong, already tracked
+   via Store.s.ans) and answer speed (from qTimes, captured by trackExamTime/trackPrTime) —
+   into one "where to focus" view. A topic can be accurate-but-slow (needs speed drilling,
+   not more content review) or fast-but-wrong (needs content review, not speed drilling) —
+   these need different remedies, so the summary keeps them as two separate axes rather
+   than collapsing into a single score. qs: array of {i,d,t,a,...} PREPPED questions actually
+   seen this round (each instance's .a reflects that instance's own shuffled option order —
+   correctFn MUST be given the question object itself, not just looked up by id elsewhere,
+   since a fresh prep() reshuffles options and byId[] holds the un-shuffled original);
+   correctFn(q)=>bool; qTimes: {qid: seconds}. */
+function topicSpeedAnalysis(qs,correctFn,qTimes){
+  const byTopic={};
+  qs.forEach(q=>{
+    const t=qTimes[q.i];
+    if(t==null) return; // never displayed long enough to record a time (shouldn't normally happen)
+    byTopic[q.t]=byTopic[q.t]||{n:0,ok:0,time:0};
+    byTopic[q.t].n++; byTopic[q.t].time+=t;
+    if(correctFn(q)) byTopic[q.t].ok++;
+  });
+  const topics=Object.entries(byTopic).map(([t,v])=>({t,n:v.n,ok:v.ok,acc:pct(v.ok,v.n),avgTime:v.time/v.n}));
+  if(!topics.length) return {topics:[],overallAvg:0};
+  const overallAvg=topics.reduce((a,x)=>a+x.avgTime*x.n,0)/topics.reduce((a,x)=>a+x.n,0);
+  topics.forEach(x=>{
+    /* speed relative to this round's own overall average — ±20% band counts as "normal" */
+    x.speed = x.avgTime > overallAvg*1.2 ? "slow" : x.avgTime < overallAvg*0.8 ? "fast" : "normal";
+  });
+  return {topics,overallAvg};
+}
+function topicSpeedHTML(qs,correctFn,qTimes){
+  const {topics,overallAvg}=topicSpeedAnalysis(qs,correctFn,qTimes);
+  if(!topics.length) return "";
+  const speedLabel={slow:"איטי",normal:"קצב תקין",fast:"מהיר"};
+  /* .acc-txt/.amber-txt (not raw var(--acc)/var(--amber)) — those two fail WCAG AA (4.5:1) at
+     this small font size in light mode; see the CSS comment where the classes are defined. */
+  const speedClass={slow:"",normal:"",fast:"acc-txt"};
+  const strong=topics.filter(x=>x.acc>=80).sort((a,b)=>b.acc-a.acc).slice(0,5);
+  const weak=topics.filter(x=>x.acc<80).sort((a,b)=>a.acc-b.acc).slice(0,5);
+  const slowTopics=topics.filter(x=>x.speed==="slow").sort((a,b)=>b.avgTime-a.avgTime).slice(0,5);
+  const row=x=>`<div class="kv"><span class="mono">${esc(x.t)}</span>
+    <span class="v" style="display:flex;gap:8px;align-items:center">
+      <span class="${x.acc<60?"":x.acc>=80?"acc-txt":"amber-txt"}" style="${x.acc<60?"color:var(--red)":""}">${x.acc}%</span>
+      <span class="${speedClass[x.speed]}" style="${!speedClass[x.speed]?`color:var(${x.speed==="slow"?"--red":"--dim"})`:""};font-size:11.5px">${speedLabel[x.speed]} · ${x.avgTime.toFixed(0)}s</span>
+    </span></div>`;
+  return `<h2 class="sec">חוזק לפי נושא (דיוק + מהירות)</h2>
+  <div class="card tight">
+    <div class="muted" style="margin-bottom:6px">ממוצע זמן לשאלה בסבב זה: ${overallAvg.toFixed(0)}s. "איטי" = מעל 120% מהממוצע, "מהיר" = מתחת ל-80%.</div>
+    ${strong.length?`<div class="acc-txt" style="margin-top:8px;font-weight:700;font-size:12.5px">חזק ביותר</div>${strong.map(row).join("")}`:""}
+    ${weak.length?`<div style="margin-top:10px;font-weight:700;font-size:12.5px;color:var(--red)">חלש ביותר — ממוקד לתרגול</div>${weak.map(row).join("")}`:""}
+    ${slowTopics.length?`<div class="amber-txt" style="margin-top:10px;font-weight:700;font-size:12.5px">איטי ביותר (גם אם נכון — כדאי לתרגל למהירות)</div>${slowTopics.map(row).join("")}`:""}
+  </div>`;
+}
+
 /* ================= HOME ================= */
 R.home=()=>{
   const o=overall(), sc=scaled(o.ok,o.n), pass=sc>=EXAM.pass;
   const last=Store.s.sessions.slice(-1)[0];
+  const pracc=o.n?pct(o.ok,o.n):0;
+  const prScore=Math.round(pracc*10)/10;
+  const examScore=last?last.score:"—";
+  const readiness=pass?"✓ מוכן/ה":"⚠ צריך עוד הכנה";
+  const weakTopics=Object.entries(o.tp).filter(([,v])=>v[1]>=2).sort((a,b)=>pct(a[1][0],a[1][1])-pct(b[1][0],b[1][1])).slice(0,3).map(([t])=>t).join(", ");
+  const tooltip=pass?`ציון עולה על ${EXAM.pass} ✓ — זכאי/ת להיבחן`:`חסרות ${EXAM.pass-sc} נקודות · נושאים חלשים: ${weakTopics||"עדיין לא מספיק נתונים"}`;
   $("#v-home").innerHTML=`
   <div class="card">
-    <h3>מוכנות משוערת</h3>
-    <p class="lead">ציון מדומה על סולם ${EXAM.scaleMin}–${EXAM.scaleMax}, מבוסס על כל התשובות שלך עד כה. סף המעבר הרשמי הוא ${EXAM.pass}.</p>
-    ${gaugeHTML(sc)}
+    <h3>מוכנות משוערת <span style="font-size:13px;color:var(--dim)">(כל הדרכים)</span></h3>
+    <p class="lead" style="margin-bottom:6px">ציון כללי על סולם ${EXAM.scaleMin}–${EXAM.scaleMax}. סף מעבר: <b>${EXAM.pass}</b></p>
+    <p style="font-size:13px;color:var(--dim);margin:0 0 12px">מתחשב בכל התרגולים והמבחנים שלך עד כה. זה הציון המשוער שתקבל במבחן האמיתי בהנחה שתתרגלו עוד.</p>
+    <div style="padding:12px;background:var(--surf2);border-radius:9px;border:1px solid var(--line);cursor:help;transition:.2s" title="${tooltip}">
+      ${gaugeHTML(sc)}
+      <div style="text-align:center;margin-top:10px;font-size:14px;color:var(--dim)">👆 העבר עכבר להסבר</div>
+    </div>
     <div class="bigstat" style="margin-top:18px">
-      <div><div class="n" style="color:${pass?"var(--acc)":"var(--amber)"}">${o.n?pct(o.ok,o.n)+"%":"—"}</div><div class="l">דיוק כולל</div></div>
-      <div><div class="n">${o.n}</div><div class="l">תשובות</div></div>
-      <div><div class="n">${o.seen}<span style="font-size:14px;color:var(--dim)">/${QS.length}</span></div><div class="l">שאלות שנראו</div></div>
-      <div><div class="n">${Store.s.streak.n||0}</div><div class="l">ימים ברצף</div></div>
+      <div title="דיוק כללי בכל התרגול ומבחנים"><div class="n" style="color:${pass?"var(--acc)":"var(--amber)"}">${pracc}%</div><div class="l">דיוק כללי</div></div>
+      <div title="ציון משוער לפי תרגול"><div class="n" style="color:var(--acc2)">${sc}</div><div class="l">ציון משוער</div></div>
+      <div title="${last?`מבחן אחרון: ${last.score}`:""}">${last?`<div class="n" style="color:${last.score>=EXAM.pass?"var(--acc)":"var(--red)"}">${last.score}</div><div class="l">מבחן אחרון</div>`:`<div class="n" style="color:var(--dim)">—</div><div class="l">אין מבחן עדיין</div>`}</div>
+      <div><div class="n">${o.seen}<span style="font-size:14px;color:var(--dim)">/${QS.length}</span></div><div class="l">כיסוי בנק</div></div>
     </div>
   </div>
 
@@ -2471,9 +2724,10 @@ function buildExam(){
     const pool=shuffle(QS.filter(q=>q.d===d));
     list=list.concat(pool.slice(0,Math.min(per[d],pool.length)));
   }
-  return {qs:shuffle(list).map(prep),cur:0,pick:{},flags:{},t0:Date.now(),
+  return {qs:shuffle(list).map(prep),cur:0,pick:{},flags:{},skipped:{},t0:Date.now(),
           left:EXAM.minutes*60,done:false,timer:null,showNav:false,
-          paused:false,pausedAt:0,reveal:{},trQ:{},trO:{}};
+          paused:false,pausedAt:0,reveal:{},trQ:{},trO:{},
+          qTimes:{},_timeQid:null,_timeSince:null,showClock:false};
 }
 R.exam=()=>{ if(!EX) renderExamIntro(); else if(EX.done) renderResults(); else renderExamQ(); };
 
@@ -2507,7 +2761,7 @@ function renderExamIntro(){
     <button class="btn wide" onclick="EX=buildExam();persistExam();startTimer();renderExamQ()" style="margin-top:6px">התחל מבחן</button>`}
   </div>`;
 }
-function pauseExam(){ clearInterval(EX.timer); EX.paused=true; persistExam(); renderExamQ(); }
+function pauseExam(){ clearInterval(EX.timer); trackExamTime(); EX._timeQid=null; EX._timeSince=null; EX.paused=true; persistExam(); renderExamQ(); }
 function resumeExam(){ EX.paused=false; startTimer(); persistExam(); renderExamQ(); }
 window.pauseExam=pauseExam; window.resumeExam=resumeExam;
 function resetExamActive(){
@@ -2528,7 +2782,23 @@ function startTimer(){
     if(EX.left<=0){ clearInterval(EX.timer); finishExam(); }
   },1000);
 }
+/* Per-question time tracking (feeds the hidden clock + the post-exam speed analysis).
+   Called at the top of every renderExamQ() — whichever question was on screen before this
+   render accrues the elapsed time into EX.qTimes[id], then the clock starts fresh for the
+   question now being shown. Works regardless of how navigation happened (prev/next/nav-grid/
+   keyboard) since it's centralized here rather than hooked into each individual onclick. */
+function trackExamTime(){
+  EX.qTimes=EX.qTimes||{};
+  const now=Date.now();
+  if(EX._timeQid!=null&&EX._timeSince!=null){
+    const delta=(now-EX._timeSince)/1000;
+    EX.qTimes[EX._timeQid]=(EX.qTimes[EX._timeQid]||0)+delta;
+  }
+  const q=EX.qs[EX.cur];
+  EX._timeQid=q.i; EX._timeSince=now;
+}
 function renderExamQ(){
+  if(!EX.paused) trackExamTime();
   persistExam();
   const q=EX.qs[EX.cur], sel=EX.pick[q.i]||[];
   const answered=Object.keys(EX.pick).length;
@@ -2558,9 +2828,11 @@ function renderExamQ(){
     <button class="icobtn" onclick="pauseExam()" title="השהה מבחן">⏸</button>
     <button class="icobtn flagbtn ${EX.flags[q.i]?"on":""}" onclick="EX.flags[${q.i}]=!EX.flags[${q.i}];renderExamQ()" title="סמן לחזרה">⚑</button>
     <button class="icobtn" onclick="EX.showNav=!EX.showNav;renderExamQ()" title="מפת שאלות">▦</button>
+    <button class="icobtn" onclick="EX.showClock=!EX.showClock;renderExamQ()" title="שעון מוסתר — זמן ומהירות">🕐</button>
   </div>
+  ${EX.showClock?clockPanelHTML(EX.qTimes,EX.t0,EX.qs.length,Object.keys(EX.pick).length):""}
   ${EX.showNav?`<div class="card tight"><div class="navgrid">${EX.qs.map((x,i)=>
-      `<button class="${EX.pick[x.i]?"ans ":""}${EX.flags[x.i]?"flag ":""}${i===EX.cur?"cur":""}"
+      `<button class="${EX.pick[x.i]?"ans ":""}${EX.flags[x.i]?"flag ":""}${EX.skipped&&EX.skipped[x.i]?"skip ":""}${i===EX.cur?"cur":""}"
         onclick="EX.cur=${i};EX.showNav=false;renderExamQ()">${i+1}</button>`).join("")}</div>
       <div class="row" style="margin-top:12px">
         <button class="btn wide" onclick="confirmFinish()">סיים והצג תוצאות</button>
@@ -2589,6 +2861,9 @@ function renderExamQ(){
   </div>
   <div class="row">
     <button class="btn ghost" ${EX.cur===0?"disabled":""} onclick="EX.cur--;renderExamQ()">הקודם</button>
+    ${revealed
+      ?`<button class="btn ghost" disabled title="אי אפשר לדלג אחרי הצגת תשובה">דלג</button>`
+      :`<button class="btn ghost" onclick="EX.skipped=EX.skipped||{};EX.skipped[q.i]=true;${EX.cur===EX.qs.length-1?"confirmFinish()":"EX.cur++;renderExamQ()"}">דלג</button>`}
     ${EX.cur===EX.qs.length-1
       ?`<button class="btn" onclick="confirmFinish()">סיים מבחן</button>`
       :`<button class="btn" onclick="EX.cur++;renderExamQ()">הבא</button>`}
@@ -2608,14 +2883,22 @@ function pickOpt(qid,i){
   renderExamQ();
 }
 function confirmFinish(){
-  const un=EX.qs.length-Object.keys(EX.pick).length;
-  if(un>0&&!confirm(`נותרו ${un} שאלות ללא מענה. שאלה ללא מענה נחשבת שגויה. לסיים בכל זאת?`)) return;
+  const answered=Object.keys(EX.pick).length;
+  const skipped=Object.keys(EX.skipped||{}).length;
+  const un=EX.qs.length-answered-skipped;
+  let msg=[];
+  if(skipped>0) msg.push(`${skipped} שדלגת עליהן`);
+  if(un>0) msg.push(`${un} ללא מענה`);
+  const warn=msg.length>0?`\n⚠ ${msg.join(", ")} — יחשבו כשגויות.`:"\n";
+  if(msg.length>0&&!confirm(`סיכום:${warn}לסיים בכל זאת?`)) return;
   finishExam();
 }
 function finishExam(){
-  clearInterval(EX.timer); EX.done=true;
+  clearInterval(EX.timer); trackExamTime(); EX.done=true;
   let ok=0; const d={1:[0,0],2:[0,0],3:[0,0],4:[0,0]};
   EX.qs.forEach(q=>{
+    /* Don't record skipped questions — they shouldn't count as wrong or affect spaced repetition */
+    if(EX.skipped&&EX.skipped[q.i]) return;
     const good=eq(EX.pick[q.i]||[],q.a);
     if(good) ok++; d[q.d][1]++; if(good) d[q.d][0]++;
     record(q.i,good);
@@ -2642,9 +2925,17 @@ function renderResults(){
   </div>
   <h2 class="sec">פילוח לפי דומיין</h2>
   <div class="card">${domainBars(d)}</div>
+  ${topicSpeedHTML(EX.qs.filter(q=>!(EX.skipped&&EX.skipped[q.i])),q=>eq(EX.pick[q.i]||[],q.a),EX.qTimes||{})}
   <h2 class="sec">מפת התשובות</h2>
   <div class="card tight"><div class="navgrid">${EX.qs.map((q,i)=>
-    `<button class="${eq(EX.pick[q.i]||[],q.a)?"ok":"no"}" onclick="reviewAt(${i})">${i+1}</button>`).join("")}</div></div>
+    `<button class="${EX.skipped&&EX.skipped[q.i]?"skip":eq(EX.pick[q.i]||[],q.a)?"ok":"no"}" onclick="reviewAt(${i})">${i+1}</button>`).join("")}</div></div>
+  ${(()=>{ const skippedIdx=EX.qs.map((q,i)=>({q,i})).filter(x=>EX.skipped&&EX.skipped[x.q.i]);
+    if(!skippedIdx.length) return "";
+    return `<h2 class="sec">שאלות שדילגת עליהן (${skippedIdx.length})</h2>
+    <div class="card tight">${skippedIdx.map(x=>
+      `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="reviewAt(${x.i})">
+        <span><span class="tag d${x.q.d}">D${x.q.d}</span> <span class="mono">שאלה ${x.i+1}</span> · ${x.q.t}</span>
+        <span class="v" style="color:var(--dim)">לחץ לצפייה ←</span></div>`).join("")}</div>`; })()}
   <div class="row" style="margin-top:14px">
     <button class="btn" onclick="reviewAt(0)">סקירת כל השאלות</button>
     <button class="btn ghost" onclick="EX=null;renderExamIntro()">מבחן חדש</button>
@@ -2685,15 +2976,32 @@ function qReviewHTML(q,sel,good){
 
 /* ================= PRACTICE ================= */
 let PR={d:0,mode:"all",list:[],i:0,sel:[],shown:false,tr:{stem:{},opt:{}},
-        ses:{ok:0,wrong:0,topics:{}},showStats:false};
+        ses:{ok:0,wrong:0,topics:{},skipped:[],correct:{}},showStats:false,
+        t0:0,qTimes:{},_timeQid:null,_timeSince:null,showClock:false};
 R.practice=()=>{ PR.list.length?renderPr():renderPrIntro(); };
+
+/* Mirrors trackExamTime() for practice sessions — accrues elapsed time for whichever
+   question was on screen into PR.qTimes[id] every time a new render happens, so the
+   hidden clock and the per-topic speed analysis both work in practice too (which has
+   no countdown timer of its own otherwise). */
+function trackPrTime(){
+  if(!PR.list.length) return;
+  PR.qTimes=PR.qTimes||{};
+  const now=Date.now();
+  if(PR._timeQid!=null&&PR._timeSince!=null){
+    const delta=(now-PR._timeSince)/1000;
+    PR.qTimes[PR._timeQid]=(PR.qTimes[PR._timeQid]||0)+delta;
+  }
+  const q=PR.list[PR.i];
+  if(q){ PR._timeQid=q.i; PR._timeSince=now; }
+}
 
 /* Persists the in-progress practice round the same way exam progress is persisted —
    so "עצור והמשך" (pause/resume) survives a refresh, tab close, or phone lock.
    Cleared only when a round genuinely completes or the user discards it. */
 function persistPractice(){
   if(!PR.list.length){ Store.s.practice=null; }
-  else { Store.s.practice={d:PR.d,mode:PR.mode,list:PR.list,i:PR.i,sel:PR.sel,shown:PR.shown,ses:PR.ses}; }
+  else { Store.s.practice={d:PR.d,mode:PR.mode,list:PR.list,i:PR.i,sel:PR.sel,shown:PR.shown,ses:PR.ses,t0:PR.t0,qTimes:PR.qTimes}; }
   Store.save();
 }
 window.persistPractice=persistPractice;
@@ -2742,19 +3050,44 @@ function poolOf(){
 }
 function startPr(){
   PR.list=shuffle(poolOf()).map(prep); PR.i=0; PR.sel=[]; PR.shown=false;
-  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{}}; PR.showStats=false;
+  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false;
+  PR.t0=Date.now(); PR.qTimes={}; PR._timeQid=null; PR._timeSince=null;
   persistPractice(); renderPr();
 }
 function startWeak(){ PR.d=0; PR.mode="weak"; go("practice"); if(poolOf().length) startPr(); else renderPrIntro(); }
+function filterPrByTopic(topic){
+  /* Filter practice to only questions of a specific topic, starting fresh (from practice stats) */
+  const f=QS.filter(q=>q.t===topic);
+  if(!f.length) return;
+  PR.list=shuffle(f).map(prep); PR.i=0; PR.sel=[]; PR.shown=false;
+  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false;
+  PR.t0=Date.now(); PR.qTimes={}; PR._timeQid=null; PR._timeSince=null;
+  persistPractice(); renderPr();
+}
+function filterPrByTopicFromStats(topic){
+  /* Filter practice to topic from stats page, then navigate to practice */
+  const f=QS.filter(q=>q.t===topic);
+  if(!f.length) return;
+  PR.list=shuffle(f).map(prep); PR.i=0; PR.sel=[]; PR.shown=false;
+  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false;
+  PR.t0=Date.now(); PR.qTimes={}; PR._timeQid=null; PR._timeSince=null;
+  persistPractice(); go('practice'); renderPr();
+}
+window.filterPrByTopic=filterPrByTopic;
+window.filterPrByTopicFromStats=filterPrByTopicFromStats;
 function renderPr(){
+  if(PR.showRoundEnd){ renderPrRoundEnd(); return; }
+  if(!PR.showStats) trackPrTime();
   const q=PR.list[PR.i], good=PR.shown&&eq(PR.sel,q.a);
   if(PR.showStats){ renderPrStats(); return; }
   const stemHe=PR.tr.stem[q.i]&&trStem(q);
   $("#v-practice").innerHTML=`
   <div class="exambar"><span class="cnt">${PR.i+1}/${PR.list.length}</span>
     <div class="prog"><i style="width:${(PR.i+1)/PR.list.length*100}%"></i></div>
+    <button class="icobtn" onclick="PR.showClock=!PR.showClock;renderPr()" title="שעון מוסתר — זמן ומהירות">🕐</button>
     <button class="icobtn" onclick="PR.showStats=true;renderPr()" title="סטטיסטיקה">📊</button>
     <button class="icobtn" onclick="PR.list=[];renderPrIntro()" title="עצור והמשך אחר כך">⏸</button></div>
+  ${PR.showClock?clockPanelHTML(PR.qTimes,PR.t0,PR.list.length,PR.ses.ok+PR.ses.wrong):""}
   ${PR.shown?qReviewHTML(q,PR.sel,good):`
   <div class="card">
     <div class="qmeta"><span class="tag d${q.d}">DOMAIN ${q.d}</span><span class="tag">${q.t}</span>
@@ -2774,12 +3107,36 @@ function renderPr(){
     ${PR.shown
       ? (PR.i<PR.list.length-1
           ? `<button class="btn" onclick="PR.i++;PR.sel=[];PR.shown=false;PR.tr={stem:{},opt:{}};persistPractice();renderPr()">השאלה הבאה</button>`
-          : `<button class="btn" onclick="Store.s.practice=null;Store.save();PR.list=[];renderPrIntro()">סיימת את הסבב ✓</button>`)
+          : `<button class="btn" onclick="finishPrRound()">סיימת את הסבב ✓</button>`)
       : `<button class="btn" ${PR.sel.length?"":"disabled"} onclick="prSubmit()">בדוק תשובה</button>`}
+    ${!PR.shown?`<button class="btn ghost" onclick="prSkip()">דלג</button>`:""}
     <button class="btn ghost" onclick="PR.list=[];renderPrIntro()">עצור והמשך אחר כך</button>
   </div>`;
   window.scrollTo({top:0,behavior:"instant"});
 }
+function prSkip(){
+  /* Track skipped question ids (deduped) so the end-of-round summary can list them for review */
+  const q=PR.list[PR.i];
+  PR.ses.skipped=PR.ses.skipped||[];
+  if(!PR.ses.skipped.includes(q.i)) PR.ses.skipped.push(q.i);
+  if(PR.i<PR.list.length-1){ PR.i++; PR.sel=[]; PR.shown=false; PR.tr={stem:{},opt:{}}; persistPractice(); renderPr(); }
+  else finishPrRound();
+}
+window.prSkip=prSkip;
+function finishPrRound(){
+  Store.s.practice=null; Store.save();
+  if(PR.ses.skipped&&PR.ses.skipped.length){ PR.showRoundEnd=true; renderPr(); }
+  else { PR.list=[]; renderPrIntro(); }
+}
+window.finishPrRound=finishPrRound;
+function prJumpTo(qid){
+  /* Jump back to a specific skipped question by its original id, from the round-end summary */
+  const idx=PR.list.findIndex(x=>x.i===qid);
+  if(idx===-1) return;
+  PR.i=idx; PR.sel=[]; PR.shown=false; PR.tr={stem:{},opt:{}}; PR.showRoundEnd=false;
+  persistPractice(); renderPr();
+}
+window.prJumpTo=prJumpTo;
 function prPick(i){
   const q=PR.list[PR.i]; if(PR.shown) return;
   if(q.ty==="m") PR.sel=PR.sel.includes(i)?PR.sel.filter(x=>x!==i):[...PR.sel,i];
@@ -2792,7 +3149,33 @@ function prSubmit(){
   record(q.i,ok);
   if(ok) PR.ses.ok++; else PR.ses.wrong++;
   PR.ses.topics[q.t]=PR.ses.topics[q.t]||[0,0]; PR.ses.topics[q.t][1]++; if(ok) PR.ses.topics[q.t][0]++;
+  /* Remember per-question correctness this round (by original question id) so the topic×speed
+     analysis can look up "was THIS specific instance answered correctly" without re-deriving it
+     from Store.s.ans, which only holds lifetime aggregates, not this-round-specific results. */
+  PR.ses.correct=PR.ses.correct||{}; PR.ses.correct[q.i]=ok;
+  /* If this question was previously skipped and jumped back to, remove it from the skip list — it's answered now */
+  if(PR.ses.skipped&&PR.ses.skipped.includes(q.i)) PR.ses.skipped=PR.ses.skipped.filter(x=>x!==q.i);
   persistPractice(); renderPr();
+}
+function renderPrRoundEnd(){
+  const skippedQs=(PR.ses.skipped||[]).map(qid=>PR.list.find(x=>x.i===qid)).filter(Boolean);
+  $("#v-practice").innerHTML=`
+  <div class="exambar"><span class="cnt">סיימת את הסבב ✓</span></div>
+  <div class="card">
+    <h3>סיכום הסבב</h3>
+    <p class="lead">ענית על ${PR.ses.ok+PR.ses.wrong} שאלות · ${PR.ses.ok} נכונות · ${PR.ses.wrong} שגויות${skippedQs.length?` · ${skippedQs.length} דילוגים שנותרו`:""}</p>
+  </div>
+  ${skippedQs.length?`<h2 class="sec">שאלות שדילגת עליהן (${skippedQs.length}) — עדיין לא ענית</h2>
+  <div class="card tight">${skippedQs.map(q=>
+    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="prJumpTo(${q.i})">
+      <span><span class="tag d${q.d}">D${q.d}</span> ${q.t}</span>
+      <span class="v" style="color:var(--dim)">ענה עכשיו ←</span></div>`).join("")}</div>
+  <div class="muted" style="margin-top:6px">אפשר לחזור ולענות על כל אחת, או לסיים את הסבב לגמרי.</div>`:""}
+  ${topicSpeedHTML(PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct)),q=>PR.ses.correct[q.i],PR.qTimes||{})}
+  <div class="row" style="margin-top:14px">
+    <button class="btn wide" onclick="PR.showRoundEnd=false;PR.list=[];renderPrIntro()">${skippedQs.length?"סיים בכל זאת (הדילוגים לא ייספרו)":"חזרה לתרגול"}</button>
+  </div>`;
+  window.scrollTo({top:0,behavior:"instant"});
 }
 function renderPrStats(){
   const answered=PR.ses.ok+PR.ses.wrong;
@@ -2813,8 +3196,9 @@ function renderPrStats(){
     </div>
   </div>
   ${weakSes.length?`<h2 class="sec">פילוח לפי נושא — בסבב הזה</h2>
-  <div class="card tight">${weakSes.map(([t,v])=>
-    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="PR.list=[];PR.d=0;PR.mode='new';PR.ses={ok:0,wrong:0,topics:{}};const f=QS.filter(q=>q.t==='${t}');PR.list=f;PR.i=0;PR.sel=[];PR.shown=false;PR.tr={stem:{},opt:{}};PR.showStats=false;Store.s.practice={d:0,mode:'new',list:f,i:0,sel:[],shown:false,ses:{ok:0,wrong:0,topics:{}},tr:{stem:{},opt:{}}};Store.save();renderPr()"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
+  <div class="card tight" id="weakSes">${weakSes.map(([t,v])=>
+    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopic(this.dataset.topic)"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
+  ${topicSpeedHTML(PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct)),q=>PR.ses.correct[q.i],PR.qTimes||{})}
   <h2 class="sec">לאן להשקיע עכשיו</h2>
   <div class="card tight">
     <div class="muted" style="margin-bottom:8px">מבוסס על כל ההיסטוריה שלך (לא רק הסבב הנוכחי) — הנושאים עם אחוז ההצלחה הנמוך ביותר:</div>
@@ -2895,8 +3279,8 @@ R.stats=()=>{
   <h2 class="sec">דומיינים</h2>
   <div class="card">${domainBars(o.d)}</div>
   ${weak.length?`<h2 class="sec">חמשת הנושאים החלשים</h2>
-  <div class="card tight">${weak.map(([t,v])=>
-    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="PR.list=[];PR.d=0;PR.mode='new';PR.ses={ok:0,wrong:0,topics:{}};const f=QS.filter(q=>q.t==='${t}');PR.list=f;PR.i=0;PR.sel=[];PR.shown=false;PR.tr={stem:{},opt:{}};PR.showStats=false;Store.s.practice={d:0,mode:'new',list:f,i:0,sel:[],shown:false,ses:{ok:0,wrong:0,topics:{}},tr:{stem:{},opt:{}}};Store.save();go('practice');startPr()"><span class="mono">${t}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
+  <div class="card tight" id="weakTopics">${weak.map(([t,v])=>
+    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopicFromStats(this.dataset.topic)"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
     <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">או: תרגל את כל טעויותיי</button></div>`:""}
   <h2 class="sec">שליטה לפי נושא</h2>
   <div class="card">${topicPills(o.tp)}</div>

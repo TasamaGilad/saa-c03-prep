@@ -262,7 +262,7 @@ select,input[type=number]{background:var(--surf2);border:1px solid var(--line);c
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v7</span></div>
+    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v8</span></div>
     <div class="spacer"></div>
     <button class="icobtn" id="themeBtn" title="מצב תצוגה">◐</button>
   </div>
@@ -2815,7 +2815,8 @@ function renderExamQ(){
       <p class="lead">הטיימר עצור. אף אחד לא רואה את השאלות שלך — אפשר לחזור מתי שנוח.</p>
       <button class="btn wide" onclick="resumeExam()">המשך מבחן ▶</button>
       <button class="btn ghost wide" style="margin-top:9px" onclick="resetExamActive()">איפוס מבחן</button>
-    </div>`;
+    </div>
+    ${topicSpeedHTML(EX.qs.filter(x=>EX.pick[x.i]&&!(EX.skipped&&EX.skipped[x.i])),x=>eq(EX.pick[x.i]||[],x.a),EX.qTimes||{})}`;
     return;
   }
   const revealed=!!EX.reveal[q.i], good=revealed&&eq(sel,q.a);
@@ -2976,7 +2977,7 @@ function qReviewHTML(q,sel,good){
 
 /* ================= PRACTICE ================= */
 let PR={d:0,mode:"all",list:[],i:0,sel:[],shown:false,tr:{stem:{},opt:{}},
-        ses:{ok:0,wrong:0,topics:{},skipped:[],correct:{}},showStats:false,
+        ses:{ok:0,wrong:0,topics:{},skipped:[],correct:{}},showStats:false,showRoundEnd:false,showPause:false,
         t0:0,qTimes:{},_timeQid:null,_timeSince:null,showClock:false};
 R.practice=()=>{ PR.list.length?renderPr():renderPrIntro(); };
 
@@ -3014,7 +3015,7 @@ function renderPrIntro(){
     <h3>תרגול פתוח ממתין</h3>
     <p class="lead">נותרו ${resume.list.length-resume.i}/${resume.list.length} שאלות בסבב שהתחלת קודם. אפשר להמשיך בדיוק איפה שעצרת, או למחוק ולהתחיל סבב חדש.</p>
     <div class="row">
-      <button class="btn wide" onclick="const r=Store.s.practice;PR.d=r.d;PR.mode=r.mode;PR.list=r.list;PR.i=r.i;PR.sel=r.sel;PR.shown=r.shown;PR.ses=r.ses||{ok:0,wrong:0,topics:{}};PR.tr={stem:{},opt:{}};PR.showStats=false;renderPr()">המשך תרגול פתוח</button>
+      <button class="btn wide" onclick="resumePractice()">המשך תרגול פתוח</button>
       <button class="btn ghost wide" onclick="if(confirm('למחוק את התרגול הפתוח?')){Store.s.practice=null;Store.save();renderPrIntro();}">מחיקה והתחלה מחדש</button>
     </div>
   </div>`:""}
@@ -3048,6 +3049,26 @@ function poolOf(){
     const days=[0,0,1,3,7,16][s.box]||0; return Date.now()-s.last>days*864e5;});
   return p;
 }
+function resumePractice(){
+  /* Restore a persisted practice round. Must explicitly carry over t0/qTimes (added for
+     the hidden clock) — PR is a long-lived global object, so any field this doesn't set
+     keeps whatever stale value it already had (e.g. t0:0 from the initial declaration),
+     which is exactly the bug that made the clock show a garbled multi-million-minute
+     reading: Date.now()-0 was being treated as a small elapsed-seconds count. A round
+     saved before this field existed has no r.t0/r.qTimes — default to "clock starts now"
+     rather than leaving the stale 0. _timeQid/_timeSince are reset to null either way so
+     trackPrTime() begins a fresh interval for whichever question is shown next, instead of
+     computing a delta against a timestamp from before the round was saved. */
+  const r=Store.s.practice;
+  if(!r) return;
+  PR.d=r.d; PR.mode=r.mode; PR.list=r.list; PR.i=r.i; PR.sel=r.sel; PR.shown=r.shown;
+  PR.ses=r.ses||{ok:0,wrong:0,topics:{},skipped:[],correct:{}};
+  PR.ses.skipped=PR.ses.skipped||[]; PR.ses.correct=PR.ses.correct||{};
+  PR.tr={stem:{},opt:{}}; PR.showStats=false; PR.showRoundEnd=false; PR.showPause=false;
+  PR.t0=r.t0||Date.now(); PR.qTimes=r.qTimes||{}; PR._timeQid=null; PR._timeSince=null;
+  renderPr();
+}
+window.resumePractice=resumePractice;
 function startPr(){
   PR.list=shuffle(poolOf()).map(prep); PR.i=0; PR.sel=[]; PR.shown=false;
   PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false;
@@ -3075,8 +3096,32 @@ function filterPrByTopicFromStats(topic){
 }
 window.filterPrByTopic=filterPrByTopic;
 window.filterPrByTopicFromStats=filterPrByTopicFromStats;
+function pausePr(){
+  /* Stopping mid-round now shows a quick "where do I stand" glance before actually
+     exiting to the menu — the round itself is already safely persisted regardless,
+     so this only affects what's shown, not whether progress is saved. */
+  PR.showPause=true; renderPr();
+}
+window.pausePr=pausePr;
+function exitPractice(){ PR.list=[]; renderPrIntro(); }
+window.exitPractice=exitPractice;
+function renderPrPause(){
+  const answeredQs=PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct));
+  $("#v-practice").innerHTML=`
+  <div class="exambar"><span class="cnt">התרגול בהפסקה</span></div>
+  <div class="card pauseCard">
+    <div class="pauseIc">⏸</div>
+    <h3>עצרת באמצע הסבב</h3>
+    <p class="lead">ההתקדמות נשמרה — אפשר להמשיך בדיוק מכאן, או לצאת לתפריט ולחזור מאוחר יותר.</p>
+    <button class="btn wide" onclick="PR.showPause=false;renderPr()">המשך תרגול ▶</button>
+    <button class="btn ghost wide" style="margin-top:9px" onclick="exitPractice()">יציאה לתפריט</button>
+  </div>
+  ${topicSpeedHTML(answeredQs,q=>PR.ses.correct[q.i],PR.qTimes||{})}`;
+  window.scrollTo({top:0,behavior:"instant"});
+}
 function renderPr(){
   if(PR.showRoundEnd){ renderPrRoundEnd(); return; }
+  if(PR.showPause){ renderPrPause(); return; }
   if(!PR.showStats) trackPrTime();
   const q=PR.list[PR.i], good=PR.shown&&eq(PR.sel,q.a);
   if(PR.showStats){ renderPrStats(); return; }
@@ -3086,7 +3131,7 @@ function renderPr(){
     <div class="prog"><i style="width:${(PR.i+1)/PR.list.length*100}%"></i></div>
     <button class="icobtn" onclick="PR.showClock=!PR.showClock;renderPr()" title="שעון מוסתר — זמן ומהירות">🕐</button>
     <button class="icobtn" onclick="PR.showStats=true;renderPr()" title="סטטיסטיקה">📊</button>
-    <button class="icobtn" onclick="PR.list=[];renderPrIntro()" title="עצור והמשך אחר כך">⏸</button></div>
+    <button class="icobtn" onclick="pausePr()" title="עצור והמשך אחר כך">⏸</button></div>
   ${PR.showClock?clockPanelHTML(PR.qTimes,PR.t0,PR.list.length,PR.ses.ok+PR.ses.wrong):""}
   ${PR.shown?qReviewHTML(q,PR.sel,good):`
   <div class="card">
@@ -3110,7 +3155,7 @@ function renderPr(){
           : `<button class="btn" onclick="finishPrRound()">סיימת את הסבב ✓</button>`)
       : `<button class="btn" ${PR.sel.length?"":"disabled"} onclick="prSubmit()">בדוק תשובה</button>`}
     ${!PR.shown?`<button class="btn ghost" onclick="prSkip()">דלג</button>`:""}
-    <button class="btn ghost" onclick="PR.list=[];renderPrIntro()">עצור והמשך אחר כך</button>
+    <button class="btn ghost" onclick="pausePr()">עצור והמשך אחר כך</button>
   </div>`;
   window.scrollTo({top:0,behavior:"instant"});
 }

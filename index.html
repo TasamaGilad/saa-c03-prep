@@ -263,7 +263,7 @@ select,input[type=number]{background:var(--surf2);border:1px solid var(--line);c
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v11</span></div>
+    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v12</span></div>
     <div class="spacer"></div>
     <button class="icobtn" id="themeBtn" title="מצב תצוגה" aria-label="מצב תצוגה">◐</button>
   </div>
@@ -2205,7 +2205,7 @@ domains:[
 /* ================= storage layer ================= */
 const Store=(()=>{
   const KEY="saa_c03_state_v1"; const STATE_V=2; let mem=null;
-  const blank=()=>({ans:{},sessions:[],cards:{},streak:{last:null,n:0},exam:null,practice:null,roundSize:20,v:STATE_V});
+  const blank=()=>({ans:{},sessions:[],practiceSessions:[],cards:{},streak:{last:null,n:0},exam:null,practice:null,roundSize:20,v:STATE_V});
   /* Defends against corrupted or partial localStorage data (manual edits, a browser
      extension, or a future schema change) — JSON.parse succeeding does NOT guarantee
      the shape is valid, so every field is defensively checked. Without this, a value
@@ -2218,6 +2218,7 @@ const Store=(()=>{
     return {
       ans:(raw.ans&&typeof raw.ans==="object")?raw.ans:b.ans,
       sessions:Array.isArray(raw.sessions)?raw.sessions:b.sessions,
+      practiceSessions:Array.isArray(raw.practiceSessions)?raw.practiceSessions:b.practiceSessions,
       cards:(raw.cards&&typeof raw.cards==="object")?raw.cards:b.cards,
       streak:(raw.streak&&typeof raw.streak==="object")?{last:raw.streak.last??null,n:raw.streak.n||0}:b.streak,
       exam:(raw.exam&&typeof raw.exam==="object")?raw.exam:b.exam,
@@ -2257,6 +2258,12 @@ const LET="ABCDE";
 /* ================= helpers ================= */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+/* A single-quoted JS string literal, for embedding a dynamic value (e.g. a topic name)
+   inside an inline onclick="..." handler — which is itself a DOUBLE-quoted HTML attribute
+   everywhere in this file. JSON.stringify()'s double-quoted output would close that
+   attribute at its very first character, silently mangling the handler (and everything
+   after it) for EVERY value, not just ones with special characters — this is the fix. */
+const jsStr=s=>"'"+String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'")+"'";
 /* Defense-in-depth for question explanations (q.e/q.w) and flashcard text (c.f/c.b):
    all of it is developer-authored and shipped inside this same file today, so there is
    no live injection path — but these fields intentionally render a *few* formatting
@@ -2404,11 +2411,11 @@ function topicSpeedAnalysis(qs,correctFn,qTimes){
   qs.forEach(q=>{
     const t=qTimes[q.i];
     if(t==null) return; // never displayed long enough to record a time (shouldn't normally happen)
-    byTopic[q.t]=byTopic[q.t]||{n:0,ok:0,time:0};
+    byTopic[q.t]=byTopic[q.t]||{n:0,ok:0,time:0,wrongQs:[]};
     byTopic[q.t].n++; byTopic[q.t].time+=t;
-    if(correctFn(q)) byTopic[q.t].ok++;
+    if(correctFn(q)) byTopic[q.t].ok++; else byTopic[q.t].wrongQs.push(q);
   });
-  const topics=Object.entries(byTopic).map(([t,v])=>({t,n:v.n,ok:v.ok,acc:pct(v.ok,v.n),avgTime:v.time/v.n}));
+  const topics=Object.entries(byTopic).map(([t,v])=>({t,n:v.n,ok:v.ok,acc:pct(v.ok,v.n),avgTime:v.time/v.n,wrongQs:v.wrongQs}));
   if(!topics.length) return {topics:[],overallAvg:0};
   const overallAvg=topics.reduce((a,x)=>a+x.avgTime*x.n,0)/topics.reduce((a,x)=>a+x.n,0);
   topics.forEach(x=>{
@@ -2417,7 +2424,35 @@ function topicSpeedAnalysis(qs,correctFn,qTimes){
   });
   return {topics,overallAvg};
 }
-function topicSpeedHTML(qs,correctFn,qTimes){
+/* Best-effort match from a topic tag to an existing flashcard, so the weak-topic detail
+   view can surface a short "concept refresher" alongside the specific questions missed —
+   without needing a dedicated write-up for all 180+ topic tags in the bank. Deliberately
+   permissive (substring match, either direction) since a miss just omits the bonus card —
+   never treated as an error. */
+function conceptRefresher(topic){
+  const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9א-ת]/g,"");
+  const nt=norm(topic);
+  if(!nt) return null;
+  return CARDS.find(c=>{ const nf=norm(c.f); return nf.includes(nt)||nt.includes(nf); })||null;
+}
+/* Renders the expandable "why" behind a weak topic: the actual questions gotten wrong on
+   it this round/exam, with their full explanation and per-option wrong-reasons (the same
+   rich content already authored per-question — just resurfaced here instead of requiring
+   the user to remember/scroll back to find it), plus a matching flashcard concept refresher
+   when one exists. This is what makes the weak-topics list a genuine study aid instead of
+   just a percentage. */
+function weakTopicDetailHTML(topic,wrongQs){
+  const card=conceptRefresher(topic);
+  return `<div class="card tight" style="margin:6px 0 4px;background:var(--surf2)">
+    ${card?`<div style="font-size:12.5px;line-height:1.55;margin-bottom:${wrongQs.length?"10px":"0"}"><b>${esc(card.c)} — ${esc(card.f)}</b><br>${safeHTML(card.b)}</div>${wrongQs.length?`<div style="border-top:1px solid var(--line);margin-bottom:10px"></div>`:""}`:""}
+    ${wrongQs.map((q,i)=>`<div style="${i<wrongQs.length-1?"margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)":""}">
+      <div class="stem" style="font-size:13px;margin-bottom:6px" dir="ltr">${safeHTML(q.q)}</div>
+      <div class="muted" style="font-size:12px;margin-bottom:4px">תשובה נכונה: <b style="color:var(--acc)">${q.a.map(x=>LET[x]+" — "+esc(q.o[x])).join(", ")}</b></div>
+      <div style="font-size:12.5px;line-height:1.55">${safeHTML(q.e)}</div>
+    </div>`).join("")}
+  </div>`;
+}
+function topicSpeedHTML(qs,correctFn,qTimes,owner,rerenderCall){
   const {topics,overallAvg}=topicSpeedAnalysis(qs,correctFn,qTimes);
   if(!topics.length) return "";
   const speedLabel={slow:"איטי",normal:"קצב תקין",fast:"מהיר"};
@@ -2427,16 +2462,39 @@ function topicSpeedHTML(qs,correctFn,qTimes){
   const strong=topics.filter(x=>x.acc>=80).sort((a,b)=>b.acc-a.acc).slice(0,5);
   const weak=topics.filter(x=>x.acc<80).sort((a,b)=>a.acc-b.acc).slice(0,5);
   const slowTopics=topics.filter(x=>x.speed==="slow").sort((a,b)=>b.avgTime-a.avgTime).slice(0,5);
-  const row=x=>`<div class="kv"><span class="mono">${esc(x.t)}</span>
-    <span class="v" style="display:flex;gap:8px;align-items:center">
-      <span class="${x.acc<60?"":x.acc>=80?"acc-txt":"amber-txt"}" style="${x.acc<60?"color:var(--red)":""}">${x.acc}%</span>
-      <span class="${speedClass[x.speed]}" style="${!speedClass[x.speed]?`color:var(${x.speed==="slow"?"--red":"--dim"})`:""};font-size:11.5px">${speedLabel[x.speed]} · ${x.avgTime.toFixed(0)}s</span>
-    </span></div>`;
+  const expandable=!!(owner&&rerenderCall);
+  const expanded=expandable?(owner==="EX"?EX.expandTopic:PR.expandTopic):null;
+  /* A single topic object can legitimately appear in more than one of the strong/weak/slow
+     lists below (e.g. acc=80% with 1 wrong out of 5 is "strong" but can also be "slow" — see
+     the accurate-but-slow vs fast-but-wrong comment above topicSpeedAnalysis). Since expand
+     state is keyed by topic NAME (not by which list/row triggered it), without this guard the
+     same detail block would render twice when a topic appears in two lists and is expanded —
+     caught via a jsdom diagnostic that found 2 explanation blocks rendered for a single
+     expanded topic. Track which topics already had their detail rendered this call so each
+     appears only once, under whichever row is drawn first (strong, then weak, then slow).*/
+  const shownDetail=new Set();
+  const row=x=>{
+    const canExpand=expandable&&x.wrongQs&&x.wrongQs.length;
+    const isOpen=canExpand&&expanded===x.t;
+    const toggle=canExpand?`${owner}.expandTopic=(${owner}.expandTopic===${jsStr(x.t)}?null:${jsStr(x.t)});${rerenderCall}()`:"";
+    let detail="";
+    if(isOpen){
+      if(!shownDetail.has(x.t)){ shownDetail.add(x.t); detail=weakTopicDetailHTML(x.t,x.wrongQs); }
+      else detail=`<div class="muted" style="font-size:11.5px;margin:2px 0 8px">(ההסבר המפורט מוצג למעלה — נושא זה מופיע ביותר מרשימה אחת)</div>`;
+    }
+    return `<div class="kv"${canExpand?` tabindex="0" role="button" style="cursor:pointer" onclick="${toggle}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"`:""}>
+      <span class="mono">${esc(x.t)}${canExpand?` <span style="color:var(--dim);font-size:11px">— ${isOpen?"הסתר הסבר ▲":"הסבר מפורט ▾"}</span>`:""}</span>
+      <span class="v" style="display:flex;gap:8px;align-items:center">
+        <span class="${x.acc<60?"":x.acc>=80?"acc-txt":"amber-txt"}" style="${x.acc<60?"color:var(--red)":""}">${x.acc}%</span>
+        <span class="${speedClass[x.speed]}" style="${!speedClass[x.speed]?`color:var(${x.speed==="slow"?"--red":"--dim"})`:""};font-size:11.5px">${speedLabel[x.speed]} · ${x.avgTime.toFixed(0)}s</span>
+      </span></div>
+      ${detail}`;
+  };
   return `<h2 class="sec">חוזק לפי נושא (דיוק + מהירות)</h2>
   <div class="card tight">
     <div class="muted" style="margin-bottom:6px">ממוצע זמן לשאלה בסבב זה: ${overallAvg.toFixed(0)}s. "איטי" = מעל 120% מהממוצע, "מהיר" = מתחת ל-80%.</div>
     ${strong.length?`<div class="acc-txt" style="margin-top:8px;font-weight:700;font-size:12.5px">חזק ביותר</div>${strong.map(row).join("")}`:""}
-    ${weak.length?`<div style="margin-top:10px;font-weight:700;font-size:12.5px;color:var(--red)">חלש ביותר — ממוקד לתרגול</div>${weak.map(row).join("")}`:""}
+    ${weak.length?`<div style="margin-top:10px;font-weight:700;font-size:12.5px;color:var(--red)">חלש ביותר — ממוקד לתרגול${expandable?" (הקש על נושא להסבר מפורט)":""}</div>${weak.map(row).join("")}`:""}
     ${slowTopics.length?`<div class="amber-txt" style="margin-top:10px;font-weight:700;font-size:12.5px">איטי ביותר (גם אם נכון — כדאי לתרגל למהירות)</div>${slowTopics.map(row).join("")}`:""}
   </div>`;
 }
@@ -2513,7 +2571,7 @@ function buildExam(){
   return {qs:shuffle(list).map(prep),cur:0,pick:{},flags:{},skipped:{},t0:Date.now(),
           left:EXAM.minutes*60,done:false,timer:null,showNav:false,
           paused:false,pausedAt:0,reveal:{},trQ:{},trO:{},
-          qTimes:{},_timeQid:null,_timeSince:null,showClock:false};
+          qTimes:{},_timeQid:null,_timeSince:null,showClock:false,expandTopic:null};
 }
 R.exam=()=>{ if(!EX) renderExamIntro(); else if(EX.done) renderResults(); else renderExamQ(); };
 
@@ -2704,8 +2762,45 @@ function finishExam(){
     record(q.i,good);
   });
   EX.res={ok,d,secs:Math.round((Date.now()-EX.t0)/1000)};
-  Store.s.sessions.push({at:Date.now(),ok,total:EX.qs.length,score:scaled(ok,EX.qs.length),secs:EX.res.secs});
+  /* `d` (per-domain [ok,n]) rides along on the session record so the NEXT exam's results
+     screen can show a "vs last time, per domain" comparison — see examDeltaHTML(). Sessions
+     saved before this field existed simply won't have it; examDeltaHTML() checks for that. */
+  Store.s.sessions.push({at:Date.now(),ok,total:EX.qs.length,score:scaled(ok,EX.qs.length),secs:EX.res.secs,d});
   Store.s.exam=null; Store.save(); renderResults();
+}
+/* Compares the exam session finishExam() just pushed (last entry) against the one before it
+   (second-to-last) — score, overall accuracy, and per-domain accuracy where both sessions
+   have domain data (`d`, added alongside this feature; older sessions won't have it and are
+   handled gracefully). This is what answers "what improved since my last exam". */
+function examDeltaHTML(){
+  const sess=Store.s.sessions;
+  if(sess.length<2) return `<div class="card tight"><div class="muted">זה המבחן הראשון שלך במערכת — השוואה לעומת מבחן קודם תופיע מהמבחן הבא.</div></div>`;
+  const prev=sess[sess.length-2], cur=sess[sess.length-1];
+  const scoreDelta=cur.score-prev.score;
+  const prevAcc=pct(prev.ok,prev.total), curAcc=pct(cur.ok,cur.total);
+  const accDelta=curAcc-prevAcc;
+  const arrow=x=>x>0?"↑":x<0?"↓":"—";
+  const clr=x=>x>0?"var(--acc)":x<0?"var(--red)":"var(--dim)";
+  let domainRows="";
+  if(prev.d&&cur.d){
+    const changes=EXAM.domains.map(dm=>{
+      const pN=prev.d[dm.id]||[0,0], cN=cur.d[dm.id]||[0,0];
+      if(!pN[1]||!cN[1]) return null;
+      const pA=pct(pN[0],pN[1]), cA=pct(cN[0],cN[1]);
+      return {dm,pA,cA,delta:cA-pA};
+    }).filter(x=>x&&x.delta!==0);
+    if(changes.length){
+      domainRows=`<div class="muted" style="margin-top:10px;font-weight:700;font-size:12.5px">שינוי לפי דומיין</div>${
+        changes.sort((a,b)=>b.delta-a.delta).map(x=>`<div class="kv"><span>${x.dm.he}</span>
+          <span class="v" style="color:${clr(x.delta)}">${arrow(x.delta)} ${Math.abs(x.delta)}% (${x.pA}%→${x.cA}%)</span></div>`).join("")}`;
+    }
+  }
+  return `<div class="card tight">
+    <div class="muted" style="font-weight:700;margin-bottom:6px">לעומת המבחן הקודם</div>
+    <div class="kv"><span>ציון</span><span class="v" style="color:${clr(scoreDelta)}">${arrow(scoreDelta)} ${scoreDelta>0?"+":""}${scoreDelta} (${prev.score}→${cur.score})</span></div>
+    <div class="kv"><span>דיוק</span><span class="v" style="color:${clr(accDelta)}">${arrow(accDelta)} ${accDelta>0?"+":""}${accDelta}% (${prevAcc}%→${curAcc}%)</span></div>
+    ${domainRows}
+  </div>`;
 }
 function renderResults(){
   const {ok,d,secs}=EX.res, sc=scaled(ok,EX.qs.length), pass=sc>=EXAM.pass;
@@ -2723,9 +2818,11 @@ function renderResults(){
       <div><div class="n">${(secs/EX.qs.length).toFixed(0)}s</div><div class="l">לשאלה</div></div>
     </div>
   </div>
+  <h2 class="sec">מה השתנה מהפעם הקודמת</h2>
+  ${examDeltaHTML()}
   <h2 class="sec">פילוח לפי דומיין</h2>
   <div class="card">${domainBars(d)}</div>
-  ${topicSpeedHTML(EX.qs.filter(q=>!(EX.skipped&&EX.skipped[q.i])),q=>eq(EX.pick[q.i]||[],q.a),EX.qTimes||{})}
+  ${topicSpeedHTML(EX.qs.filter(q=>!(EX.skipped&&EX.skipped[q.i])),q=>eq(EX.pick[q.i]||[],q.a),EX.qTimes||{},"EX","renderResults")}
   <h2 class="sec">מפת התשובות</h2>
   <div class="card tight"><div class="navgrid">${EX.qs.map((q,i)=>
     `<button class="${EX.skipped&&EX.skipped[q.i]?"skip":eq(EX.pick[q.i]||[],q.a)?"ok":"no"}" onclick="reviewAt(${i})">${i+1}</button>`).join("")}</div></div>
@@ -2782,7 +2879,7 @@ function qReviewHTML(q,sel,good){
 /* ================= PRACTICE ================= */
 let PR={d:0,mode:"all",roundSize:20,list:[],i:0,sel:[],shown:false,tr:{stem:{},opt:{}},
         ses:{ok:0,wrong:0,topics:{},skipped:[],correct:{}},showStats:false,showRoundEnd:false,showPause:false,
-        t0:0,qTimes:{},_timeQid:null,_timeSince:null,showClock:false};
+        t0:0,qTimes:{},_timeQid:null,_timeSince:null,showClock:false,expandTopic:null,topicBaseline:{}};
 R.practice=()=>{ PR.list.length?renderPr():renderPrIntro(); };
 
 /* Mirrors trackExamTime() for practice sessions — accrues elapsed time for whichever
@@ -2810,7 +2907,7 @@ function trackPrTime(){
    Cleared only when a round genuinely completes or the user discards it. */
 function persistPractice(){
   if(!PR.list.length){ Store.s.practice=null; }
-  else { Store.s.practice={d:PR.d,mode:PR.mode,list:PR.list,i:PR.i,sel:PR.sel,shown:PR.shown,ses:PR.ses,t0:PR.t0,qTimes:PR.qTimes}; }
+  else { Store.s.practice={d:PR.d,mode:PR.mode,list:PR.list,i:PR.i,sel:PR.sel,shown:PR.shown,ses:PR.ses,t0:PR.t0,qTimes:PR.qTimes,topicBaseline:PR.topicBaseline}; }
   Store.save();
 }
 window.persistPractice=persistPractice;
@@ -2895,15 +2992,21 @@ function resumePractice(){
   PR.d=r.d; PR.mode=r.mode; PR.list=r.list; PR.i=r.i; PR.sel=r.sel; PR.shown=r.shown;
   PR.ses=r.ses||{ok:0,wrong:0,topics:{},skipped:[],correct:{}};
   PR.ses.skipped=PR.ses.skipped||[]; PR.ses.correct=PR.ses.correct||{};
-  PR.tr={stem:{},opt:{}}; PR.showStats=false; PR.showRoundEnd=false; PR.showPause=false;
+  PR.tr={stem:{},opt:{}}; PR.showStats=false; PR.showRoundEnd=false; PR.showPause=false; PR.expandTopic=null;
   PR.t0=r.t0||Date.now(); PR.qTimes=r.qTimes||{}; PR._timeQid=null; PR._timeSince=null;
+  PR.topicBaseline=r.topicBaseline||{};
   renderPr();
 }
 window.resumePractice=resumePractice;
 function startPr(){
   PR.list=pickRound(poolOf(),PR.roundSize).map(prep); PR.i=0; PR.sel=[]; PR.shown=false;
-  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false;
+  PR.tr={stem:{},opt:{}}; PR.ses={ok:0,wrong:0,topics:{},skipped:[],correct:{}}; PR.showStats=false; PR.expandTopic=null;
   PR.t0=Date.now(); PR.qTimes={}; PR._timeQid=null; PR._timeSince=null;
+  /* Snapshot each topic's cumulative accuracy BEFORE this round's answers land in Store.s.ans,
+     so the round-end screen can show exactly how much THIS round moved each topic's lifetime
+     accuracy — see practiceDeltaHTML(). Deep-cloned since overall().tp returns fresh arrays
+     each call but they're still references into a structure we don't want to accidentally share. */
+  PR.topicBaseline=JSON.parse(JSON.stringify(overall().tp));
   persistPractice(); renderPr();
 }
 function startWeak(){ PR.d=0; PR.mode="weak"; go("practice"); if(poolOf().length) startPr(); else renderPrIntro(); }
@@ -3006,9 +3109,18 @@ function prSkip(){
 }
 window.prSkip=prSkip;
 function finishPrRound(){
-  Store.s.practice=null; Store.save();
-  if(PR.ses.skipped&&PR.ses.skipped.length){ PR.showRoundEnd=true; renderPr(); }
-  else { PR.list=[]; renderPrIntro(); }
+  Store.s.practice=null;
+  /* Record this round's summary so the NEXT round can show "what improved since last
+     time" — see practiceDeltaHTML(). Pushed before Store.save() flushes to disk. */
+  const answered=PR.ses.ok+PR.ses.wrong;
+  if(answered>0){
+    Store.s.practiceSessions.push({at:Date.now(),ok:PR.ses.ok,wrong:PR.ses.wrong,total:answered,topics:PR.ses.topics});
+  }
+  Store.save();
+  /* Always show the round-end summary (weak topics, detailed explanations, what improved) —
+     previously this was skipped straight back to the intro screen when nothing was skipped,
+     which meant a fully-answered round never got a summary at all. */
+  PR.showRoundEnd=true; renderPr();
 }
 window.finishPrRound=finishPrRound;
 function prJumpTo(qid){
@@ -3039,6 +3151,42 @@ function prSubmit(){
   if(PR.ses.skipped&&PR.ses.skipped.includes(q.i)) PR.ses.skipped=PR.ses.skipped.filter(x=>x!==q.i);
   persistPractice(); renderPr();
 }
+/* Compares the round finishPrRound() just recorded against the one before it (overall
+   accuracy), plus per-topic accuracy vs the PR.topicBaseline snapshot taken at this round's
+   start (i.e. "how much did THIS round move each topic's lifetime accuracy") — together
+   these answer "what improved since my last practice". */
+function practiceDeltaHTML(){
+  const rounds=Store.s.practiceSessions;
+  let headline;
+  if(rounds.length<2){
+    headline=`<div class="muted">זה סבב התרגול הראשון שלך שנשמר — השוואה לעומת סבב קודם תופיע מהסבב הבא.</div>`;
+  } else {
+    const prev=rounds[rounds.length-2], cur=rounds[rounds.length-1];
+    const prevAcc=pct(prev.ok,prev.total), curAcc=pct(cur.ok,cur.total);
+    const delta=curAcc-prevAcc;
+    const clr=delta>0?"var(--acc)":delta<0?"var(--red)":"var(--dim)";
+    const arrow=delta>0?"↑":delta<0?"↓":"—";
+    headline=`<div class="kv"><span>דיוק בסבב</span><span class="v" style="color:${clr}">${arrow} ${delta>0?"+":""}${delta}% (${prevAcc}%→${curAcc}%)</span></div>`;
+  }
+  const baseline=PR.topicBaseline||{}, now=overall().tp;
+  const changes=Object.keys(PR.ses.topics).map(t=>{
+    const b=baseline[t], n=now[t];
+    if(!b||!b[1]||!n||!n[1]) return null; // no "before this round" baseline for a brand-new topic
+    const bAcc=pct(b[0],b[1]), nAcc=pct(n[0],n[1]);
+    if(bAcc===nAcc) return null;
+    return {t,bAcc,nAcc,delta:nAcc-bAcc};
+  }).filter(Boolean).sort((a,b)=>b.delta-a.delta);
+  const changeRows=changes.length?`<div class="muted" style="margin-top:10px;font-weight:700;font-size:12.5px">שיפור מצטבר לפי נושא (מאז תחילת הסבב)</div>${
+    changes.map(x=>{
+      const clr=x.delta>0?"var(--acc)":"var(--red)";
+      return `<div class="kv"><span class="mono">${esc(x.t)}</span><span class="v" style="color:${clr}">${x.delta>0?"↑ +":"↓ "}${x.delta}% (${x.bAcc}%→${x.nAcc}%)</span></div>`;
+    }).join("")}`:"";
+  return `<div class="card tight">
+    <div class="muted" style="font-weight:700;margin-bottom:6px">לעומת פעם קודמת</div>
+    ${headline}
+    ${changeRows}
+  </div>`;
+}
 function renderPrRoundEnd(){
   const skippedQs=(PR.ses.skipped||[]).map(qid=>PR.list.find(x=>x.i===qid)).filter(Boolean);
   $("#v-practice").innerHTML=`
@@ -3053,7 +3201,9 @@ function renderPrRoundEnd(){
       <span><span class="tag d${q.d}">D${q.d}</span> ${q.t}</span>
       <span class="v" style="color:var(--dim)">ענה עכשיו ←</span></div>`).join("")}</div>
   <div class="muted" style="margin-top:6px">אפשר לחזור ולענות על כל אחת, או לסיים את הסבב לגמרי.</div>`:""}
-  ${topicSpeedHTML(PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct)),q=>PR.ses.correct[q.i],PR.qTimes||{})}
+  <h2 class="sec">מה השתנה מהפעם הקודמת</h2>
+  ${practiceDeltaHTML()}
+  ${topicSpeedHTML(PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct)),q=>PR.ses.correct[q.i],PR.qTimes||{},"PR","renderPrRoundEnd")}
   <div class="row" style="margin-top:14px">
     <button class="btn wide" onclick="PR.showRoundEnd=false;PR.list=[];renderPrIntro()">${skippedQs.length?"סיים בכל זאת (הדילוגים לא ייספרו)":"חזרה לתרגול"}</button>
   </div>`;

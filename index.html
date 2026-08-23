@@ -85,7 +85,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:50;background:color-mix(
   backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;
   padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs button{flex:1;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
-  font-size:10.5px;color:var(--dim2);border-top:2px solid transparent;transition:color .15s,border-color .15s}
+  font-size:10.5px;color:var(--dim);border-top:2px solid transparent;transition:color .15s,border-color .15s}
 nav.tabs button .ic{font-size:17px;line-height:1;transition:transform .15s}
 nav.tabs button.on{color:var(--acc);border-top-color:var(--acc)}
 nav.tabs button.on .ic{transform:translateY(-1px) scale(1.08)}
@@ -134,7 +134,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
 .gauge{margin:6px 0 2px}
 .gauge .scale{position:relative;height:34px;border-radius:8px;overflow:hidden;
   background:linear-gradient(90deg,var(--red-d),var(--amber-d) 55%,var(--acc-d));border:1px solid var(--line)}
-.gauge .fillbar{position:absolute;top:0;bottom:0;right:0;background:var(--acc);opacity:.22;
+.gauge .fillbar{position:absolute;top:0;bottom:0;left:0;background:var(--acc);opacity:.22;
   transition:width .7s cubic-bezier(.2,.7,.3,1)}
 .gauge .passline{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--txt);opacity:.85}
 .gauge .passlbl{position:absolute;top:-17px;transform:translateX(50%);font-family:var(--mono);
@@ -143,7 +143,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
   background:var(--txt);color:var(--bg);font-family:var(--mono);font-weight:700;font-size:13px;
   padding:3px 9px;border-radius:6px;transition:right .7s cubic-bezier(.2,.7,.3,1)}
 .gauge .ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
-  color:var(--dim2);margin-top:5px}
+  color:var(--dim);margin-top:5px}
 .bigstat{display:flex;gap:18px;flex-wrap:wrap;margin:4px 0 2px}
 .bigstat div{min-width:74px}
 .bigstat .n{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1.1}
@@ -242,7 +242,7 @@ html[data-t="light"] .amber-txt{color:#A36704}
 .fc .front{font-size:18px;font-weight:800;text-align:center;letter-spacing:-.1px}
 .fc .back{font-size:14px;line-height:1.75;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .fc .back code{background:var(--surf3);padding:1px 5px;border-radius:4px;color:var(--amber);direction:ltr;display:inline-block}
-.fc .hint{text-align:center;font-size:11.5px;color:var(--dim2);margin-top:12px;font-family:var(--mono)}
+.fc .hint{text-align:center;font-size:11.5px;color:var(--dim);margin-top:12px;font-family:var(--mono)}
 
 /* misc */
 .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}
@@ -262,9 +262,9 @@ select,input[type=number]{background:var(--surf2);border:1px solid var(--line);c
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v9</span></div>
+    <div class="brand"><b>מכון הכנה</b><span class="code">SAA-C03 v10</span></div>
     <div class="spacer"></div>
-    <button class="icobtn" id="themeBtn" title="מצב תצוגה">◐</button>
+    <button class="icobtn" id="themeBtn" title="מצב תצוגה" aria-label="מצב תצוגה">◐</button>
   </div>
 </header>
 
@@ -2337,14 +2337,22 @@ try{ const th=localStorage.getItem("saa_theme"); if(th) document.documentElement
 
 /* ================= gauge ================= */
 function gaugeHTML(score){
+  /* p/pp are "% of the way from scaleMin (worst) to scaleMax (best)". The scale bar's
+     gradient (90deg: red -> amber -> green) and physical right/left CSS properties are
+     NOT affected by the page's dir="rtl", so red is always visually on the left and
+     green always on the right. The .ends labels place scaleMax (best) on the right and
+     scaleMin (worst) on the left because of how RTL flexbox reverses DOM order — so
+     "best=right/green, worst=left/red" is the established convention here. Marker/
+     passline/fillbar must therefore anchor from the RIGHT using (100-p)%, not p% —
+     otherwise a perfect score plots into the red zone and vice versa. */
   const p=Math.max(0,Math.min(100,(score-EXAM.scaleMin)/(EXAM.scaleMax-EXAM.scaleMin)*100));
   const pp=(EXAM.pass-EXAM.scaleMin)/(EXAM.scaleMax-EXAM.scaleMin)*100;
   return `<div class="gauge">
     <div class="scale">
       <div class="fillbar" style="width:${p}%"></div>
-      <div class="passline" style="right:${pp}%"></div>
-      <div class="passlbl" style="right:${pp}%">${EXAM.pass}</div>
-      <div class="marker" style="right:${p}%">${score}</div>
+      <div class="passline" style="right:${100-pp}%"></div>
+      <div class="passlbl" style="right:${100-pp}%">${EXAM.pass}</div>
+      <div class="marker" style="right:${100-p}%">${score}</div>
     </div>
     <div class="ends"><span>${EXAM.scaleMax}</span><span>${EXAM.scaleMin}</span></div>
   </div>`;
@@ -2354,7 +2362,7 @@ function domainBars(d){
     const [ok,n]=d[dm.id], p=pct(ok,n);
     return `<div class="dbar">
       <div class="hd"><span class="tag d${dm.id}">D${dm.id}</span><span>${dm.he}</span>
-        <span class="pct">${n?p+"%":"—"} <span style="color:var(--dim2)">(${dm.w}%)</span></span></div>
+        <span class="pct">${n?p+"%":"—"} <span style="color:var(--dim)">(${dm.w}%)</span></span></div>
       <div class="track"><i class="fill" style="width:${p}%;background:${DCOL[dm.id]}"></i></div>
     </div>`;
   }).join("");
@@ -2609,10 +2617,10 @@ function renderExamQ(){
     <span id="timer" class="t${EX.left<300?" crit":EX.left<900?" warn":""}">${fmt(EX.left)}</span>
     <div class="prog"><i style="width:${answered/EX.qs.length*100}%"></i></div>
     <span class="cnt">${EX.cur+1}/${EX.qs.length}</span>
-    <button class="icobtn" onclick="pauseExam()" title="השהה מבחן">⏸</button>
-    <button class="icobtn flagbtn ${EX.flags[q.i]?"on":""}" onclick="EX.flags[${q.i}]=!EX.flags[${q.i}];renderExamQ()" title="סמן לחזרה">⚑</button>
-    <button class="icobtn" onclick="EX.showNav=!EX.showNav;renderExamQ()" title="מפת שאלות">▦</button>
-    <button class="icobtn" onclick="EX.showClock=!EX.showClock;renderExamQ()" title="שעון מוסתר — זמן ומהירות">🕐</button>
+    <button class="icobtn" onclick="pauseExam()" title="השהה מבחן" aria-label="השהה מבחן">⏸</button>
+    <button class="icobtn flagbtn ${EX.flags[q.i]?"on":""}" onclick="EX.flags[${q.i}]=!EX.flags[${q.i}];renderExamQ()" title="סמן לחזרה" aria-label="סמן לחזרה" aria-pressed="${!!EX.flags[q.i]}">⚑</button>
+    <button class="icobtn" onclick="EX.showNav=!EX.showNav;renderExamQ()" title="מפת שאלות" aria-label="מפת שאלות" aria-pressed="${!!EX.showNav}">▦</button>
+    <button class="icobtn" onclick="EX.showClock=!EX.showClock;renderExamQ()" title="שעון מוסתר — זמן ומהירות" aria-label="שעון מוסתר — זמן ומהירות" aria-pressed="${!!EX.showClock}">🕐</button>
   </div>
   ${EX.showClock?clockPanelHTML(EX.qTimes,EX.t0,EX.qs.length,Object.keys(EX.pick).length):""}
   ${EX.showNav?`<div class="card tight"><div class="navgrid">${EX.qs.map((x,i)=>
@@ -2627,7 +2635,7 @@ function renderExamQ(){
       ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}
       ${trBtn(!!EX.trQ[q.i],`EX.trQ[${q.i}]=!EX.trQ[${q.i}];renderExamQ()`,"תרגם שאלה לעברית / חזרה לאנגלית")}</div>
     <div class="stem${stemHe?" he":""}">${stemHe?safeHTML(stemHe):safeHTML(q.q)}</div>
-    <div class="opts" role="group" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>{
+    <div class="opts" role="${q.ty==="m"?"group":"radiogroup"}" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>{
       const k=q.i+"_"+i, oHe=EX.trO[k]&&trOpt(q,i);
       const cls=revealed?(q.a.includes(i)?"good":sel.includes(i)?"bad":"dim"):(sel.includes(i)?"sel":"");
       return `<div class="opt ${cls}${oHe?" he":""}" style="cursor:${revealed?"default":"pointer"}">
@@ -2717,7 +2725,7 @@ function renderResults(){
     if(!skippedIdx.length) return "";
     return `<h2 class="sec">שאלות שדילגת עליהן (${skippedIdx.length})</h2>
     <div class="card tight">${skippedIdx.map(x=>
-      `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="reviewAt(${x.i})">
+      `<div class="kv" tabindex="0" role="button" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="reviewAt(${x.i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <span><span class="tag d${x.q.d}">D${x.q.d}</span> <span class="mono">שאלה ${x.i+1}</span> · ${x.q.t}</span>
         <span class="v" style="color:var(--dim)">לחץ לצפייה ←</span></div>`).join("")}</div>`; })()}
   <div class="row" style="margin-top:14px">
@@ -2730,7 +2738,7 @@ function reviewAt(i){
   $("#v-exam").innerHTML=`
   <div class="exambar"><span class="cnt">סקירה ${i+1}/${EX.qs.length}</span>
     <div class="prog"><i style="width:${(i+1)/EX.qs.length*100}%"></i></div>
-    <button class="icobtn" onclick="renderResults()" title="חזרה לתוצאות">✕</button></div>
+    <button class="icobtn" onclick="renderResults()" title="חזרה לתוצאות" aria-label="חזרה לתוצאות">✕</button></div>
   ${qReviewHTML(q,sel,good)}
   <div class="row">
     <button class="btn ghost" ${i===0?"disabled":""} onclick="reviewAt(${i-1})">הקודם</button>
@@ -2945,9 +2953,9 @@ function renderPr(){
   $("#v-practice").innerHTML=`
   <div class="exambar"><span class="cnt">${PR.i+1}/${PR.list.length}</span>
     <div class="prog"><i style="width:${(PR.i+1)/PR.list.length*100}%"></i></div>
-    <button class="icobtn" onclick="PR.showClock=!PR.showClock;renderPr()" title="שעון מוסתר — זמן ומהירות">🕐</button>
-    <button class="icobtn" onclick="PR.showStats=true;renderPr()" title="סטטיסטיקה">📊</button>
-    <button class="icobtn" onclick="pausePr()" title="עצור והמשך אחר כך">⏸</button></div>
+    <button class="icobtn" onclick="PR.showClock=!PR.showClock;renderPr()" title="שעון מוסתר — זמן ומהירות" aria-label="שעון מוסתר — זמן ומהירות" aria-pressed="${!!PR.showClock}">🕐</button>
+    <button class="icobtn" onclick="PR.showStats=true;renderPr()" title="סטטיסטיקה" aria-label="סטטיסטיקה">📊</button>
+    <button class="icobtn" onclick="pausePr()" title="עצור והמשך אחר כך" aria-label="עצור והמשך אחר כך">⏸</button></div>
   ${PR.showClock?clockPanelHTML(PR.qTimes,PR.t0,PR.list.length,PR.ses.ok+PR.ses.wrong):""}
   ${PR.shown?qReviewHTML(q,PR.sel,good):`
   <div class="card">
@@ -2955,7 +2963,7 @@ function renderPr(){
       ${q.ty==="m"?`<span class="tag" style="color:var(--amber)">SELECT ${q.sel}</span>`:""}
       ${trBtn(!!PR.tr.stem[q.i],`PR.tr.stem[${q.i}]=!PR.tr.stem[${q.i}];renderPr()`,"תרגם שאלה לעברית / חזרה לאנגלית")}</div>
     <div class="stem${stemHe?" he":""}">${stemHe?safeHTML(stemHe):safeHTML(q.q)}</div>
-    <div class="opts" role="group" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>{
+    <div class="opts" role="${q.ty==="m"?"group":"radiogroup"}" aria-label="${q.ty==="m"?"אפשרויות, בחר "+q.sel:"אפשרויות, בחר אחת"}">${q.o.map((o,i)=>{
       const k=q.i+"_"+i, oHe=PR.tr.opt[k]&&trOpt(q,i);
       return `<div class="opt ${PR.sel.includes(i)?"sel":""}${oHe?" he":""}">
         <button class="optmain" role="${q.ty==="m"?"checkbox":"radio"}" aria-checked="${PR.sel.includes(i)}" onclick="prPick(${i})">
@@ -3028,7 +3036,7 @@ function renderPrRoundEnd(){
   </div>
   ${skippedQs.length?`<h2 class="sec">שאלות שדילגת עליהן (${skippedQs.length}) — עדיין לא ענית</h2>
   <div class="card tight">${skippedQs.map(q=>
-    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="prJumpTo(${q.i})">
+    `<div class="kv" tabindex="0" role="button" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="prJumpTo(${q.i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
       <span><span class="tag d${q.d}">D${q.d}</span> ${q.t}</span>
       <span class="v" style="color:var(--dim)">ענה עכשיו ←</span></div>`).join("")}</div>
   <div class="muted" style="margin-top:6px">אפשר לחזור ולענות על כל אחת, או לסיים את הסבב לגמרי.</div>`:""}
@@ -3046,7 +3054,7 @@ function renderPrStats(){
   const focus=weakAll.length?weakAll.map(([t])=>t).join(", "):"עדיין אין מספיק נתונים — המשך לתרגל כדי לקבל המלצות ממוקדות.";
   $("#v-practice").innerHTML=`
   <div class="exambar"><span class="cnt">סטטיסטיקת תרגול</span>
-    <button class="icobtn" onclick="PR.showStats=false;renderPr()" title="חזרה לתרגול">✕</button></div>
+    <button class="icobtn" onclick="PR.showStats=false;renderPr()" title="חזרה לתרגול" aria-label="חזרה לתרגול">✕</button></div>
   <div class="card">
     <h3>הסבב הנוכחי</h3>
     <div class="bigstat">
@@ -3058,7 +3066,7 @@ function renderPrStats(){
   </div>
   ${weakSes.length?`<h2 class="sec">פילוח לפי נושא — בסבב הזה</h2>
   <div class="card tight" id="weakSes">${weakSes.map(([t,v])=>
-    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopic(this.dataset.topic)"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
+    `<div class="kv" tabindex="0" role="button" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopic(this.dataset.topic)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--acc)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}</div>`:""}
   ${topicSpeedHTML(PR.list.filter(q=>PR.ses.correct&&(q.i in PR.ses.correct)),q=>PR.ses.correct[q.i],PR.qTimes||{})}
   <h2 class="sec">לאן להשקיע עכשיו</h2>
   <div class="card tight">
@@ -3105,7 +3113,7 @@ function renderCards(){
     </div>
     <div class="muted" style="margin-top:8px">נסקרו ${seen}/${pool.length} בבחירה הנוכחית${st?` · הכרטיסייה הזו: ${st.ok}/${st.n} ידעת`:""}</div>
   </div>
-  <div class="fc" onclick="CD.flip=!CD.flip;renderCards()">
+  <div class="fc" tabindex="0" role="button" aria-label="הקש לחשיפת התשובה" onclick="CD.flip=!CD.flip;renderCards()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
     <div class="front">${safeHTML(c.f)}</div>
     ${CD.flip?`<div class="back">${safeHTML(c.b)}</div>`:`<div class="hint">הקש לחשיפת התשובה</div>`}
   </div>
@@ -3141,7 +3149,7 @@ R.stats=()=>{
   <div class="card">${domainBars(o.d)}</div>
   ${weak.length?`<h2 class="sec">חמשת הנושאים החלשים</h2>
   <div class="card tight" id="weakTopics">${weak.map(([t,v])=>
-    `<div class="kv" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopicFromStats(this.dataset.topic)"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
+    `<div class="kv" tabindex="0" role="button" style="cursor:pointer;border-bottom:1px solid var(--line);padding:9px 0;transition:.15s" data-topic="${esc(t)}" onmouseover="this.style.background='var(--surf3)'" onmouseout="this.style.background='transparent'" onclick="filterPrByTopicFromStats(this.dataset.topic)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><span class="mono">${esc(t)}</span><span class="v" style="color:${pct(v[0],v[1])<60?"var(--red)":"var(--amber)"}">${pct(v[0],v[1])}% · ${v[0]}/${v[1]}</span></div>`).join("")}
     <button class="btn wide ghost" style="margin-top:12px" onclick="startWeak()">או: תרגל את כל טעויותיי</button></div>`:""}
   <h2 class="sec">שליטה לפי נושא</h2>
   <div class="card">${topicPills(o.tp)}</div>
